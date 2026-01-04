@@ -1,21 +1,171 @@
-```txt
+# 경영인증평가원 - 제조를 잇다
+
+## 프로젝트 개요
+- **이름**: 경영인증평가원
+- **목표**: 제조의 수요와 공급을 온라인으로 연결하는 플랫폼
+- **주요 기능**: 
+  - 공장 연결 서비스 (고객-공장 매칭)
+  - 외국인 채용 서비스 (제조공장 인력 채용 지원)
+
+## URL
+- **개발 서버**: https://3000-i91vb6cej9whqnqsv09tr-0e616f0a.sandbox.novita.ai
+- **로컬호스트**: http://localhost:3000
+- **GitHub**: (설정 대기 중)
+
+## 완성된 기능
+
+### 1. 공장 연결 서비스
+- **고객용 (CAPA Client)**: 부품제조, 제품개발, 완제품 위탁생산을 위한 파트너 공장 찾기
+- **공장용 (CAPA Partners)**: 온라인으로 고객과 견적요청 받기
+- **파트너 검색**: 신뢰할 수 있는 인증 파트너 검색 및 상담/견적 요청 기능
+
+### 2. 외국인 채용 서비스
+- **인력 매칭**: 동포비자 보유 인력 연결
+- **검증된 인력**: 검증된 인력만 매칭
+- **전국 단위 풀**: 전국 단위의 고려인 구직자 풀 보유
+- **신속 지원**: 3일 이내 이력서 발송
+- **온라인 제공**: 검증된 인력 정보를 온라인으로 제공
+
+### 3. 디자인 및 UX
+- 반응형 디자인 (모바일, 태블릿, 데스크톱 지원)
+- 그라디언트 배경과 모던한 UI
+- SVG 아이콘과 일러스트레이션
+- 호버 애니메이션 효과
+- 직관적인 섹션 레이아웃
+
+## 미구현 기능
+- 공장 마켓 (요청에 따라 제외됨)
+- 실제 데이터베이스 연동
+- 회원가입/로그인 시스템
+- 견적 요청 폼
+- 파트너 검색 필터링
+- 채용 문의 폼
+- 관리자 대시보드
+
+## 기술 스택
+- **프레임워크**: Hono v4.11.3
+- **런타임**: Cloudflare Workers
+- **빌드 도구**: Vite v6.3.5
+- **배포 도구**: Wrangler v4.4.0
+- **스타일링**: Custom CSS (그라디언트, 애니메이션)
+- **프로세스 관리**: PM2
+
+## 프로젝트 구조
+```
+webapp/
+├── src/
+│   ├── index.tsx          # 메인 애플리케이션 (라우팅 및 HTML 렌더링)
+│   └── renderer.tsx       # HTML 레이아웃 렌더러
+├── public/
+│   └── static/
+│       └── style.css      # 스타일시트
+├── dist/                  # 빌드 결과물 (자동 생성)
+├── ecosystem.config.cjs   # PM2 설정
+├── wrangler.jsonc         # Cloudflare 설정
+├── vite.config.ts         # Vite 설정
+├── package.json           # 의존성 관리
+└── README.md              # 프로젝트 문서
+```
+
+## 사용자 가이드
+
+### 홈페이지
+1. **Hero 섹션**: 경영인증평가원 소개 및 핵심 메시지
+2. **서비스 개요**: 공장 연결과 외국인 채용 서비스 요약
+3. **공장 연결 상세**: 고객용/공장용 서비스 설명 및 파트너 검색
+4. **외국인 채용 상세**: 채용 서비스 특징 및 문의 버튼
+
+### 주요 페이지 (미구현)
+- 공장 찾기
+- 파트너 등록
+- 채용 공고
+- 문의하기
+
+## 개발 환경 설정
+
+### 필수 요구사항
+- Node.js 18 이상
+- npm 또는 yarn
+- Git
+
+### 로컬 개발 시작
+```bash
+# 의존성 설치 (이미 완료됨)
 npm install
+
+# 빌드
+npm run build
+
+# 개발 서버 시작 (PM2)
+pm2 start ecosystem.config.cjs
+
+# 개발 서버 중지
+pm2 stop webapp
+
+# 로그 확인
+pm2 logs webapp --nostream
+```
+
+### 스크립트
+```bash
+# 개발 서버 (Vite)
 npm run dev
-```
 
-```txt
+# 빌드
+npm run build
+
+# 프리뷰 (Wrangler)
+npm run preview
+
+# 배포
 npm run deploy
-```
 
-[For generating/synchronizing types based on your Worker configuration run](https://developers.cloudflare.com/workers/wrangler/commands/#types):
-
-```txt
+# Cloudflare 타입 생성
 npm run cf-typegen
 ```
 
-Pass the `CloudflareBindings` as generics when instantiation `Hono`:
+## 추천 다음 단계
 
-```ts
-// src/index.ts
-const app = new Hono<{ Bindings: CloudflareBindings }>()
-```
+1. **데이터베이스 연동**
+   - Cloudflare D1 설정
+   - 공장, 파트너, 채용 정보 스키마 설계
+   - API 엔드포인트 구현
+
+2. **인증 시스템**
+   - 회원가입/로그인 구현
+   - JWT 또는 세션 기반 인증
+   - 사용자 권한 관리 (고객/공장/관리자)
+
+3. **견적 요청 시스템**
+   - 견적 요청 폼 구현
+   - 파일 업로드 (도면, 사양서)
+   - 이메일 알림
+
+4. **파트너 관리**
+   - 파트너 등록 폼
+   - 파트너 프로필 페이지
+   - 검색 및 필터링 기능
+
+5. **채용 시스템**
+   - 채용 공고 등록
+   - 이력서 제출 폼
+   - 지원자 관리 대시보드
+
+6. **관리자 기능**
+   - 관리자 대시보드
+   - 회원 관리
+   - 통계 및 분석
+
+7. **추가 기능**
+   - 실시간 채팅/상담
+   - 리뷰 및 평점 시스템
+   - 결제 연동
+
+## 배포 상태
+- **플랫폼**: Cloudflare Pages (준비 완료)
+- **상태**: 로컬 개발 완료
+- **프로덕션 배포**: 대기 중
+- **마지막 업데이트**: 2026-01-04
+
+## 라이센스
+Copyright © 2026 경영인증평가원. All rights reserved.
