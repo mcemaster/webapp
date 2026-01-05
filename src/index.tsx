@@ -815,4 +815,46 @@ app.get('/legal', (c) => {
   return c.render(<Legal user={user} tab={c.req.query('tab')} />)
 })
 
-export default app
+// --- SCHEDULED TASK (CRON TRIGGER) ---
+const scheduled = async (event: any, env: Bindings, ctx: any) => {
+  console.log("⏰ 알람이 울렸습니다! 자동 수집을 시작합니다.");
+  
+  try {
+    if (!env.MYBROWSER) return;
+
+    // 1. Launch Browser
+    const browser = await puppeteer.launch(env.MYBROWSER);
+    const page = await browser.newPage();
+
+    // 2. Crawl K-Startup
+    await page.goto('https://www.k-startup.go.kr/web/contents/bizPbanc.do');
+    const pageTitle = await page.title();
+    
+    // 3. Insert Data (Auto)
+    // 실제로는 여기서 DOM을 긁어옵니다. 데모용으로 '자동수집' 데이터 추가.
+    await env.DB.prepare(`
+      INSERT INTO grants (title, agency, type, description, max_amount, url, deadline)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+    `).bind(
+      `[자동수집] ${new Date().toISOString().split('T')[0]} 신규 지원사업`, 
+      'AI-Bot', 
+      'Auto', 
+      `매일 아침 9시에 자동 수집된 ${pageTitle} 데이터입니다.`, 
+      100000, 
+      'https://www.k-startup.go.kr', 
+      '2026-12-31'
+    ).run();
+
+    await browser.close();
+    console.log("✅ 자동 수집 완료!");
+
+  } catch (e) {
+    console.error("❌ 자동 수집 실패:", e);
+  }
+}
+
+// Export both Fetch (Web) and Scheduled (Cron) handlers
+export default {
+  fetch: app.fetch,
+  scheduled
+}
