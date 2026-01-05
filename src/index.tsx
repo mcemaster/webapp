@@ -120,6 +120,100 @@ app.get('/api/admin/stats', async (c) => {
   }
 })
 
+// --- 1. SARAMIN CRAWLER (Puppeteer) ---
+app.get('/api/crawl/saramin', async (c) => {
+  const name = c.req.query('name');
+  if (!name) return c.json({ error: '기업명을 입력하세요' }, 400);
+
+  if (!c.env.MYBROWSER) {
+    return c.json({ error: '유료 플랜 및 브라우저 설정이 필요합니다.' }, 500);
+  }
+
+  try {
+    const browser = await puppeteer.launch(c.env.MYBROWSER);
+    const page = await browser.newPage();
+
+    // 1. 사람인 검색 결과 페이지 접속
+    await page.goto(`https://www.saramin.co.kr/zf_user/search/company?search_word=${encodeURIComponent(name)}`);
+
+    // 2. 첫 번째 기업 링크 찾기 (CSS Selector)
+    // 사람인 구조: .content_col .company_tit a
+    const companyLink = await page.$('.content_col .company_tit a');
+
+    if (!companyLink) {
+      await browser.close();
+      return c.json({ success: false, message: '검색 결과가 없습니다.' });
+    }
+
+    // 3. 상세 페이지 이동 및 대기
+    await Promise.all([
+      page.waitForNavigation(),
+      companyLink.click()
+    ]);
+
+    // 4. 데이터 추출 (기업개요)
+    const data = await page.evaluate(() => {
+      const getText = (selector: string) => document.querySelector(selector)?.textContent?.trim() || '-';
+      
+      return {
+        ceo: getText('.ceo .name'), // 대표자
+        address: getText('.address .txt'), // 주소
+        employees: getText('.company_summary .summary_list li:nth-child(1) .num'), // 사원수 (구조에 따라 변경 가능)
+        salary: getText('.company_summary .summary_list li:nth-child(2) .num'), // 평균연봉
+        industry: getText('.industry .txt'), // 업종
+      };
+    });
+
+    await browser.close();
+
+    // 5. DB 업데이트
+    await c.env.DB.prepare(`
+      UPDATE companies 
+      SET ceo = ?, address = ?, employee_count = ?, industry = ?, source = 'SARAMIN'
+      WHERE name = ?
+    `).bind(
+      data.ceo, 
+      data.address, 
+      parseInt(data.employees.replace(/,/g, '') || '0'), 
+      data.industry, 
+      name
+    ).run();
+
+    return c.json({ success: true, source: 'Saramin', data });
+
+  } catch (e: any) {
+    return c.json({ error: 'Saramin Crawling Failed', details: e.message }, 500);
+  }
+});
+
+// --- 2. EMPLOYMENT INSURANCE API (Public Data) ---
+app.get('/api/data/employment', async (c) => {
+  const bizNum = c.req.query('bizNum'); // 사업자번호
+  const serviceKey = c.env.DATA_GO_KR_KEY; // 환경변수 설정 필요
+
+  if (!bizNum) return c.json({ error: '사업자번호가 필요합니다.' }, 400);
+  if (!serviceKey) return c.json({ error: '공공데이터 API 키가 설정되지 않았습니다.' }, 500);
+
+  try {
+    // 고용노동부 API (예시 URL - 실제 승인 후 변경 필요)
+    const apiUrl = `http://apis.data.go.kr/B490001/sidoSggManpowerService/getSidoSggManpowerList?serviceKey=${serviceKey}&bizno=${bizNum}&type=json`;
+    
+    const response = await fetch(apiUrl);
+    const json: any = await response.json();
+
+    // 데이터 가공 (API 응답 구조에 따라 다름)
+    const result = {
+      insured_count: json?.items?.[0]?.cnt || 0, // 피보험자수
+      updated_date: new Date().toISOString()
+    };
+
+    return c.json({ success: true, source: 'Employment Insurance', data: result });
+
+  } catch (e: any) {
+    return c.json({ error: 'Public API Error', details: e.message }, 500);
+  }
+});
+
 // --- CRAWLER ENDPOINT (Requires Paid Plan) ---
 app.get('/api/crawl/company', async (c) => {
   const companyName = c.req.query('name');
