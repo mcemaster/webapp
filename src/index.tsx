@@ -160,8 +160,8 @@ app.get('/auth/:provider', (c) => {
   if (provider === 'admin') {
     const adminData = {
       id: 'admin',
-      name: '관리자',
-      email: 'admin@mce.re.kr',
+      name: '최고관리자',
+      email: 'mce@mce.re.kr',
       role: 'admin',
       isCertified: true,
       profileImage: 'https://ui-avatars.com/api/?name=Admin&background=0D8ABC&color=fff'
