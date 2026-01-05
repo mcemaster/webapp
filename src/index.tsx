@@ -56,6 +56,57 @@ app.get('/api/search/company', async (c) => {
   }
 })
 
+// --- ADMIN FULL API SUITE ---
+
+// 1. Users Management
+app.get('/api/admin/users', async (c) => {
+  try {
+    const { results } = await c.env.DB.prepare('SELECT * FROM users ORDER BY created_at DESC LIMIT 50').all();
+    return c.json({ results });
+  } catch (e: any) { return c.json({ error: e.message }, 500); }
+});
+
+// 2. Partners Management
+app.get('/api/admin/partners', async (c) => {
+  try {
+    const { results } = await c.env.DB.prepare("SELECT * FROM partners WHERE status = 'pending' ORDER BY applied_at DESC").all();
+    return c.json({ results });
+  } catch (e: any) { return c.json({ error: e.message }, 500); }
+});
+
+app.post('/api/admin/partners/approve', async (c) => {
+  try {
+    const { id } = await c.req.json();
+    await c.env.DB.prepare("UPDATE partners SET status = 'approved' WHERE id = ?").bind(id).run();
+    return c.json({ success: true });
+  } catch (e: any) { return c.json({ error: e.message }, 500); }
+});
+
+// 3. RFQ Management
+app.get('/api/admin/rfqs', async (c) => {
+  try {
+    const { results } = await c.env.DB.prepare('SELECT * FROM rfqs ORDER BY created_at DESC').all();
+    return c.json({ results });
+  } catch (e: any) { return c.json({ error: e.message }, 500); }
+});
+
+app.post('/api/admin/rfqs/send', async (c) => {
+  try {
+    // Simulate Notification Sending
+    const { id, channels } = await c.req.json();
+    await c.env.DB.prepare("UPDATE rfqs SET status = 'sent' WHERE id = ?").bind(id).run();
+    return c.json({ success: true, message: `${channels.length}개 채널로 발송되었습니다.` });
+  } catch (e: any) { return c.json({ error: e.message }, 500); }
+});
+
+// 4. Banners Management
+app.get('/api/admin/banners', async (c) => {
+  try {
+    const { results } = await c.env.DB.prepare('SELECT * FROM banners ORDER BY id DESC').all();
+    return c.json({ results });
+  } catch (e: any) { return c.json({ error: e.message }, 500); }
+});
+
 // --- ADMIN DEPLOY ENDPOINT ---
 app.post('/api/admin/deploy', async (c) => {
   const userSession = getCookie(c, 'user_session')
