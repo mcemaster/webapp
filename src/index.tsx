@@ -37,25 +37,25 @@ app.use('/static/*', serveStatic({ root: './public' }))
 // --- ADMIN DEPLOY ENDPOINT ---
 app.post('/api/admin/deploy', async (c) => {
   const userSession = getCookie(c, 'user_session')
-  if (!userSession) return c.json({ error: 'Unauthorized' }, 401)
+  if (!userSession) return c.json({ success: false, message: '로그인이 필요합니다.' }, 401)
   
   const user = JSON.parse(userSession)
-  if (user.role !== 'admin') return c.json({ error: 'Forbidden' }, 403)
+  if (user.role !== 'admin') return c.json({ success: false, message: '관리자 권한이 없습니다.' }, 403)
 
   const deployUrl = c.env.DEPLOY_HOOK;
   if (!deployUrl) {
-    return c.json({ success: false, message: '배포 후크 URL이 설정되지 않았습니다.' });
+    return c.json({ success: false, message: 'Cloudflare 배포 후크 URL이 설정되지 않았습니다. 환경 변수를 확인하세요.' });
   }
 
   try {
     const response = await fetch(deployUrl, { method: 'POST' });
     if (response.ok) {
-      return c.json({ success: true, message: '배포가 시작되었습니다! 약 3분 후 완료됩니다.' });
+      return c.json({ success: true, message: '🚀 배포 요청 성공! 약 3분 뒤에 사이트가 업데이트됩니다.' });
     } else {
-      return c.json({ success: false, message: 'Cloudflare 호출 실패' });
+      return c.json({ success: false, message: `Cloudflare 응답 오류: ${response.status}` });
     }
   } catch (e: any) {
-    return c.json({ success: false, message: e.message });
+    return c.json({ success: false, message: '서버 내부 오류: ' + e.message });
   }
 })
 
