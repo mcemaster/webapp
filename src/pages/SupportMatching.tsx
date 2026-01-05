@@ -104,19 +104,22 @@ export const SupportMatching = ({ user }: SupportMatchingProps) => {
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-5xl mx-auto">
                   
-                  {/* Card 1: Basic Info */}
+                  {/* Card 1: Basic Info & Status */}
                   <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200 relative overflow-hidden group">
-                    <div className="absolute top-0 right-0 bg-slate-200 text-slate-500 text-[10px] font-bold px-2 py-1 rounded-bl-lg">DART + 등기소</div>
-                    <h4 className="font-bold text-slate-800 mb-4 border-b border-slate-200 pb-2 flex items-center"><i className="fas fa-building text-blue-600 mr-2"></i> 기업 식별 정보</h4>
+                    <div className="absolute top-0 right-0 bg-slate-200 text-slate-500 text-[10px] font-bold px-2 py-1 rounded-bl-lg">DART + 등기소 + NICE</div>
+                    <h4 className="font-bold text-slate-800 mb-4 border-b border-slate-200 pb-2 flex items-center"><i className="fas fa-building text-blue-600 mr-2"></i> 기업 개요 및 신용</h4>
                     <div className="space-y-4">
-                      <div><label className="block text-xs font-bold text-slate-600 mb-1">기업명</label><input type="text" id="companyName" className="w-full rounded-lg border-slate-300 text-sm bg-white" /></div>
                       <div className="grid grid-cols-2 gap-4">
-                        <div><label className="block text-xs font-bold text-slate-600 mb-1">사업자등록번호</label><input type="text" id="bizNum" className="w-full rounded-lg border-slate-300 text-sm bg-white" /></div>
-                        <div><label className="block text-xs font-bold text-slate-600 mb-1">법인등록번호</label><input type="text" id="corpNum" className="w-full rounded-lg border-slate-300 text-sm bg-white" /></div>
+                        <div><label className="block text-xs font-bold text-slate-600 mb-1">기업명</label><input type="text" id="companyName" className="w-full rounded-lg border-slate-300 text-sm bg-white" /></div>
+                        <div><label className="block text-xs font-bold text-slate-600 mb-1">대표자</label><input type="text" id="ceoName" className="w-full rounded-lg border-slate-300 text-sm bg-white" /></div>
                       </div>
                       <div className="grid grid-cols-2 gap-4">
-                        <div><label className="block text-xs font-bold text-slate-600 mb-1">대표자명</label><input type="text" id="ceoName" className="w-full rounded-lg border-slate-300 text-sm bg-white" /></div>
-                        <div><label className="block text-xs font-bold text-slate-600 mb-1">설립일자</label><input type="text" id="foundingDate" className="w-full rounded-lg border-slate-300 text-sm bg-white" /></div>
+                        <div><label className="block text-xs font-bold text-slate-600 mb-1">설립일 (업력)</label><input type="text" id="foundingDate" className="w-full rounded-lg border-slate-300 text-sm bg-white" /></div>
+                        <div><label className="block text-xs font-bold text-slate-600 mb-1">기업규모/형태</label><input type="text" id="companyType" className="w-full rounded-lg border-slate-300 text-sm bg-white" placeholder="예: 중소/외부감사" /></div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                         <div><label className="block text-xs font-bold text-slate-600 mb-1">주거래은행</label><input type="text" id="mainBank" className="w-full rounded-lg border-slate-300 text-sm bg-white" /></div>
+                         <div><label className="block text-xs font-bold text-slate-600 mb-1">신용등급 (공공)</label><input type="text" id="creditRating" className="w-full rounded-lg border-slate-300 text-sm font-bold text-blue-600 bg-blue-50" /></div>
                       </div>
                       <div><label className="block text-xs font-bold text-slate-600 mb-1">본점 주소</label><input type="text" id="address" className="w-full rounded-lg border-slate-300 text-sm bg-white" /></div>
                     </div>
@@ -124,8 +127,8 @@ export const SupportMatching = ({ user }: SupportMatchingProps) => {
 
                   {/* Card 2: HR Info (NPS/Employment Insurance) */}
                   <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200 relative overflow-hidden group">
-                    <div className="absolute top-0 right-0 bg-green-100 text-green-700 text-[10px] font-bold px-2 py-1 rounded-bl-lg">고용노동부/국민연금</div>
-                    <h4 className="font-bold text-slate-800 mb-4 border-b border-slate-200 pb-2 flex items-center"><i className="fas fa-user-friends text-green-600 mr-2"></i> 인력 및 고용 현황</h4>
+                    <div className="absolute top-0 right-0 bg-green-100 text-green-700 text-[10px] font-bold px-2 py-1 rounded-bl-lg">고용노동부 (고용보험)</div>
+                    <h4 className="font-bold text-slate-800 mb-4 border-b border-slate-200 pb-2 flex items-center"><i className="fas fa-user-friends text-green-600 mr-2"></i> 고용 및 인력 변동 (최근 1년)</h4>
                     <div className="space-y-4">
                       <div className="grid grid-cols-2 gap-4">
                         <div>
@@ -136,23 +139,35 @@ export const SupportMatching = ({ user }: SupportMatchingProps) => {
                           </div>
                         </div>
                         <div>
-                          <label className="block text-xs font-bold text-slate-600 mb-1">청년 근로자 (만 34세↓)</label>
+                          <label className="block text-xs font-bold text-slate-600 mb-1">청년 (만 34세↓)</label>
                           <div className="relative">
                             <input type="number" id="youthEmp" className="w-full rounded-lg border-slate-300 text-sm bg-white" />
                             <span className="absolute right-3 top-2 text-xs text-slate-400">명</span>
                           </div>
                         </div>
                       </div>
-                      <div>
-                        <label className="block text-xs font-bold text-slate-600 mb-1">최근 1년 채용/퇴사</label>
-                        <div className="flex space-x-2">
-                           <span className="flex-1 bg-green-50 border border-green-200 rounded-lg py-2 px-3 text-xs text-green-700 font-bold"><i className="fas fa-plus mr-1"></i> 입사 12명</span>
-                           <span className="flex-1 bg-red-50 border border-red-200 rounded-lg py-2 px-3 text-xs text-red-700 font-bold"><i className="fas fa-minus mr-1"></i> 퇴사 2명</span>
+                      
+                      {/* Expanded HR Data */}
+                      <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
+                        <div className="grid grid-cols-3 gap-2 text-center">
+                           <div>
+                             <p className="text-[10px] text-slate-500">최근 1년 입사</p>
+                             <p className="text-sm font-bold text-blue-600"><span id="entry1yr">0</span>명</p>
+                           </div>
+                           <div className="border-l border-slate-100">
+                             <p className="text-[10px] text-slate-500">최근 1년 퇴사</p>
+                             <p className="text-sm font-bold text-red-500"><span id="exit1yr">0</span>명</p>
+                           </div>
+                           <div className="border-l border-slate-100">
+                             <p className="text-[10px] text-slate-500">퇴사율</p>
+                             <p className="text-sm font-bold text-slate-700"><span id="turnoverRate">0</span>%</p>
+                           </div>
                         </div>
                       </div>
+
                       <div className="bg-yellow-50 p-3 rounded-lg border border-yellow-100">
-                        <p className="text-[11px] text-yellow-800 font-bold"><i className="fas fa-lightbulb mr-1"></i>고용 증가율 상위 10% 기업입니다.</p>
-                        <p className="text-[10px] text-yellow-700">일자리 창출 관련 가점 2점 확보 가능</p>
+                        <p className="text-[11px] text-yellow-800 font-bold"><i className="fas fa-lightbulb mr-1"></i> 고용 유지율 우수 기업</p>
+                        <p className="text-[10px] text-yellow-700">일자리 창출 및 고용 안정 자금 추천 대상입니다.</p>
                       </div>
                     </div>
                   </div>
