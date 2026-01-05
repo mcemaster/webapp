@@ -75,11 +75,11 @@ app.get('/login', (c) => {
             <form action="/auth/login" method="post" class="space-y-4">
               <div>
                 <label class="block text-gray-700 text-sm font-bold mb-2">아이디 (이메일)</label>
-                <input type="email" id="email" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-blue-500 transition-colors" placeholder="example@company.com" />
+                <input type="email" name="email" id="email" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-blue-500 transition-colors" placeholder="example@company.com" required />
               </div>
               <div>
                 <label class="block text-gray-700 text-sm font-bold mb-2">비밀번호</label>
-                <input type="password" id="password" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-blue-500 transition-colors" placeholder="••••••••" />
+                <input type="password" name="password" id="password" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-blue-500 transition-colors" placeholder="••••••••" required />
               </div>
               
               {/* Error Message Area */}
@@ -203,6 +203,54 @@ app.get('/logout', (c) => {
 })
 
 // API Routes
+app.post('/auth/login', async (c) => {
+  try {
+    const body = await c.req.parseBody()
+    const email = body['email'] as string
+    const password = body['password'] as string
+
+    // 1. Admin Login Check
+    if (email === 'mce@mce.re.kr' && password === '1q2w3e4r5t!') {
+      const adminData = {
+        id: 'admin',
+        name: '최고관리자',
+        email: 'mce@mce.re.kr',
+        role: 'admin',
+        isCertified: true,
+        profileImage: 'https://ui-avatars.com/api/?name=Admin&background=0D8ABC&color=fff'
+      }
+      setCookie(c, 'user_session', JSON.stringify(adminData), {
+        path: '/',
+        secure: false,
+        httpOnly: true,
+        maxAge: 86400,
+      })
+      return c.redirect('/admin')
+    }
+
+    // 2. Mock User Login Check (for demo)
+    if (email && (email.includes('user') || email.includes('test'))) {
+      return c.redirect('/auth/kakao')
+    }
+
+    // 3. Fail - Redirect back with error
+    return c.html(
+      <html lang="ko">
+        <head>
+          <meta charset="UTF-8" />
+          <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+          <title>로그인 오류</title>
+          <script dangerouslySetInnerHTML={{
+            __html: `alert('아이디 또는 비밀번호가 일치하지 않습니다.'); window.history.back();`
+          }} />
+        </head>
+      </html>
+    )
+  } catch (e) {
+    return c.redirect('/login')
+  }
+})
+
 app.post('/api/rfq', async (c) => {
   const body = await c.req.json()
   console.log('RFQ Received:', body)
