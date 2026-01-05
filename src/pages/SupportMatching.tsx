@@ -281,7 +281,7 @@ export const SupportMatching = ({ user }: SupportMatchingProps) => {
         <div id="matching-results" className="hidden mt-12 space-y-8 animate-fade-in-up">
            <div className="text-center mb-10">
              <h2 className="text-3xl font-bold text-slate-900 mb-2">🎉 정밀 진단이 완료되었습니다.</h2>
-             <p className="text-slate-600">입력된 데이터를 기반으로 <span className="text-blue-600 font-bold">총 3건</span>의 최적 지원사업을 추천합니다.</p>
+             <p className="text-slate-600">입력된 데이터를 기반으로 <span className="text-blue-600 font-bold">전체 추천 결과</span>를 표시합니다.</p>
            </div>
            
            <div id="results-list" className="space-y-6 max-w-5xl mx-auto">
@@ -380,7 +380,15 @@ export const SupportMatching = ({ user }: SupportMatchingProps) => {
             { id: 2, title: '2026년 스마트공장 보급확산사업', agency: '중기부', type: 'Smart', maxAmount: '5천만원', region: '전국', tags: ['제조혁신'], deadline: '2026-03-15' },
             { id: 3, title: '수출바우처사업', agency: 'KOTRA', type: 'Export', maxAmount: '3천만원', region: '전국', tags: ['해외진출'], deadline: '2026-01-31' },
             { id: 4, title: '청년일자리 도약장려금', agency: '고용노동부', type: 'Hiring', maxAmount: '1,200만원', region: '전국', tags: ['채용지원'], deadline: '2026-12-31' },
-            { id: 5, title: '중소기업 혁신바우처', agency: '중진공', type: 'Consulting', maxAmount: '5천만원', region: '전국', tags: ['마케팅', '컨설팅'], deadline: '2026-04-30' }
+            { id: 5, title: '중소기업 혁신바우처', agency: '중진공', type: 'Consulting', maxAmount: '5천만원', region: '전국', tags: ['마케팅', '컨설팅'], deadline: '2026-04-30' },
+            { id: 6, title: '스마트공장 고도화 지원사업', agency: '중기부', type: 'Smart', maxAmount: '2억원', region: '전국', tags: ['고도화', 'AI적용'], deadline: '2026-03-31' },
+            { id: 7, title: '수출유망중소기업 지정', agency: '중기부', type: 'Export', maxAmount: '지원우대', region: '전국', tags: ['수출지원'], deadline: '2026-05-31' },
+            { id: 8, title: 'IP나래 프로그램', agency: '특허청', type: 'R&D', maxAmount: '1,750만원', region: '지역별', tags: ['특허전략'], deadline: '2026-02-15' },
+            { id: 9, title: '데이터바우처 지원사업', agency: '과기부', type: 'Smart', maxAmount: '6천만원', region: '전국', tags: ['AI가공'], deadline: '2026-04-10' },
+            { id: 10, title: '예비창업패키지', agency: '창업진흥원', type: 'Funding', maxAmount: '5천만원', region: '전국', tags: ['예비창업'], deadline: '2026-02-28' },
+            { id: 11, title: '초기창업패키지', agency: '창업진흥원', type: 'Funding', maxAmount: '7천만원', region: '전국', tags: ['3년미만'], deadline: '2026-03-20' },
+            { id: 12, title: '창업도약패키지', agency: '창업진흥원', type: 'Funding', maxAmount: '1.2억원', region: '전국', tags: ['3-7년'], deadline: '2026-03-31' },
+            { id: 13, title: '산재예방시설 융자', agency: '안전보건공단', type: 'Loan', maxAmount: '10억원', region: '전국', tags: ['안전설비'], deadline: '상시접수' }
           ];
 
           document.addEventListener('DOMContentLoaded', () => {
@@ -533,7 +541,7 @@ export const SupportMatching = ({ user }: SupportMatchingProps) => {
                     
                     let count = 0;
                     grantDatabase.forEach((item) => {
-                       if(count >= 3) return; // Limit to 3
+                       // LIMIT REMOVED: Show all matches
                        // Mock filtering: show hiring grants if emp > 10, rnd if rnd selected
                        let score = 80;
                        if(isRnd && item.type === 'R&D') score += 15;
