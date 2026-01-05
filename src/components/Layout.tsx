@@ -25,11 +25,11 @@ export const Layout = (props: { children: any; title?: string; user?: any }) => 
                 <button class="px-4 text-[15px] font-bold text-slate-600 group-hover:text-blue-600 transition-colors flex items-center h-full">
                   평가/인증 <i class="fas fa-chevron-down ml-1.5 text-xs opacity-50 group-hover:opacity-100 transition-opacity"></i>
                 </button>
-                {/* Fixed Alignment: left-0, increased width, invisible bridge */}
-                <div class="absolute top-full left-0 w-60 bg-white rounded-b-xl shadow-xl border border-slate-100 overflow-hidden hidden group-hover:block animate-fade-in-up before:absolute before:-top-4 before:left-0 before:w-full before:h-4 before:content-['']">
+                {/* Fixed: Center Alignment + Invisible Bridge */}
+                <div class="absolute top-full left-1/2 transform -translate-x-1/2 w-48 bg-white rounded-b-xl shadow-xl border border-slate-100 overflow-hidden hidden group-hover:block animate-fade-in-up before:absolute before:-top-4 before:left-0 before:w-full before:h-4 before:content-['']">
                   <div class="py-2">
-                    <a href="/services/spec" class="block px-6 py-3 text-sm text-slate-600 hover:bg-slate-50 hover:text-blue-600 font-medium transition-colors">기업 SPEC 평가</a>
-                    <a href="/services/certification" class="block px-6 py-3 text-sm text-slate-600 hover:bg-slate-50 hover:text-blue-600 font-medium transition-colors">ISO 인증</a>
+                    <a href="/services/spec" class="block px-5 py-3 text-sm text-slate-600 hover:bg-slate-50 hover:text-blue-600 font-medium transition-colors">기업 SPEC 평가</a>
+                    <a href="/services/certification" class="block px-5 py-3 text-sm text-slate-600 hover:bg-slate-50 hover:text-blue-600 font-medium transition-colors">ISO 인증</a>
                   </div>
                 </div>
               </div>
