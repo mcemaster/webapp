@@ -72,7 +72,7 @@ app.get('/login', (c) => {
               <button id="tab-institution" class="flex-1 py-2 text-gray-500" onclick="switchTab('institution')">기관/심사원</button>
             </div>
             
-            <form action="/auth/login" method="post" class="space-y-4" onsubmit="event.preventDefault(); handleLogin();">
+            <form action="/auth/login" method="post" class="space-y-4">
               <div>
                 <label class="block text-gray-700 text-sm font-bold mb-2">아이디 (이메일)</label>
                 <input type="email" id="email" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-blue-500 transition-colors" placeholder="example@company.com" />
@@ -148,87 +148,7 @@ app.get('/login', (c) => {
           </div>
         </div>
 
-        <script dangerouslySetInnerHTML={{
-          __html: `
-            function switchTab(type) {
-              const entBtn = document.getElementById('tab-enterprise');
-              const instBtn = document.getElementById('tab-institution');
-              
-              if (type === 'enterprise') {
-                entBtn.className = 'flex-1 py-2 text-blue-600 border-b-2 border-blue-600 font-semibold';
-                instBtn.className = 'flex-1 py-2 text-gray-500';
-              } else {
-                instBtn.className = 'flex-1 py-2 text-blue-600 border-b-2 border-blue-600 font-semibold';
-                entBtn.className = 'flex-1 py-2 text-gray-500';
-              }
-            }
-
-            function handleLogin() {
-              const emailInput = document.getElementById('email');
-              const passInput = document.getElementById('password');
-              const email = emailInput.value;
-              const password = passInput.value;
-              const btn = document.getElementById('login-btn');
-              const errorMsg = document.getElementById('error-msg');
-              const errorText = document.getElementById('error-text');
-              
-              // Reset UI
-              errorMsg.classList.add('hidden');
-              emailInput.classList.remove('border-red-500', 'bg-red-50');
-              passInput.classList.remove('border-red-500', 'bg-red-50');
-
-              // Validation
-              if (!email || !password) {
-                showError('아이디와 비밀번호를 모두 입력해주세요.');
-                return;
-              }
-
-              // Loading state
-              const originalBtnText = btn.innerHTML;
-              btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 로그인 중...';
-              btn.disabled = true;
-
-              // Helper to show error
-              function showError(msg) {
-                errorText.innerText = msg;
-                errorMsg.classList.remove('hidden');
-                
-                // Highlight inputs
-                emailInput.classList.add('border-red-500', 'bg-red-50');
-                passInput.classList.add('border-red-500', 'bg-red-50');
-                
-                // Shake animation effect
-                const form = document.querySelector('form');
-                form.classList.add('animate-pulse');
-                setTimeout(() => form.classList.remove('animate-pulse'), 500);
-
-                // Reset button
-                btn.innerHTML = originalBtnText;
-                btn.disabled = false;
-              }
-
-              // Simulate API call logic
-              setTimeout(() => {
-                // 1. Admin Check
-                if (email === 'mce@mce.re.kr') {
-                  if (password === '1q2w3e4r5t!') {
-                    window.location.href = '/auth/admin';
-                  } else {
-                    showError('비밀번호가 일치하지 않습니다.');
-                  }
-                } 
-                // 2. Mock User Check (Allows 'user' or 'test' in email for demo)
-                else if (email.includes('user') || email.includes('test')) {
-                   window.location.href = '/auth/kakao'; 
-                } 
-                // 3. Not Found
-                else {
-                  showError('등록되지 않은 아이디입니다.\\n회원가입 후 이용해주세요.');
-                }
-              }, 600);
-            }
-          `
-        }} />
+        <script src="/static/js/auth.js"></script>
       </body>
     </html>
   )
