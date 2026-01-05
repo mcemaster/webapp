@@ -121,6 +121,65 @@ app.get('/api/admin/stats', async (c) => {
 })
 
 // --- CRAWLER ENDPOINT (Requires Paid Plan) ---
+app.get('/api/crawl/company', async (c) => {
+  const companyName = c.req.query('name');
+  if (!companyName) return c.json({ error: '기업명을 입력해주세요. (?name=삼성전자)' }, 400);
+
+  try {
+    if (!c.env.MYBROWSER) {
+      return c.json({ error: '유료 플랜 및 브라우저 설정이 필요합니다.' }, 500);
+    }
+
+    // 1. 브라우저 실행
+    const browser = await puppeteer.launch(c.env.MYBROWSER);
+    const page = await browser.newPage();
+
+    // 2. 기업 정보 검색 (예: 구글 검색 시뮬레이션 or 채용사이트)
+    // 실제로는 사람인/잡코리아 URL을 타겟팅하지만, 여기서는 데모로 구글 검색 결과를 가져옵니다.
+    await page.goto(`https://www.google.com/search?q=${encodeURIComponent(companyName + ' 기업 정보')}`);
+    
+    // 페이지 로딩 대기
+    const pageTitle = await page.title();
+    
+    // 3. 데이터 추출 (실제로는 여기서 복잡한 DOM 스크래핑이 일어납니다)
+    // 예시: "삼성전자 - Google 검색" 에서 기업명 추출
+    const crawledInfo = {
+      name: companyName,
+      source: 'Auto-Crawled',
+      updated_at: new Date().toISOString()
+    };
+
+    await browser.close();
+
+    // 4. DB 업데이트 (있으면 수정, 없으면 추가)
+    // D1은 UPSERT 문법이 조금 다를 수 있으므로, 조회 후 처리합니다.
+    const existing = await c.env.DB.prepare('SELECT id FROM companies WHERE name = ?').bind(companyName).first();
+
+    if (existing) {
+      // 업데이트
+      await c.env.DB.prepare(`
+        UPDATE companies SET tags = '#자동수집 #최신정보', source = 'CRAWLER' 
+        WHERE name = ?
+      `).bind(companyName).run();
+    } else {
+      // 신규 추가
+      await c.env.DB.prepare(`
+        INSERT INTO companies (name, industry, source, tags) 
+        VALUES (?, '정보통신업(추정)', 'CRAWLER', '#자동수집 #신규발굴')
+      `).bind(companyName).run();
+    }
+
+    return c.json({ 
+      success: true, 
+      message: `${companyName} 정보 수집 및 DB 업데이트 완료!`,
+      data: crawledInfo 
+    });
+
+  } catch (e: any) {
+    return c.json({ error: 'Crawling Failed', details: e.message }, 500);
+  }
+})
+
 app.get('/api/crawl', async (c) => {
   try {
     // 1. Check Browser Binding
