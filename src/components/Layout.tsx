@@ -25,11 +25,11 @@ export const Layout = (props: { children: any; title?: string; user?: any }) => 
                 <button class="px-4 text-[15px] font-bold text-slate-600 group-hover:text-blue-600 transition-colors flex items-center h-full">
                   평가/인증 <i class="fas fa-chevron-down ml-1.5 text-xs opacity-50 group-hover:opacity-100 transition-opacity"></i>
                 </button>
-                {/* Fixed Alignment: left-0 instead of center */}
-                <div class="absolute top-full left-0 w-56 bg-white rounded-b-xl shadow-xl border border-slate-100 overflow-hidden hidden group-hover:block animate-fade-in-up before:absolute before:-top-4 before:left-0 before:w-full before:h-4 before:content-['']">
+                {/* Fixed Alignment: left-0, increased width, invisible bridge */}
+                <div class="absolute top-full left-0 w-60 bg-white rounded-b-xl shadow-xl border border-slate-100 overflow-hidden hidden group-hover:block animate-fade-in-up before:absolute before:-top-4 before:left-0 before:w-full before:h-4 before:content-['']">
                   <div class="py-2">
-                    <a href="/services/spec" class="block px-5 py-3 text-sm text-slate-600 hover:bg-slate-50 hover:text-blue-600 font-medium transition-colors">기업 SPEC 평가</a>
-                    <a href="/services/certification" class="block px-5 py-3 text-sm text-slate-600 hover:bg-slate-50 hover:text-blue-600 font-medium transition-colors">ISO 인증</a>
+                    <a href="/services/spec" class="block px-6 py-3 text-sm text-slate-600 hover:bg-slate-50 hover:text-blue-600 font-medium transition-colors">기업 SPEC 평가</a>
+                    <a href="/services/certification" class="block px-6 py-3 text-sm text-slate-600 hover:bg-slate-50 hover:text-blue-600 font-medium transition-colors">ISO 인증</a>
                   </div>
                 </div>
               </div>
@@ -75,8 +75,8 @@ export const Layout = (props: { children: any; title?: string; user?: any }) => 
             <div class="hidden md:flex items-center ml-6 pl-6">
               {user ? (
                 /* Logged In State */
-                <div class="relative group">
-                  <button class="flex items-center space-x-2 text-sm font-bold text-slate-700 hover:text-blue-600 focus:outline-none py-2">
+                <div class="relative group h-20 flex items-center">
+                  <button class="flex items-center space-x-2 text-sm font-bold text-slate-700 hover:text-blue-600 focus:outline-none py-2 h-full">
                     <div class="relative">
                       <img src={user.profileImage} alt={user.name} class="h-9 w-9 rounded-full border border-slate-200 object-cover shadow-sm" />
                       <div class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 border-2 border-white rounded-full"></div>
@@ -84,17 +84,21 @@ export const Layout = (props: { children: any; title?: string; user?: any }) => 
                     <span>{user.name}님</span>
                     <i class="fas fa-chevron-down text-xs text-slate-400"></i>
                   </button>
-                  {/* Invisible Bridge Added */}
-                  <div class="absolute right-0 mt-0 w-56 bg-white rounded-xl shadow-xl border border-slate-100 overflow-hidden hidden group-hover:block animate-fade-in-up before:absolute before:-top-4 before:left-0 before:w-full before:h-4 before:content-['']">
-                    <div class="px-5 py-4 border-b border-slate-100 bg-slate-50">
-                      <p class="text-sm font-bold text-slate-900">{user.name}</p>
-                      <p class="text-xs text-slate-500 truncate">{user.email}</p>
+                  {/* Fixed: Invisible Bridge & Right Alignment */}
+                  <div class="absolute top-full right-0 w-64 bg-white rounded-b-xl shadow-xl border border-slate-100 overflow-hidden hidden group-hover:block animate-fade-in-up before:absolute before:-top-4 before:left-0 before:w-full before:h-4 before:content-['']">
+                    <div class="px-6 py-5 border-b border-slate-100 bg-slate-50">
+                      <p class="text-base font-bold text-slate-900">{user.name}</p>
+                      <p class="text-xs text-slate-500 truncate mt-1">{user.email}</p>
                     </div>
                     <div class="py-2">
                       {user.role === 'admin' && (
-                        <a href="/admin" class="block px-5 py-2.5 text-sm text-blue-600 hover:bg-blue-50 font-bold"><i class="fas fa-cog mr-2"></i>관리자 모드</a>
+                        <a href="/admin" class="block px-6 py-3 text-sm text-blue-600 hover:bg-blue-50 font-bold flex items-center">
+                          <i class="fas fa-cog w-5"></i> 관리자 모드
+                        </a>
                       )}
-                      <a href="/logout" class="block px-5 py-2.5 text-sm text-red-600 hover:bg-red-50 font-medium"><i class="fas fa-sign-out-alt mr-2"></i>로그아웃</a>
+                      <a href="/logout" class="block px-6 py-3 text-sm text-red-600 hover:bg-red-50 font-medium flex items-center">
+                        <i class="fas fa-sign-out-alt w-5"></i> 로그아웃
+                      </a>
                     </div>
                   </div>
                 </div>
