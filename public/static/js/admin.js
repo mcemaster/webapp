@@ -41,23 +41,28 @@ console.log("Admin JS Loaded");
   }
 })();
 
-// UI 업데이트 함수 (안전하게 요소 찾기)
+// UI 업데이트 함수 (ID 기반으로 안전하게 수정)
 function updateDashboardUI(data) {
-  // 1. Total Users (첫 번째 카드)
-  const card1 = document.querySelector('div.bg-white:nth-child(1) h3');
-  if (card1) card1.innerText = (data.total_users || 0).toLocaleString();
+  // 1. Total Users
+  const totalUsersEl = document.getElementById('stat-total-users');
+  if (totalUsersEl) {
+    totalUsersEl.innerText = (data.total_users || 0).toLocaleString();
+    // 애니메이션 효과 (선택사항)
+    totalUsersEl.classList.add('animate-pulse');
+    setTimeout(() => totalUsersEl.classList.remove('animate-pulse'), 1000);
+  }
 
-  // 2. AI Analysis (두 번째 카드)
-  const card2Title = document.querySelector('div.bg-white:nth-child(2) p');
-  const card2Value = document.querySelector('div.bg-white:nth-child(2) h3');
-  if (card2Title) card2Title.innerText = 'AI 분석 횟수';
-  if (card2Value) card2Value.innerText = (data.ai_usage || 0).toLocaleString();
+  // 2. AI Analysis Usage
+  const aiUsageEl = document.getElementById('stat-ai-usage');
+  if (aiUsageEl) {
+    aiUsageEl.innerText = (data.ai_usage || 0).toLocaleString();
+  }
 
-  // 3. Crawler Data (세 번째 카드)
-  const card3Title = document.querySelector('div.bg-white:nth-child(3) p');
-  const card3Value = document.querySelector('div.bg-white:nth-child(3) h3');
-  if (card3Title) card3Title.innerText = '수집된 공고 수';
-  if (card3Value) card3Value.innerText = (data.crawler_usage || 0).toLocaleString();
+  // 3. Crawler Usage
+  const crawlerUsageEl = document.getElementById('stat-crawler-usage');
+  if (crawlerUsageEl) {
+    crawlerUsageEl.innerText = (data.crawler_usage || 0).toLocaleString();
+  }
 }
 
 // 배포 버튼 함수
