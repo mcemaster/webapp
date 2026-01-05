@@ -1,5 +1,10 @@
 // Auth & Login Logic (Powered by MCE Core)
 document.addEventListener('DOMContentLoaded', () => {
+  if (typeof MCE === 'undefined') {
+    alert('시스템 오류: MCE Core가 로드되지 않았습니다. 관리자에게 문의하세요.');
+    return;
+  }
+
   
   // 1. Tab Switching (안전한 요소 선택 사용)
   const tabEnterprise = MCE.$('#tab-enterprise');

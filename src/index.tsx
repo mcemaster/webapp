@@ -24,7 +24,7 @@ import { Certification } from './pages/Certification'
 const app = new Hono()
 
 app.use(renderer)
-app.use('/static/*', serveStatic({ root: './public' }))
+// app.use('/static/*', serveStatic({ root: './public' }))
 
 // Auth Middleware & Routes
 // ... (Keep existing routes) ...
