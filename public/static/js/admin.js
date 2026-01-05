@@ -1,127 +1,82 @@
-// Admin Dashboard Logic (Powered by MCE Core)
 document.addEventListener('DOMContentLoaded', () => {
-  console.log('Admin Logic Module Loaded');
+  // Check if we are on the Overview tab
+  const urlParams = new URLSearchParams(window.location.search);
+  const tab = urlParams.get('tab') || 'overview';
 
-  // --- 1. Notification Center (RFQ) ---
-  const sendBtn = document.getElementById('send-noti-btn');
-  if (sendBtn) {
-    sendBtn.addEventListener('click', () => {
-      const originalText = sendBtn.innerHTML;
-      sendBtn.disabled = true;
-      sendBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> 발송 중...';
-
-      setTimeout(() => {
-        MCE.ui.toast('선택한 3개 기업에 알림톡 발송을 완료했습니다.', 'success');
-        sendBtn.innerHTML = '<i class="fas fa-check mr-2"></i> 발송 완료';
-        sendBtn.classList.replace('bg-blue-600', 'bg-green-600');
-        sendBtn.classList.replace('hover:bg-blue-700', 'hover:bg-green-700');
-
-        setTimeout(() => {
-          sendBtn.innerHTML = originalText;
-          sendBtn.disabled = false;
-          sendBtn.classList.replace('bg-green-600', 'bg-blue-600');
-          sendBtn.classList.replace('hover:bg-green-700', 'hover:bg-blue-700');
-        }, 3000);
-      }, 1500);
-    });
-  }
-
-  // --- 2. Partner Approval & User Management (Event Delegation) ---
-  document.body.addEventListener('click', (e) => {
-    const target = e.target;
-    
-    // 승인 버튼
-    if (target.matches('.btn-approve') || target.closest('.btn-approve')) {
-      if(confirm('해당 파트너사의 가입을 승인하시겠습니까?')) {
-        MCE.ui.toast('파트너 승인 처리되었습니다. (알림 발송됨)', 'success');
-        const row = target.closest('tr');
-        if(row) {
-          row.style.opacity = '0.5';
-          row.style.pointerEvents = 'none';
-          const badge = row.querySelector('.status-badge') || row.querySelector('span.bg-yellow-100'); // Fallback selector
-          if(badge) {
-            badge.className = 'status-badge bg-green-100 text-green-700 px-2 py-1 rounded text-xs font-bold';
-            badge.innerText = '승인 완료';
-          }
-        }
-      }
-    }
-
-    // 반려 버튼
-    if (target.matches('.btn-reject') || target.closest('.btn-reject')) {
-      const reason = prompt('반려 사유를 입력해주세요.');
-      if(reason) {
-        MCE.ui.toast(`반려 처리되었습니다. (사유: ${reason})`, 'error');
-        const row = target.closest('tr');
-        if(row) row.remove();
-      }
-    }
-
-    // 회원 수정
-    if (target.matches('.btn-user-edit') || target.closest('.btn-user-edit')) {
-      MCE.ui.toast('회원 정보 수정 팝업을 엽니다. (기능 준비중)', 'info');
-    }
-
-    // 회원 차단
-    if (target.matches('.btn-user-block') || target.closest('.btn-user-block')) {
-      if(confirm('해당 회원을 차단하시겠습니까?')) {
-        MCE.ui.toast('회원이 차단되었습니다.', 'error');
-        const row = target.closest('tr');
-        if(row) row.classList.add('opacity-50', 'bg-red-50');
-      }
-    }
-
-    // --- System & API Settings ---
-    // Imweb Config
-    if (target.id === 'btn-config-imweb') {
-      MCE.ui.toast('아임웹(Imweb) SSO 설정 팝업을 엽니다.', 'info');
-    }
-    // ECOUNT Config
-    if (target.id === 'btn-config-ecount') {
-      MCE.ui.toast('ECOUNT ERP API 키 설정 팝업을 엽니다.', 'info');
-    }
-  });
-
-  // --- 3. SEO Settings Save ---
-  const btnSaveSeo = document.getElementById('btn-save-seo');
-  if(btnSaveSeo) {
-    btnSaveSeo.addEventListener('click', () => {
-      const originalText = btnSaveSeo.innerHTML;
-      btnSaveSeo.disabled = true;
-      btnSaveSeo.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> 저장 중...';
-      
-      setTimeout(() => {
-        MCE.ui.toast('SEO 설정이 사이트에 반영되었습니다.', 'success');
-        btnSaveSeo.innerHTML = originalText;
-        btnSaveSeo.disabled = false;
-      }, 1000);
-    });
-  }
-
-  // --- 4. Banner Management ---
-  const btnAddBanner = document.getElementById('btn-add-banner');
-  if(btnAddBanner) {
-    btnAddBanner.addEventListener('click', () => {
-      MCE.ui.toast('배너 등록 팝업을 엽니다. (기능 준비중)', 'info');
-    });
-  }
-
-  // --- 5. ERP Sync ---
-  const btnSyncErp = document.getElementById('btn-sync-erp');
-  if(btnSyncErp) {
-    btnSyncErp.addEventListener('click', () => {
-      btnSyncErp.disabled = true;
-      btnSyncErp.innerHTML = '<i class="fas fa-sync fa-spin mr-2"></i> 동기화 중...';
-      
-      setTimeout(() => {
-        MCE.ui.toast('ECOUNT ERP와 데이터 동기화를 완료했습니다.', 'success');
-        btnSyncErp.disabled = false;
-        btnSyncErp.innerHTML = '<i class="fas fa-sync mr-2"></i> 즉시 동기화';
-        
-        // Update Stats Mock
-        const countEl = document.getElementById('api-call-count');
-        if(countEl) countEl.innerText = parseInt(countEl.innerText) + 12;
-      }, 2000);
-    });
+  if (tab === 'overview') {
+    fetchAdminStats();
   }
 });
+
+async function fetchAdminStats() {
+  try {
+    const response = await fetch('/api/admin/stats');
+    if (!response.ok) return;
+
+    const data = await response.json();
+    
+    // Update AI Usage (Service Usage)
+    // Assuming the first card is "Total Users" or similar, we will repurpose or add to them.
+    // Let's target specific elements if possible, or update the existing hardcoded ones.
+    
+    // Strategy: Update the text content of the cards based on their labels or position.
+    // Since we don't have unique IDs on the cards in the HTML (based on previous read),
+    // we will try to find them by text content or add IDs in the TSX file next time.
+    // For now, let's look for the specific hardcoded numbers and replace them.
+    
+    // 1. Update "Total Users"
+    updateCardValue('Total Users', data.total_users);
+
+    // 2. Update "Active Partners" -> Let's change this to "AI Analysis Usage" for demo
+    // We need to change the label too potentially, but let's just find the number.
+    // Actually, it's better to update the Admin.tsx to have IDs.
+    // But since I can't edit Admin.tsx and JS in one turn easily without context loss, 
+    // I'll try to find elements by their context.
+    
+    const cards = document.querySelectorAll('.bg-white.p-6.rounded-xl.shadow-sm');
+    
+    // Card 1: Total Users
+    if (cards[0]) {
+       const valueEl = cards[0].querySelector('h3');
+       if (valueEl) valueEl.innerText = data.total_users.toLocaleString();
+    }
+
+    // Card 2: Active Partners -> Reuse as "AI Analysis Runs"
+    if (cards[1]) {
+       const titleEl = cards[1].querySelector('p');
+       if (titleEl) titleEl.innerText = 'AI Analysis Usage';
+       
+       const valueEl = cards[1].querySelector('h3');
+       if (valueEl) valueEl.innerText = data.ai_usage.toLocaleString();
+       
+       const iconContainer = cards[1].querySelector('.bg-indigo-50');
+       if (iconContainer) iconContainer.innerHTML = '<i class="fas fa-robot"></i>';
+    }
+
+    // Card 3: RFQ Requests -> Reuse as "Crawled Data"
+    if (cards[2]) {
+       const titleEl = cards[2].querySelector('p');
+       if (titleEl) titleEl.innerText = 'Crawled Data Count';
+       
+       const valueEl = cards[2].querySelector('h3');
+       if (valueEl) valueEl.innerText = data.crawler_usage.toLocaleString();
+       
+       const iconContainer = cards[2].querySelector('.bg-emerald-50');
+       if (iconContainer) iconContainer.innerHTML = '<i class="fas fa-spider"></i>';
+    }
+
+  } catch (e) {
+    console.error("Failed to fetch admin stats", e);
+  }
+}
+
+function updateCardValue(label, newValue) {
+  // Helper to find card by label text
+  const titles = document.querySelectorAll('p.text-xs.font-bold.text-slate-500');
+  titles.forEach(p => {
+    if (p.innerText.includes(label)) {
+      const h3 = p.nextElementSibling;
+      if (h3) h3.innerText = newValue.toLocaleString();
+    }
+  });
+}

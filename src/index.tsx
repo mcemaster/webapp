@@ -33,6 +33,37 @@ const app = new Hono<{ Bindings: Bindings }>()
 app.use(renderer)
 app.use('/static/*', serveStatic({ root: './public' }))
 
+// --- ADMIN STATS ENDPOINT ---
+app.get('/api/admin/stats', async (c) => {
+  const userSession = getCookie(c, 'user_session')
+  if (!userSession) return c.json({ error: 'Unauthorized' }, 401)
+  
+  const user = JSON.parse(userSession)
+  if (user.role !== 'admin') return c.json({ error: 'Forbidden' }, 403)
+
+  try {
+    // 1. AI Usage Count (from analysis_logs)
+    const aiCount = await c.env.DB.prepare('SELECT COUNT(*) as count FROM analysis_logs').first('count');
+    
+    // 2. Crawler Data Count (from grants)
+    // We assume grants with specific agencies or descriptions are crawled, or just count all for now.
+    // Or we can count grants inserted today.
+    const today = new Date().toISOString().split('T')[0];
+    const crawledCount = await c.env.DB.prepare("SELECT COUNT(*) as count FROM grants WHERE description LIKE '%브라우저%' OR agency = '자동수집(AI)'").first('count');
+    
+    // 3. Total Users
+    const userCount = await c.env.DB.prepare('SELECT COUNT(*) as count FROM users').first('count');
+
+    return c.json({
+      ai_usage: aiCount || 0,
+      crawler_usage: crawledCount || 0,
+      total_users: userCount || 0
+    });
+  } catch (e: any) {
+    return c.json({ error: e.message }, 500)
+  }
+})
+
 // --- CRAWLER ENDPOINT (Requires Paid Plan) ---
 app.get('/api/crawl', async (c) => {
   try {
