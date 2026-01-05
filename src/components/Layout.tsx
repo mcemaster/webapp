@@ -25,7 +25,8 @@ export const Layout = (props: { children: any; title?: string; user?: any }) => 
                 <button class="px-4 text-[15px] font-bold text-slate-600 group-hover:text-blue-600 transition-colors flex items-center h-full">
                   평가/인증 <i class="fas fa-chevron-down ml-1.5 text-xs opacity-50 group-hover:opacity-100 transition-opacity"></i>
                 </button>
-                <div class="absolute top-[calc(100%-1px)] left-1/2 transform -translate-x-1/2 w-48 bg-white rounded-b-xl shadow-xl border border-slate-100 overflow-hidden hidden group-hover:block animate-fade-in-up">
+                {/* Invisible Bridge Added: before:-top-4 */}
+                <div class="absolute top-full left-1/2 transform -translate-x-1/2 w-48 bg-white rounded-b-xl shadow-xl border border-slate-100 overflow-hidden hidden group-hover:block animate-fade-in-up before:absolute before:-top-4 before:left-0 before:w-full before:h-4 before:content-['']">
                   <div class="py-2">
                     <a href="/services/spec" class="block px-5 py-3 text-sm text-slate-600 hover:bg-slate-50 hover:text-blue-600 font-medium transition-colors">기업 SPEC 평가</a>
                     <a href="/services/certification" class="block px-5 py-3 text-sm text-slate-600 hover:bg-slate-50 hover:text-blue-600 font-medium transition-colors">ISO 인증</a>
@@ -83,7 +84,8 @@ export const Layout = (props: { children: any; title?: string; user?: any }) => 
                     <span>{user.name}님</span>
                     <i class="fas fa-chevron-down text-xs text-slate-400"></i>
                   </button>
-                  <div class="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-slate-100 overflow-hidden hidden group-hover:block animate-fade-in-up">
+                  {/* Invisible Bridge Added */}
+                  <div class="absolute right-0 mt-0 w-56 bg-white rounded-xl shadow-xl border border-slate-100 overflow-hidden hidden group-hover:block animate-fade-in-up before:absolute before:-top-4 before:left-0 before:w-full before:h-4 before:content-['']">
                     <div class="px-5 py-4 border-b border-slate-100 bg-slate-50">
                       <p class="text-sm font-bold text-slate-900">{user.name}</p>
                       <p class="text-xs text-slate-500 truncate">{user.email}</p>
