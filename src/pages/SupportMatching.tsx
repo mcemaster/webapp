@@ -35,7 +35,7 @@ export const SupportMatching = ({ user }: SupportMatchingProps) => {
               <span className="text-sm font-bold text-slate-800">통합 데이터 수집 시스템 대기 중</span>
             </div>
             <div className="flex items-center space-x-3">
-               <button onclick="fillDemoData()" className="text-xs bg-slate-100 text-slate-600 px-3 py-1 rounded hover:bg-slate-200 transition-colors">
+               <button id="btn-fill-demo" type="button" className="text-xs bg-slate-100 text-slate-600 px-3 py-1 rounded hover:bg-slate-200 transition-colors">
                  <i className="fas fa-magic mr-1"></i>데모(태성정밀)
                </button>
                <div className="text-xs font-mono text-slate-500 bg-white border border-slate-200 px-2 py-1 rounded">
@@ -74,7 +74,7 @@ export const SupportMatching = ({ user }: SupportMatchingProps) => {
                 {/* Search Bar */}
                 <div className="max-w-3xl mx-auto bg-slate-800 p-2 rounded-2xl shadow-lg flex mb-6 relative z-20">
                   <input type="text" id="company-search-input" placeholder="기업명을 입력하세요 (예: 태성정밀, 삼성전자)" className="flex-1 bg-white border-none rounded-xl px-6 text-lg focus:ring-2 focus:ring-blue-500" />
-                  <button type="button" onclick="autoFetchDartData()" className="bg-blue-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-blue-500 transition-colors ml-2 flex items-center whitespace-nowrap">
+                  <button type="button" id="btn-auto-fetch" className="bg-blue-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-blue-500 transition-colors ml-2 flex items-center whitespace-nowrap">
                     <i className="fas fa-search mr-2"></i> 데이터 연동
                   </button>
                 </div>
@@ -180,7 +180,7 @@ export const SupportMatching = ({ user }: SupportMatchingProps) => {
                     <h4 className="font-bold text-slate-800 mb-4 border-b border-slate-200 pb-2 flex items-center"><i className="fas fa-balance-scale text-indigo-600 mr-2"></i> 재무상태표</h4>
                     <div className="space-y-4">
                       <div className="grid grid-cols-2 gap-4"><div><label className="block text-xs font-bold text-slate-600 mb-1">자산총계</label><input type="number" id="assets" className="w-full rounded-lg border-slate-300 text-sm bg-white" /></div><div><label className="block text-xs font-bold text-slate-600 mb-1">부채총계</label><input type="number" id="liabilities" className="w-full rounded-lg border-slate-300 text-sm bg-white" /></div></div>
-                      <div className="grid grid-cols-2 gap-4"><div><label className="block text-xs font-bold text-slate-600 mb-1">자본금</label><input type="number" id="capital" className="w-full rounded-lg border-slate-300 text-sm bg-white" /></div><div><label className="block text-xs font-bold text-slate-600 mb-1">부채비율</label><input type="text" id="debtRatio" className="w-full rounded-lg border-slate-300 bg-slate-100 text-sm text-right font-bold text-blue-600" readOnly /></div></div>
+                      <div className="grid grid-cols-2 gap-4"><div><label className="block text-xs font-bold text-slate-600 mb-1">자본금</label><input type="number" id="capital" className="w-full rounded-lg border-slate-300 text-sm bg-white" /></div><div><label className="block text-xs font-bold text-slate-600 mb-1">부채비율</label><input type="text" id="debtRatio" className="w-full rounded-lg border-slate-300 bg-slate-100 text-sm text-right font-bold text-blue-600" /></div></div>
                     </div>
                   </div>
                 </div>
@@ -258,18 +258,45 @@ export const SupportMatching = ({ user }: SupportMatchingProps) => {
           </div>
         </div>
 
-        {/* ... (Loading Overlay and other sections remain same) ... */}
-        {/* Reuse existing loading overlay logic */}
+        {/* Loading Overlay */}
         <div id="loading-overlay" className="hidden fixed inset-0 bg-slate-900/95 backdrop-blur-md z-50 flex flex-col items-center justify-center">
-          {/* ... */}
+          <div className="relative w-64 h-64 mb-10">
+            <div className="absolute inset-0 border-4 border-blue-500/30 rounded-full animate-[spin_3s_linear_infinite]"></div>
+            <div className="absolute inset-4 border-4 border-t-indigo-500 border-r-transparent border-b-transparent border-l-transparent rounded-full animate-[spin_2s_linear_infinite]"></div>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <i className="fas fa-robot text-6xl text-blue-400 animate-pulse"></i>
+            </div>
+          </div>
           <h3 className="text-3xl font-extrabold text-white mb-2 tracking-tight text-center"><span className="text-blue-400">경영인증평가원 AI</span>가<br/>매칭중입니다</h3>
-          {/* ... */}
+          <p className="text-slate-400 text-lg mb-8">대표님 기업에 딱 맞는 지원사업을 찾고 있습니다.</p>
+          <div className="w-96 h-2 bg-slate-800 rounded-full overflow-hidden relative">
+            <div id="loading-bar" className="absolute left-0 top-0 h-full bg-gradient-to-r from-blue-500 to-indigo-500 transition-all duration-300 w-0"></div>
+          </div>
+          <div className="mt-4 text-sm text-slate-500 font-mono">
+            Scanning 30,241 items...
+          </div>
         </div>
+
+        {/* Results Area */}
         <div id="matching-results" className="hidden mt-12 space-y-8 animate-fade-in-up">
-           <div id="results-list" className="space-y-6"></div>
+           <div className="text-center mb-10">
+             <h2 className="text-3xl font-bold text-slate-900 mb-2">🎉 정밀 진단이 완료되었습니다.</h2>
+             <p className="text-slate-600">입력된 데이터를 기반으로 <span className="text-blue-600 font-bold">총 3건</span>의 최적 지원사업을 추천합니다.</p>
+           </div>
+           
+           <div id="results-list" className="space-y-6 max-w-5xl mx-auto">
+             {/* Results will be injected here */}
+           </div>
+
+           <div className="text-center mt-12 bg-slate-50 p-8 rounded-2xl border border-slate-200 max-w-3xl mx-auto">
+             <p className="font-bold text-slate-700 mb-4">원하는 결과를 찾지 못하셨나요?</p>
+             <a href="https://search.naver.com/search.naver?query=2026년+정부지원사업+통합공고" target="_blank" className="inline-flex items-center text-blue-600 hover:text-blue-800 font-bold transition-colors">
+               <i className="fas fa-external-link-alt mr-2"></i> 네이버에서 전체 공고 검색하기
+             </a>
+           </div>
         </div>
         
-        {/* Loading Modal for Data Fetching (New) */}
+        {/* Data Fetching Loading Modal */}
         <div id="data-loading-modal" className="hidden fixed inset-0 z-[70] flex items-center justify-center bg-black/60 backdrop-blur-sm">
            <div className="bg-white rounded-2xl p-8 max-w-sm w-full text-center shadow-2xl border border-slate-100">
               <div className="mb-6 flex justify-center">
@@ -284,7 +311,7 @@ export const SupportMatching = ({ user }: SupportMatchingProps) => {
            </div>
         </div>
 
-        {/* Success Modal (Reuse) */}
+        {/* Success Modal */}
         <div id="custom-success-modal" className="hidden fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm transition-opacity">
           <div className="bg-white rounded-2xl p-8 max-w-sm w-full text-center shadow-2xl transform scale-100 animate-fade-in-up border border-slate-100">
             <div className="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
@@ -295,8 +322,26 @@ export const SupportMatching = ({ user }: SupportMatchingProps) => {
               <span className="font-bold text-blue-600">DART, 고용부, 인증협회</span>의<br/>
               모든 데이터를 성공적으로 불러왔습니다.
             </p>
-            <button onclick="document.getElementById('custom-success-modal').classList.add('hidden')" className="w-full bg-blue-600 text-white py-3 rounded-xl font-bold hover:bg-blue-700 transition-colors shadow-lg">
+            <button id="btn-close-success" className="w-full bg-blue-600 text-white py-3 rounded-xl font-bold hover:bg-blue-700 transition-colors shadow-lg">
               확인
+            </button>
+          </div>
+        </div>
+
+        {/* Not Found Modal (Manual Input Guide) */}
+        <div id="not-found-modal" className="hidden fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm transition-opacity">
+          <div className="bg-white rounded-2xl p-8 max-w-sm w-full text-center shadow-2xl transform scale-100 animate-fade-in-up border border-slate-100">
+            <div className="w-20 h-20 bg-amber-50 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
+              <i className="fas fa-edit text-3xl text-amber-600"></i>
+            </div>
+            <h3 className="text-xl font-bold text-slate-900 mb-2">등록된 데이터가 없습니다.</h3>
+            <p className="text-slate-600 mb-8 leading-relaxed text-sm">
+              아직 공시 데이터가 없는 기업입니다.<br/>
+              <span className="font-bold text-amber-600">직접 정보를 입력</span>해주시면<br/>
+              AI가 정확하게 분석해드립니다.
+            </p>
+            <button id="btn-manual-input" className="w-full bg-amber-500 text-white py-3 rounded-xl font-bold hover:bg-amber-600 transition-colors shadow-lg">
+              수기 입력 시작하기
             </button>
           </div>
         </div>
@@ -332,128 +377,195 @@ export const SupportMatching = ({ user }: SupportMatchingProps) => {
 
           const grantDatabase = [
             { id: 1, title: '2026년 창업성장기술개발사업 디딤돌 창업과제', agency: '중소벤처기업부', type: 'R&D', maxAmount: '1.2억원', region: '전국', targetAge: '7년미만', certs: [], tags: ['기술개발', '초기창업'], deadline: '2026-02-28' },
-            // ... (keep limited list for brevity in this snippet, full list persists in memory)
             { id: 2, title: '2026년 스마트공장 보급확산사업', agency: '중기부', type: 'Smart', maxAmount: '5천만원', region: '전국', tags: ['제조혁신'], deadline: '2026-03-15' },
-            { id: 3, title: '수출바우처사업', agency: 'KOTRA', type: 'Export', maxAmount: '3천만원', region: '전국', tags: ['해외진출'], deadline: '2026-01-31' }
+            { id: 3, title: '수출바우처사업', agency: 'KOTRA', type: 'Export', maxAmount: '3천만원', region: '전국', tags: ['해외진출'], deadline: '2026-01-31' },
+            { id: 4, title: '청년일자리 도약장려금', agency: '고용노동부', type: 'Hiring', maxAmount: '1,200만원', region: '전국', tags: ['채용지원'], deadline: '2026-12-31' },
+            { id: 5, title: '중소기업 혁신바우처', agency: '중진공', type: 'Consulting', maxAmount: '5천만원', region: '전국', tags: ['마케팅', '컨설팅'], deadline: '2026-04-30' }
           ];
 
-          // Logic
-          let currentStep = 1;
-          const totalSteps = 4;
-          
-          if(document.getElementById('next-btn')) {
-             document.getElementById('next-btn').addEventListener('click', () => { if(currentStep < totalSteps) { currentStep++; updateUI(); } });
-             document.getElementById('prev-btn').addEventListener('click', () => { if(currentStep > 1) { currentStep--; updateUI(); } });
-             document.getElementById('submit-btn').addEventListener('click', runMatching);
-          }
+          document.addEventListener('DOMContentLoaded', () => {
+            console.log('SupportMatching Script Loaded');
+            
+            // --- Elements ---
+            const btnFillDemo = document.getElementById('btn-fill-demo');
+            const btnAutoFetch = document.getElementById('btn-auto-fetch');
+            const btnNext = document.getElementById('next-btn');
+            const btnPrev = document.getElementById('prev-btn');
+            const btnSubmit = document.getElementById('submit-btn');
+            const btnCloseSuccess = document.getElementById('btn-close-success');
+            const btnManualInput = document.getElementById('btn-manual-input');
+            const companyInput = document.getElementById('company-search-input');
+            
+            // --- Wizard Logic ---
+            let currentStep = 1;
+            const totalSteps = 4;
 
-          function updateUI() {
-             document.querySelectorAll('.step-content').forEach((el, idx) => {
-                if(idx+1 === currentStep) el.classList.remove('hidden'); else el.classList.add('hidden');
-             });
-             document.querySelectorAll('.step-dot').forEach((el, idx) => {
-                if(idx+1 <= currentStep) { el.classList.remove('bg-slate-200','text-slate-500'); el.classList.add('bg-blue-600','text-white'); }
-                else { el.classList.remove('bg-blue-600','text-white'); el.classList.add('bg-slate-200','text-slate-500'); }
-             });
-             if(currentStep === 1) document.getElementById('prev-btn').classList.add('hidden'); else document.getElementById('prev-btn').classList.remove('hidden');
-             if(currentStep === totalSteps) { document.getElementById('next-btn').classList.add('hidden'); document.getElementById('submit-btn').classList.remove('hidden'); }
-             else { document.getElementById('next-btn').classList.remove('hidden'); document.getElementById('submit-btn').classList.add('hidden'); }
-             document.getElementById('step-wizard').scrollIntoView({ behavior: 'smooth' });
-          }
+            function updateUI() {
+               document.querySelectorAll('.step-content').forEach((el, idx) => {
+                  if(idx+1 === currentStep) el.classList.remove('hidden'); else el.classList.add('hidden');
+               });
+               document.querySelectorAll('.step-dot').forEach((el, idx) => {
+                  if(idx+1 <= currentStep) { el.classList.remove('bg-slate-200','text-slate-500'); el.classList.add('bg-blue-600','text-white'); }
+                  else { el.classList.remove('bg-blue-600','text-white'); el.classList.add('bg-slate-200','text-slate-500'); }
+               });
+               if(currentStep === 1) btnPrev.classList.add('hidden'); else btnPrev.classList.remove('hidden');
+               if(currentStep === totalSteps) { btnNext.classList.add('hidden'); btnSubmit.classList.remove('hidden'); }
+               else { btnNext.classList.remove('hidden'); btnSubmit.classList.add('hidden'); }
+               document.getElementById('step-wizard').scrollIntoView({ behavior: 'smooth' });
+            }
 
-          window.fillDemoData = function() {
-             document.getElementById('company-search-input').value = '태성정밀';
-             alert('데모 기업명(태성정밀)이 입력되었습니다. [데이터 연동] 버튼을 눌러주세요.');
-          }
+            if(btnNext) btnNext.addEventListener('click', () => { if(currentStep < totalSteps) { currentStep++; updateUI(); } });
+            if(btnPrev) btnPrev.addEventListener('click', () => { if(currentStep > 1) { currentStep--; updateUI(); } });
+            
+            // --- Demo Fill ---
+            if(btnFillDemo) {
+              btnFillDemo.addEventListener('click', () => {
+                 if(companyInput) companyInput.value = '태성정밀';
+                 alert('데모 기업명(태성정밀)이 입력되었습니다. [데이터 연동] 버튼을 눌러주세요.');
+              });
+            }
+            
+            // --- Auto Fetch Logic ---
+            if(btnAutoFetch) {
+              btnAutoFetch.addEventListener('click', () => {
+                 const name = companyInput.value.trim();
+                 if(!name) return alert('기업명을 입력하세요.');
+                 
+                 // Show Loading Modal
+                 const loadingModal = document.getElementById('data-loading-modal');
+                 loadingModal.classList.remove('hidden');
+                 
+                 // Reset logs
+                 document.getElementById('log-nps').classList.add('hidden');
+                 document.getElementById('log-cert').classList.add('hidden');
 
-          window.autoFetchDartData = function() {
-             const input = document.getElementById('company-search-input');
-             const name = input.value.trim();
-             if(!name) return alert('기업명을 입력하세요.');
-             
-             // Show Loading Modal
-             const loadingModal = document.getElementById('data-loading-modal');
-             loadingModal.classList.remove('hidden');
-             
-             // Simulate Multi-source Fetching
-             setTimeout(() => { document.getElementById('log-nps').classList.remove('hidden'); }, 800);
-             setTimeout(() => { document.getElementById('log-cert').classList.remove('hidden'); }, 1600);
+                 // Simulate Multi-source Fetching
+                 setTimeout(() => { document.getElementById('log-nps').classList.remove('hidden'); }, 800);
+                 setTimeout(() => { document.getElementById('log-cert').classList.remove('hidden'); }, 1600);
 
-             setTimeout(() => {
-                loadingModal.classList.add('hidden');
-                
-                const data = corporateDB[name];
-                if(data) {
-                   // 1. Basic Info
-                   document.getElementById('companyName').value = data.name;
-                   document.getElementById('bizNum').value = data.bizNum;
-                   document.getElementById('corpNum').value = data.corpNum;
-                   document.getElementById('ceoName').value = data.ceoName;
-                   document.getElementById('foundingDate').value = data.foundingDate;
-                   document.getElementById('address').value = data.address;
-                   
-                   // 2. HR Info (NPS)
-                   document.getElementById('employees').value = data.employees;
-                   document.getElementById('youthEmp').value = data.youthEmp;
+                 setTimeout(() => {
+                    loadingModal.classList.add('hidden');
+                    
+                    const data = corporateDB[name];
+                    if(data) {
+                       // SUCCESS: Fill Data
+                       document.getElementById('companyName').value = data.name;
+                       document.getElementById('bizNum').value = data.bizNum;
+                       document.getElementById('corpNum').value = data.corpNum;
+                       document.getElementById('ceoName').value = data.ceoName;
+                       document.getElementById('foundingDate').value = data.foundingDate;
+                       document.getElementById('address').value = data.address;
+                       
+                       // 2. HR Info
+                       document.getElementById('employees').value = data.employees;
+                       document.getElementById('youthEmp').value = data.youthEmp;
 
-                   // 3. Financials (DART)
-                   document.getElementById('rev_2024').value = data.rev_2024;
-                   document.getElementById('rev_2025').value = data.rev_2025;
-                   document.getElementById('op_2024').value = data.op_2024;
-                   document.getElementById('op_2025').value = data.op_2025;
-                   document.getElementById('net_2024').value = data.net_2024;
-                   document.getElementById('net_2025').value = data.net_2025;
-                   document.getElementById('assets').value = data.assets;
-                   document.getElementById('liabilities').value = data.liabilities;
-                   document.getElementById('capital').value = data.capital;
-                   document.getElementById('debtRatio').value = data.debtRatio + '%';
+                       // 3. Financials
+                       document.getElementById('rev_2024').value = data.rev_2024;
+                       document.getElementById('rev_2025').value = data.rev_2025;
+                       document.getElementById('op_2024').value = data.op_2024;
+                       document.getElementById('op_2025').value = data.op_2025;
+                       document.getElementById('net_2024').value = data.net_2024;
+                       document.getElementById('net_2025').value = data.net_2025;
+                       document.getElementById('assets').value = data.assets;
+                       document.getElementById('liabilities').value = data.liabilities;
+                       document.getElementById('capital').value = data.capital;
+                       document.getElementById('debtRatio').value = data.debtRatio + '%';
 
-                   // 4. R&D & Certs
-                   document.getElementById('labStatus').value = data.hasLab;
-                   document.getElementById('researchers').value = data.researchers;
-                   document.getElementById('rndSpend').value = data.rndSpend;
-                   
-                   // Auto-check Certs
-                   if(data.certs) {
-                      data.certs.forEach(cert => {
-                         const checkbox = document.getElementById('cert-'+cert);
-                         if(checkbox) checkbox.checked = true;
-                      });
-                   }
+                       // 4. R&D & Certs
+                       document.getElementById('labStatus').value = data.hasLab;
+                       document.getElementById('researchers').value = data.researchers;
+                       document.getElementById('rndSpend').value = data.rndSpend;
+                       
+                       // Auto-check Certs
+                       if(data.certs) {
+                          data.certs.forEach(cert => {
+                             const checkbox = document.getElementById('cert-'+cert);
+                             if(checkbox) checkbox.checked = true;
+                          });
+                       }
 
-                   // Show Badges
-                   document.getElementById('data-status-area').classList.remove('hidden');
-                   document.getElementById('badge-dart').classList.remove('hidden');
-                   document.getElementById('badge-nps').classList.remove('hidden');
-                   document.getElementById('badge-cert').classList.remove('hidden');
-                   
-                   document.getElementById('custom-success-modal').classList.remove('hidden');
-                } else {
-                   alert('데이터를 찾을 수 없습니다. (데모: 태성정밀, 삼성전자)');
-                }
-             }, 2500);
-          }
+                       // Show Badges & Success Modal
+                       document.getElementById('data-status-area').classList.remove('hidden');
+                       document.getElementById('badge-dart').classList.remove('hidden');
+                       document.getElementById('badge-nps').classList.remove('hidden');
+                       document.getElementById('badge-cert').classList.remove('hidden');
+                       
+                       document.getElementById('custom-success-modal').classList.remove('hidden');
+                    } else {
+                       // FAILURE: Show Manual Input Modal
+                       document.getElementById('not-found-modal').classList.remove('hidden');
+                    }
+                 }, 2500);
+              });
+            }
 
-          function runMatching() {
-             // ... existing matching logic ...
-             document.getElementById('loading-overlay').classList.remove('hidden');
-             const bar = document.getElementById('loading-bar');
-             let w=0;
-             const intv = setInterval(() => { w+=2; if(bar) bar.style.width=w+'%'; if(w>100) clearInterval(intv); }, 50);
-             setTimeout(() => {
-                document.getElementById('loading-overlay').classList.add('hidden');
-                document.getElementById('matching-results').classList.remove('hidden');
-                const list = document.getElementById('results-list');
-                list.innerHTML = '';
-                grantDatabase.forEach((item, idx) => {
-                   // ... render results ...
-                   const div = document.createElement('div');
-                   div.className = 'bg-white p-6 rounded-xl border border-slate-200 hover:border-blue-500 shadow-sm mb-4';
-                   div.innerHTML = '<h4 class="font-bold">'+item.title+'</h4><p class="text-sm text-slate-500">'+item.agency+' | '+item.maxAmount+'</p>';
-                   list.appendChild(div);
-                });
-             }, 3000);
-          }
+            // --- Modal Close Handlers ---
+            if(btnCloseSuccess) {
+              btnCloseSuccess.addEventListener('click', () => {
+                document.getElementById('custom-success-modal').classList.add('hidden');
+              });
+            }
+            if(btnManualInput) {
+              btnManualInput.addEventListener('click', () => {
+                document.getElementById('not-found-modal').classList.add('hidden');
+                document.getElementById('companyName').focus(); // Focus on first input
+                // Ensure inputs are writable (they are by default in this code)
+              });
+            }
+
+            // --- Submit Logic ---
+            if(btnSubmit) {
+               btnSubmit.addEventListener('click', () => {
+                 document.getElementById('loading-overlay').classList.remove('hidden');
+                 const bar = document.getElementById('loading-bar');
+                 let w=0;
+                 const intv = setInterval(() => { w+=2; if(bar) bar.style.width=w+'%'; if(w>100) clearInterval(intv); }, 50);
+                 setTimeout(() => {
+                    document.getElementById('loading-overlay').classList.add('hidden');
+                    document.getElementById('matching-results').classList.remove('hidden');
+                    const list = document.getElementById('results-list');
+                    list.innerHTML = '';
+                    
+                    // Filter Logic (Simple Mock)
+                    const empCount = parseInt(document.getElementById('employees').value || '0');
+                    const isRnd = document.querySelector('input[name="interest"]:checked')?.value === 'rnd';
+                    
+                    let count = 0;
+                    grantDatabase.forEach((item) => {
+                       if(count >= 3) return; // Limit to 3
+                       // Mock filtering: show hiring grants if emp > 10, rnd if rnd selected
+                       let score = 80;
+                       if(isRnd && item.type === 'R&D') score += 15;
+                       if(empCount > 5 && item.type === 'Hiring') score += 10;
+                       
+                       const div = document.createElement('div');
+                       div.className = 'bg-white p-6 rounded-xl border border-slate-200 hover:border-blue-500 shadow-sm mb-4 transition-all hover:shadow-md';
+                       div.innerHTML = \`
+                         <div class="flex justify-between items-start">
+                           <div>
+                             <span class="inline-block bg-blue-100 text-blue-700 text-[10px] font-bold px-2 py-1 rounded mb-2">\${item.agency}</span>
+                             <h4 class="font-bold text-lg text-slate-800 mb-1">\${item.title}</h4>
+                             <p class="text-sm text-slate-500 mb-3">\${item.tags.join(', ')} | 최대 \${item.maxAmount}</p>
+                           </div>
+                           <div class="text-right">
+                             <div class="text-2xl font-bold text-blue-600">\${score}%</div>
+                             <div class="text-xs text-slate-400">매칭률</div>
+                           </div>
+                         </div>
+                         <div class="border-t border-slate-100 pt-3 mt-3 flex justify-between items-center">
+                            <span class="text-xs text-red-500 font-bold"><i class="far fa-clock mr-1"></i> 마감: \${item.deadline}</span>
+                            <button class="text-sm bg-slate-800 text-white px-4 py-2 rounded-lg font-bold hover:bg-slate-700">공고 확인</button>
+                         </div>
+                       \`;
+                       list.appendChild(div);
+                       count++;
+                    });
+                 }, 3000);
+               });
+            }
+
+          });
         `
       }} />
     </Layout>
