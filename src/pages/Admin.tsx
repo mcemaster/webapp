@@ -537,7 +537,10 @@ export const Admin = (props: { user: any, tab?: string }) => {
                           <span class="text-xs text-slate-500">회원 DB 및 SSO 로그인</span>
                         </div>
                       </div>
-                      <button id="btn-config-imweb" class="text-xs bg-white border border-slate-300 px-3 py-1 rounded font-bold">설정</button>
+                      <div class="flex space-x-2">
+                        <button id="btn-config-imweb" class="text-xs bg-white border border-slate-300 px-3 py-1 rounded font-bold">설정</button>
+                        <button id="btn-sync-imweb" class="text-xs bg-indigo-600 text-white border border-indigo-600 px-3 py-1 rounded font-bold hover:bg-indigo-700">회원 동기화</button>
+                      </div>
                     </div>
                     <div class="flex items-center justify-between p-4 bg-slate-50 rounded-lg border border-slate-100">
                       <div class="flex items-center">

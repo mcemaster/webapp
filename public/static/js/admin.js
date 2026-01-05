@@ -27,7 +27,7 @@
       await fetchPolicy();
       break;
     case 'settings':
-      // Settings logic is mostly static for now, or handled by inline events
+      await initSettings();
       break;
   }
 })();
@@ -221,6 +221,91 @@ async function fetchBanners() {
   } catch (e) { console.error(e); }
 }
 
+// --- 6. Policy Management ---
+async function fetchPolicy() {
+  const editor = document.getElementById('policy-editor');
+  if (!editor) return;
+  
+  // Default load 'terms'
+  loadPolicyContent('terms');
+  
+  // Bind buttons
+  document.getElementById('btn-policy-terms').onclick = () => loadPolicyContent('terms');
+  document.getElementById('btn-policy-privacy').onclick = () => loadPolicyContent('privacy');
+  document.getElementById('btn-policy-finance').onclick = () => loadPolicyContent('finance');
+  
+  document.getElementById('btn-save-policy').onclick = savePolicy;
+}
+
+let currentPolicyType = 'terms';
+
+async function loadPolicyContent(type) {
+  currentPolicyType = type;
+  // Update buttons UI
+  ['terms', 'privacy', 'finance'].forEach(t => {
+    const btn = document.getElementById(`btn-policy-${t}`);
+    if(btn) {
+      if(t === type) btn.classList.add('bg-blue-50', 'text-blue-600', 'border-blue-200');
+      else btn.classList.remove('bg-blue-50', 'text-blue-600', 'border-blue-200');
+    }
+  });
+
+  const editor = document.getElementById('policy-editor');
+  editor.value = '로딩 중...';
+  
+  try {
+    const res = await fetch(`/api/admin/policy/${type}?t=${new Date().getTime()}`);
+    const json = await res.json();
+    editor.value = json.content || '';
+  } catch(e) { editor.value = '로딩 실패'; }
+}
+
+async function savePolicy() {
+  const content = document.getElementById('policy-editor').value;
+  try {
+    const res = await fetch('/api/admin/policy', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type: currentPolicyType, content })
+    });
+    if(res.ok) alert('저장되었습니다.');
+    else alert('저장 실패');
+  } catch(e) { alert('에러 발생'); }
+}
+
+// --- 7. Settings & Integrations ---
+async function initSettings() {
+  // Imweb Sync
+  const btnSyncImweb = document.getElementById('btn-sync-imweb');
+  if (btnSyncImweb) {
+    btnSyncImweb.onclick = async () => {
+      if (!confirm('아임웹 회원 정보를 동기화하시겠습니까?')) return;
+      
+      const originalText = btnSyncImweb.innerText;
+      btnSyncImweb.disabled = true;
+      btnSyncImweb.innerText = '동기화 중...';
+      btnSyncImweb.classList.add('opacity-50', 'cursor-not-allowed');
+      
+      try {
+        const res = await fetch('/api/imweb/users/sync', { method: 'POST' });
+        const json = await res.json();
+        
+        if (res.ok) {
+          alert(`동기화 성공!\n- 전체: ${json.total}\n- 추가됨: ${json.added}\n- 업데이트됨: ${json.updated}`);
+        } else {
+          alert('동기화 실패: ' + (json.error || '알 수 없는 오류'));
+        }
+      } catch (e) {
+        alert('에러 발생: ' + e.message);
+      } finally {
+        btnSyncImweb.disabled = false;
+        btnSyncImweb.innerText = originalText;
+        btnSyncImweb.classList.remove('opacity-50', 'cursor-not-allowed');
+      }
+    };
+  }
+}
+
 // --- Helper Functions ---
 function setText(id, val) {
   const el = document.getElementById(id);
@@ -238,4 +323,3 @@ async function triggerDeploy() {
     alert('배포 요청 실패');
   }
 }
-
