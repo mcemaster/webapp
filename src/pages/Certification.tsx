@@ -12,7 +12,7 @@ export const Certification = (props: { user?: any }) => {
           </div>
           <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-white">
             <span class="inline-block py-1 px-3 border border-blue-400 rounded-full text-blue-300 text-sm font-bold mb-4">Global Standard Certification</span>
-            <h1 class="text-4xl md:text-5xl font-extrabold mb-6">ISO / IATF 국제 표준 인증</h1>
+            <h1 class="text-4xl md:text-5xl font-extrabold mb-6">ISO 국제 표준 인증</h1>
             <p class="text-xl text-slate-300 max-w-3xl mx-auto leading-relaxed">
               경영인증평가원은 기업의 지속 가능한 성장을 위해<br/>
               글로벌 표준에 부합하는 가장 공신력 있는 인증 심사 서비스를 제공합니다.
@@ -90,16 +90,7 @@ export const Certification = (props: { user?: any }) => {
                 </p>
               </div>
 
-              {/* IATF 16949 */}
-              <div class="group relative bg-white border border-slate-200 rounded-2xl p-8 hover:border-indigo-500 transition-colors">
-                <div class="absolute top-0 right-0 bg-indigo-600 text-white text-xs font-bold px-3 py-1 rounded-bl-xl rounded-tr-xl">Automotive</div>
-                <div class="text-indigo-600 text-4xl mb-4"><i class="fas fa-car"></i></div>
-                <h3 class="text-xl font-bold text-slate-900 mb-2">IATF 16949</h3>
-                <p class="text-sm text-indigo-600 font-bold mb-3">자동차 품질경영시스템</p>
-                <p class="text-sm text-slate-600 leading-relaxed">
-                  자동차 부품 공급망에 특화된 엄격한 품질 규격으로, 현대·기아 등 완성차 업체 납품 시 필수입니다.
-                </p>
-              </div>
+
 
               {/* ISO 27001 */}
               <div class="group relative bg-white border border-slate-200 rounded-2xl p-8 hover:border-purple-500 transition-colors">
