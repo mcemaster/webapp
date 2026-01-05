@@ -6,29 +6,11 @@
   "compatibility_flags": [
     "nodejs_compat"
   ],
-  // "vars": {
-  //   "MY_VAR": "my-variable"
-  // },
-  // "kv_namespaces": [
-  //   {
-  //     "binding": "MY_KV_NAMESPACE",
-  //     "id": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-  //   }
-  // ],
-  // "r2_buckets": [
-  //   {
-  //     "binding": "MY_BUCKET",
-  //     "bucket_name": "my-bucket"
-  //   }
-  // ],
   "d1_databases": [
     {
       "binding": "DB",
       "database_name": "webapp-production",
       "database_id": "4f2b491e-f8de-4bc0-85d1-a044b33cc4a5"
     }
-  ],
-  // "ai": {
-  //   "binding": "AI"
-  // }
+  ]
 }
