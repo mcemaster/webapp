@@ -17,12 +17,30 @@ import { PartnershipProposal } from './pages/PartnershipProposal'
 import { FAQ } from './pages/FAQ'
 import { Legal } from './pages/Legal'
 
+import { AuditApplication } from './pages/AuditApplication'
+
+import { Certification } from './pages/Certification'
+
 const app = new Hono()
 
 app.use(renderer)
 app.use('/static/*', serveStatic({ root: './public' }))
 
 // Auth Middleware & Routes
+// ... (Keep existing routes) ...
+
+app.get('/services/certification', (c) => {
+  const userSession = getCookie(c, 'user_session')
+  const user = userSession ? JSON.parse(userSession) : undefined
+  return c.render(<Certification user={user} />)
+})
+// ... (Keep existing routes) ...
+
+app.get('/audit/apply', (c) => {
+  const userSession = getCookie(c, 'user_session')
+  const user = userSession ? JSON.parse(userSession) : undefined
+  return c.render(<AuditApplication user={user} />)
+})
 app.get('/login', (c) => {
   const userSession = getCookie(c, 'user_session')
   if (userSession) {

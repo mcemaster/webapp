@@ -437,14 +437,14 @@ export const SupportMatching = ({ user }: SupportMatchingProps) => {
              modal.classList.remove('hidden');
           }
 
-          function fillDemoData() {
+          window.fillDemoData = function() {
              document.getElementById('companyName').value = '(주)미래테크';
              document.querySelector('input[name="bizNum"]').value = '123-45-67890';
              // ... (rest of demo fill logic)
              alert('데모 데이터가 입력되었습니다.');
           }
 
-          function autoFetchDartData() {
+          window.autoFetchDartData = function() {
              const input = document.getElementById('company-search-input');
              const name = input.value.trim();
              const btn = event.currentTarget;
@@ -494,7 +494,7 @@ export const SupportMatching = ({ user }: SupportMatchingProps) => {
              }, 1000);
           }
           
-          function autoFetchFinancials() {
+          window.autoFetchFinancials = function() {
              // Similar logic for Step 2 button
              const btn = event.currentTarget;
              const org = btn.innerHTML;

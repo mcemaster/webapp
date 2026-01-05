@@ -28,19 +28,24 @@ export const Layout = (props: { children: any; title?: string; user?: any }) => 
                 <div class="absolute top-[calc(100%-1px)] left-1/2 transform -translate-x-1/2 w-48 bg-white rounded-b-xl shadow-xl border border-slate-100 overflow-hidden hidden group-hover:block animate-fade-in-up">
                   <div class="py-2">
                     <a href="/services/spec" class="block px-5 py-3 text-sm text-slate-600 hover:bg-slate-50 hover:text-blue-600 font-medium transition-colors">기업 SPEC 평가</a>
-                    <a href="/services/scm" class="block px-5 py-3 text-sm text-slate-600 hover:bg-slate-50 hover:text-blue-600 font-medium transition-colors">2자 심사 (SCM)</a>
-                    <a href="http://www.mce.re.kr" target="_blank" class="block px-5 py-3 text-sm text-slate-600 hover:bg-slate-50 hover:text-blue-600 font-medium transition-colors">ISO/IATF 인증</a>
+                    <a href="/services/certification" class="block px-5 py-3 text-sm text-slate-600 hover:bg-slate-50 hover:text-blue-600 font-medium transition-colors">ISO/IATF 인증</a>
                   </div>
                 </div>
               </div>
 
-              {/* Menu B: 공급사 찾기 (AI) - Text Only, Highlighted */}
+              {/* Menu B: 공급망 관리 (SCM) - Text Only */}
+              <a href="/services/scm" class="px-4 h-20 flex items-center text-[15px] font-bold text-slate-600 hover:text-teal-600 transition-colors relative group">
+                <span>공급망 관리 (SCM)</span>
+                <span class="absolute bottom-0 left-0 w-full h-0.5 bg-teal-600 scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></span>
+              </a>
+
+              {/* Menu C: 공급사 찾기 (AI) - Text Only */}
               <a href="/rfq" class="px-4 h-20 flex items-center text-[15px] font-bold text-slate-600 hover:text-blue-600 transition-colors relative group">
                 <span>공급사 찾기 (AI)</span>
                 <span class="absolute bottom-0 left-0 w-full h-0.5 bg-blue-600 scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></span>
               </a>
               
-              {/* Menu C: 정부지원사업 (AI) - Text Only, Highlighted */}
+              {/* Menu D: 정부지원사업 (AI) - Text Only */}
               <a href="/support-matching" class="px-4 h-20 flex items-center text-[15px] font-bold text-slate-600 hover:text-indigo-600 transition-colors relative group">
                 <div class="relative">
                   <span>정부지원사업 (AI)</span>
@@ -50,7 +55,7 @@ export const Layout = (props: { children: any; title?: string; user?: any }) => 
                 <span class="absolute bottom-0 left-0 w-full h-0.5 bg-indigo-600 scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></span>
               </a>
 
-              {/* Menu D: 고객센터 (Dropdown) */}
+              {/* Menu E: 고객센터 (Dropdown) */}
               <div class="relative group h-20 flex items-center">
                 <button class="px-4 text-[15px] font-bold text-slate-600 group-hover:text-blue-600 transition-colors flex items-center h-full">
                   고객센터 <i class="fas fa-chevron-down ml-1.5 text-xs opacity-50 group-hover:opacity-100 transition-opacity"></i>
@@ -92,7 +97,7 @@ export const Layout = (props: { children: any; title?: string; user?: any }) => 
                   </div>
                 </div>
               ) : (
-                /* Guest State - Text Links Only */
+                /* Guest State - Text Links Only (No Button) */
                 <div class="flex items-center text-sm font-bold">
                   <a href="/login" class="text-slate-500 hover:text-blue-600 transition-colors px-3 py-2">로그인</a>
                   <span class="text-slate-300 h-3 w-px bg-slate-300 mx-1"></span>
@@ -115,6 +120,7 @@ export const Layout = (props: { children: any; title?: string; user?: any }) => 
           <div class="p-5 space-y-1">
             <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 pl-2">Services</div>
             <a href="/services/spec" class="block px-4 py-3 rounded-lg text-slate-600 hover:bg-slate-50 hover:text-blue-600 font-bold">평가/인증</a>
+            <a href="/services/scm" class="block px-4 py-3 rounded-lg text-slate-600 hover:bg-teal-50 hover:text-teal-600 font-bold">공급망 관리 (SCM)</a>
             <a href="/rfq" class="block px-4 py-3 rounded-lg text-slate-600 hover:bg-blue-50 hover:text-blue-600 font-bold">공급사 찾기 (AI)</a>
             <a href="/support-matching" class="block px-4 py-3 rounded-lg text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 font-bold">정부지원사업 (AI)</a>
             
@@ -137,6 +143,12 @@ export const Layout = (props: { children: any; title?: string; user?: any }) => 
       <aside class="fixed right-6 top-1/2 transform -translate-y-1/2 z-40 hidden lg:flex flex-col gap-3">
         <div class="bg-white/90 backdrop-blur rounded-2xl shadow-xl border border-slate-200/60 p-2 flex flex-col items-center gap-2 w-16">
           
+          <a href="/services/scm" class="flex flex-col items-center justify-center w-12 h-12 rounded-xl text-slate-500 hover:bg-teal-50 hover:text-teal-600 transition-all group relative">
+            <i class="fas fa-network-wired text-lg mb-1"></i>
+            <span class="text-[9px] font-bold">SCM</span>
+            <span class="absolute right-full mr-3 bg-slate-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-lg">공급망 관리</span>
+          </a>
+
           <a href="/rfq" class="flex flex-col items-center justify-center w-12 h-12 rounded-xl text-slate-500 hover:bg-blue-50 hover:text-blue-600 transition-all group relative">
             <i class="fas fa-search-dollar text-lg mb-1"></i>
             <span class="text-[9px] font-bold">공급사</span>
@@ -186,9 +198,9 @@ export const Layout = (props: { children: any; title?: string; user?: any }) => 
             <div>
               <h4 class="text-white font-bold mb-4">Service</h4>
               <ul class="space-y-2">
+                <li><a href="/services/scm" class="hover:text-teal-400 transition-colors">공급망 관리 (SCM)</a></li>
                 <li><a href="/support-matching" class="hover:text-blue-400 transition-colors">지원사업 매칭</a></li>
                 <li><a href="/rfq" class="hover:text-blue-400 transition-colors">공급사 찾기</a></li>
-                <li><a href="/partners" class="hover:text-blue-400 transition-colors">파트너 찾기</a></li>
               </ul>
             </div>
             

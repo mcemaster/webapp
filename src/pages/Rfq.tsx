@@ -21,13 +21,14 @@ export const Rfq = (props: { user?: any, lang?: string }) => {
             <div class="lg:col-span-2">
               <form id="rfqForm" class="bg-white rounded-2xl shadow-lg overflow-hidden border border-slate-200">
                 
-                {/* Step 1: Industry Sector (IAF Code) - Full List Restored */}
+                {/* Step 1: Industry Sector (IAF Code) - Multi Select */}
                 <div class="p-8 border-b border-slate-100">
                   <h2 class="text-lg font-bold text-slate-900 mb-6 flex items-center">
                     <span class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-sm font-bold mr-3">1</span>
-                    제조 분야 선택 (IAF Code)
+                    제조 분야 선택 (IAF Code) <span class="text-xs text-slate-400 font-normal ml-2">* 중복 선택 가능</span>
                   </h2>
                   
+                  {/* Hidden Input for Form Submission (Comma separated) */}
                   <input type="hidden" name="iaf_code" id="iaf_code_input" required />
 
                   <div class="space-y-8" id="iaf-selector">
@@ -38,35 +39,35 @@ export const Rfq = (props: { user?: any, lang?: string }) => {
                         <i class="fas fa-industry mr-2"></i>주요 제조업
                       </h3>
                       <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
-                        <button type="button" class="iaf-btn group p-3 rounded-xl border border-slate-200 hover:border-blue-500 hover:bg-blue-50 transition-all text-left flex flex-col items-start relative" data-value="17">
+                        <button type="button" class="iaf-btn group p-3 rounded-xl border border-slate-200 hover:border-blue-500 hover:bg-blue-50 transition-all text-left flex flex-col items-start relative select-none" data-value="17">
                           <span class="text-xs font-bold text-blue-600 mb-1">IAF 17</span>
                           <span class="font-bold text-slate-700 text-sm group-hover:text-blue-700">금속 / 가공제품</span>
-                          <i class="fas fa-check-circle absolute top-3 right-3 text-blue-600 opacity-0 transition-opacity check-icon"></i>
+                          <i class="fas fa-check-circle absolute top-3 right-3 text-blue-600 opacity-0 transition-opacity check-icon transform scale-0 duration-200"></i>
                         </button>
-                        <button type="button" class="iaf-btn group p-3 rounded-xl border border-slate-200 hover:border-blue-500 hover:bg-blue-50 transition-all text-left flex flex-col items-start relative" data-value="18">
+                        <button type="button" class="iaf-btn group p-3 rounded-xl border border-slate-200 hover:border-blue-500 hover:bg-blue-50 transition-all text-left flex flex-col items-start relative select-none" data-value="18">
                           <span class="text-xs font-bold text-blue-600 mb-1">IAF 18</span>
                           <span class="font-bold text-slate-700 text-sm group-hover:text-blue-700">기계 및 장비</span>
-                          <i class="fas fa-check-circle absolute top-3 right-3 text-blue-600 opacity-0 transition-opacity check-icon"></i>
+                          <i class="fas fa-check-circle absolute top-3 right-3 text-blue-600 opacity-0 transition-opacity check-icon transform scale-0 duration-200"></i>
                         </button>
-                        <button type="button" class="iaf-btn group p-3 rounded-xl border border-slate-200 hover:border-blue-500 hover:bg-blue-50 transition-all text-left flex flex-col items-start relative" data-value="19">
+                        <button type="button" class="iaf-btn group p-3 rounded-xl border border-slate-200 hover:border-blue-500 hover:bg-blue-50 transition-all text-left flex flex-col items-start relative select-none" data-value="19">
                           <span class="text-xs font-bold text-blue-600 mb-1">IAF 19</span>
                           <span class="font-bold text-slate-700 text-sm group-hover:text-blue-700">전기 / 광학장비</span>
-                          <i class="fas fa-check-circle absolute top-3 right-3 text-blue-600 opacity-0 transition-opacity check-icon"></i>
+                          <i class="fas fa-check-circle absolute top-3 right-3 text-blue-600 opacity-0 transition-opacity check-icon transform scale-0 duration-200"></i>
                         </button>
-                        <button type="button" class="iaf-btn group p-3 rounded-xl border border-slate-200 hover:border-blue-500 hover:bg-blue-50 transition-all text-left flex flex-col items-start relative" data-value="22">
+                        <button type="button" class="iaf-btn group p-3 rounded-xl border border-slate-200 hover:border-blue-500 hover:bg-blue-50 transition-all text-left flex flex-col items-start relative select-none" data-value="22">
                           <span class="text-xs font-bold text-blue-600 mb-1">IAF 22</span>
                           <span class="font-bold text-slate-700 text-sm group-hover:text-blue-700">기타 운송장비</span>
-                          <i class="fas fa-check-circle absolute top-3 right-3 text-blue-600 opacity-0 transition-opacity check-icon"></i>
+                          <i class="fas fa-check-circle absolute top-3 right-3 text-blue-600 opacity-0 transition-opacity check-icon transform scale-0 duration-200"></i>
                         </button>
-                        <button type="button" class="iaf-btn group p-3 rounded-xl border border-slate-200 hover:border-blue-500 hover:bg-blue-50 transition-all text-left flex flex-col items-start relative" data-value="14">
+                        <button type="button" class="iaf-btn group p-3 rounded-xl border border-slate-200 hover:border-blue-500 hover:bg-blue-50 transition-all text-left flex flex-col items-start relative select-none" data-value="14">
                           <span class="text-xs font-bold text-blue-600 mb-1">IAF 14</span>
                           <span class="font-bold text-slate-700 text-sm group-hover:text-blue-700">고무 / 플라스틱</span>
-                          <i class="fas fa-check-circle absolute top-3 right-3 text-blue-600 opacity-0 transition-opacity check-icon"></i>
+                          <i class="fas fa-check-circle absolute top-3 right-3 text-blue-600 opacity-0 transition-opacity check-icon transform scale-0 duration-200"></i>
                         </button>
-                        <button type="button" class="iaf-btn group p-3 rounded-xl border border-slate-200 hover:border-blue-500 hover:bg-blue-50 transition-all text-left flex flex-col items-start relative" data-value="29">
+                        <button type="button" class="iaf-btn group p-3 rounded-xl border border-slate-200 hover:border-blue-500 hover:bg-blue-50 transition-all text-left flex flex-col items-start relative select-none" data-value="29">
                           <span class="text-xs font-bold text-blue-600 mb-1">IAF 29</span>
                           <span class="font-bold text-slate-700 text-sm group-hover:text-blue-700">도소매 / 수리</span>
-                          <i class="fas fa-check-circle absolute top-3 right-3 text-blue-600 opacity-0 transition-opacity check-icon"></i>
+                          <i class="fas fa-check-circle absolute top-3 right-3 text-blue-600 opacity-0 transition-opacity check-icon transform scale-0 duration-200"></i>
                         </button>
                       </div>
                     </div>
@@ -77,28 +78,28 @@ export const Rfq = (props: { user?: any, lang?: string }) => {
                         <i class="fas fa-flask mr-2"></i>원자재 및 화학
                       </h3>
                       <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
-                        <button type="button" class="iaf-btn p-2 rounded-lg border border-slate-200 hover:border-blue-500 hover:bg-blue-50 text-left text-xs transition-all relative" data-value="04">
+                        <button type="button" class="iaf-btn p-2 rounded-lg border border-slate-200 hover:border-blue-500 hover:bg-blue-50 text-left text-xs transition-all relative select-none" data-value="04">
                           <span class="font-bold block text-blue-600">IAF 04</span> 섬유/직물
                         </button>
-                        <button type="button" class="iaf-btn p-2 rounded-lg border border-slate-200 hover:border-blue-500 hover:bg-blue-50 text-left text-xs transition-all relative" data-value="12">
+                        <button type="button" class="iaf-btn p-2 rounded-lg border border-slate-200 hover:border-blue-500 hover:bg-blue-50 text-left text-xs transition-all relative select-none" data-value="12">
                           <span class="font-bold block text-blue-600">IAF 12</span> 화학물질
                         </button>
-                        <button type="button" class="iaf-btn p-2 rounded-lg border border-slate-200 hover:border-blue-500 hover:bg-blue-50 text-left text-xs transition-all relative" data-value="13">
+                        <button type="button" class="iaf-btn p-2 rounded-lg border border-slate-200 hover:border-blue-500 hover:bg-blue-50 text-left text-xs transition-all relative select-none" data-value="13">
                           <span class="font-bold block text-blue-600">IAF 13</span> 의약품
                         </button>
-                        <button type="button" class="iaf-btn p-2 rounded-lg border border-slate-200 hover:border-blue-500 hover:bg-blue-50 text-left text-xs transition-all relative" data-value="15">
+                        <button type="button" class="iaf-btn p-2 rounded-lg border border-slate-200 hover:border-blue-500 hover:bg-blue-50 text-left text-xs transition-all relative select-none" data-value="15">
                           <span class="font-bold block text-blue-600">IAF 15</span> 비금속 광물
                         </button>
-                        <button type="button" class="iaf-btn p-2 rounded-lg border border-slate-200 hover:border-blue-500 hover:bg-blue-50 text-left text-xs transition-all relative" data-value="16">
+                        <button type="button" class="iaf-btn p-2 rounded-lg border border-slate-200 hover:border-blue-500 hover:bg-blue-50 text-left text-xs transition-all relative select-none" data-value="16">
                           <span class="font-bold block text-blue-600">IAF 16</span> 콘크리트
                         </button>
-                        <button type="button" class="iaf-btn p-2 rounded-lg border border-slate-200 hover:border-blue-500 hover:bg-blue-50 text-left text-xs transition-all relative" data-value="02">
+                        <button type="button" class="iaf-btn p-2 rounded-lg border border-slate-200 hover:border-blue-500 hover:bg-blue-50 text-left text-xs transition-all relative select-none" data-value="02">
                           <span class="font-bold block text-blue-600">IAF 02</span> 광업/채석
                         </button>
-                        <button type="button" class="iaf-btn p-2 rounded-lg border border-slate-200 hover:border-blue-500 hover:bg-blue-50 text-left text-xs transition-all relative" data-value="07">
+                        <button type="button" class="iaf-btn p-2 rounded-lg border border-slate-200 hover:border-blue-500 hover:bg-blue-50 text-left text-xs transition-all relative select-none" data-value="07">
                           <span class="font-bold block text-blue-600">IAF 07</span> 펄프/종이
                         </button>
-                        <button type="button" class="iaf-btn p-2 rounded-lg border border-slate-200 hover:border-blue-500 hover:bg-blue-50 text-left text-xs transition-all relative" data-value="10">
+                        <button type="button" class="iaf-btn p-2 rounded-lg border border-slate-200 hover:border-blue-500 hover:bg-blue-50 text-left text-xs transition-all relative select-none" data-value="10">
                           <span class="font-bold block text-blue-600">IAF 10</span> 정제 석유
                         </button>
                       </div>
@@ -110,25 +111,25 @@ export const Rfq = (props: { user?: any, lang?: string }) => {
                         <i class="fas fa-hard-hat mr-2"></i>건설 및 기타 제조
                       </h3>
                       <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
-                        <button type="button" class="iaf-btn p-2 rounded-lg border border-slate-200 hover:border-blue-500 hover:bg-blue-50 text-left text-xs transition-all relative" data-value="28">
+                        <button type="button" class="iaf-btn p-2 rounded-lg border border-slate-200 hover:border-blue-500 hover:bg-blue-50 text-left text-xs transition-all relative select-none" data-value="28">
                           <span class="font-bold block text-blue-600">IAF 28</span> 건설업
                         </button>
-                        <button type="button" class="iaf-btn p-2 rounded-lg border border-slate-200 hover:border-blue-500 hover:bg-blue-50 text-left text-xs transition-all relative" data-value="20">
+                        <button type="button" class="iaf-btn p-2 rounded-lg border border-slate-200 hover:border-blue-500 hover:bg-blue-50 text-left text-xs transition-all relative select-none" data-value="20">
                           <span class="font-bold block text-blue-600">IAF 20</span> 조선업
                         </button>
-                        <button type="button" class="iaf-btn p-2 rounded-lg border border-slate-200 hover:border-blue-500 hover:bg-blue-50 text-left text-xs transition-all relative" data-value="21">
+                        <button type="button" class="iaf-btn p-2 rounded-lg border border-slate-200 hover:border-blue-500 hover:bg-blue-50 text-left text-xs transition-all relative select-none" data-value="21">
                           <span class="font-bold block text-blue-600">IAF 21</span> 항공우주
                         </button>
-                        <button type="button" class="iaf-btn p-2 rounded-lg border border-slate-200 hover:border-blue-500 hover:bg-blue-50 text-left text-xs transition-all relative" data-value="23">
+                        <button type="button" class="iaf-btn p-2 rounded-lg border border-slate-200 hover:border-blue-500 hover:bg-blue-50 text-left text-xs transition-all relative select-none" data-value="23">
                           <span class="font-bold block text-blue-600">IAF 23</span> 기타 제조
                         </button>
-                        <button type="button" class="iaf-btn p-2 rounded-lg border border-slate-200 hover:border-blue-500 hover:bg-blue-50 text-left text-xs transition-all relative" data-value="08">
+                        <button type="button" class="iaf-btn p-2 rounded-lg border border-slate-200 hover:border-blue-500 hover:bg-blue-50 text-left text-xs transition-all relative select-none" data-value="08">
                           <span class="font-bold block text-blue-600">IAF 08</span> 출판업
                         </button>
-                        <button type="button" class="iaf-btn p-2 rounded-lg border border-slate-200 hover:border-blue-500 hover:bg-blue-50 text-left text-xs transition-all relative" data-value="09">
+                        <button type="button" class="iaf-btn p-2 rounded-lg border border-slate-200 hover:border-blue-500 hover:bg-blue-50 text-left text-xs transition-all relative select-none" data-value="09">
                           <span class="font-bold block text-blue-600">IAF 09</span> 인쇄업
                         </button>
-                        <button type="button" class="iaf-btn p-2 rounded-lg border border-slate-200 hover:border-blue-500 hover:bg-blue-50 text-left text-xs transition-all relative" data-value="11">
+                        <button type="button" class="iaf-btn p-2 rounded-lg border border-slate-200 hover:border-blue-500 hover:bg-blue-50 text-left text-xs transition-all relative select-none" data-value="11">
                           <span class="font-bold block text-blue-600">IAF 11</span> 핵연료
                         </button>
                       </div>
@@ -140,28 +141,28 @@ export const Rfq = (props: { user?: any, lang?: string }) => {
                         <i class="fas fa-briefcase mr-2"></i>서비스 및 엔지니어링
                       </h3>
                       <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
-                        <button type="button" class="iaf-btn p-2 rounded-lg border border-slate-200 hover:border-blue-500 hover:bg-blue-50 text-left text-xs transition-all relative" data-value="33">
+                        <button type="button" class="iaf-btn p-2 rounded-lg border border-slate-200 hover:border-blue-500 hover:bg-blue-50 text-left text-xs transition-all relative select-none" data-value="33">
                           <span class="font-bold block text-blue-600">IAF 33</span> 정보기술(IT)
                         </button>
-                        <button type="button" class="iaf-btn p-2 rounded-lg border border-slate-200 hover:border-blue-500 hover:bg-blue-50 text-left text-xs transition-all relative" data-value="34">
+                        <button type="button" class="iaf-btn p-2 rounded-lg border border-slate-200 hover:border-blue-500 hover:bg-blue-50 text-left text-xs transition-all relative select-none" data-value="34">
                           <span class="font-bold block text-blue-600">IAF 34</span> 엔지니어링
                         </button>
-                        <button type="button" class="iaf-btn p-2 rounded-lg border border-slate-200 hover:border-blue-500 hover:bg-blue-50 text-left text-xs transition-all relative" data-value="31">
+                        <button type="button" class="iaf-btn p-2 rounded-lg border border-slate-200 hover:border-blue-500 hover:bg-blue-50 text-left text-xs transition-all relative select-none" data-value="31">
                           <span class="font-bold block text-blue-600">IAF 31</span> 운송/물류
                         </button>
-                        <button type="button" class="iaf-btn p-2 rounded-lg border border-slate-200 hover:border-blue-500 hover:bg-blue-50 text-left text-xs transition-all relative" data-value="35">
+                        <button type="button" class="iaf-btn p-2 rounded-lg border border-slate-200 hover:border-blue-500 hover:bg-blue-50 text-left text-xs transition-all relative select-none" data-value="35">
                           <span class="font-bold block text-blue-600">IAF 35</span> 기타 서비스
                         </button>
-                        <button type="button" class="iaf-btn p-2 rounded-lg border border-slate-200 hover:border-blue-500 hover:bg-blue-50 text-left text-xs transition-all relative" data-value="25">
+                        <button type="button" class="iaf-btn p-2 rounded-lg border border-slate-200 hover:border-blue-500 hover:bg-blue-50 text-left text-xs transition-all relative select-none" data-value="25">
                           <span class="font-bold block text-blue-600">IAF 25</span> 전기 공급
                         </button>
-                        <button type="button" class="iaf-btn p-2 rounded-lg border border-slate-200 hover:border-blue-500 hover:bg-blue-50 text-left text-xs transition-all relative" data-value="36">
+                        <button type="button" class="iaf-btn p-2 rounded-lg border border-slate-200 hover:border-blue-500 hover:bg-blue-50 text-left text-xs transition-all relative select-none" data-value="36">
                           <span class="font-bold block text-blue-600">IAF 36</span> 공공 행정
                         </button>
-                        <button type="button" class="iaf-btn p-2 rounded-lg border border-slate-200 hover:border-blue-500 hover:bg-blue-50 text-left text-xs transition-all relative" data-value="37">
+                        <button type="button" class="iaf-btn p-2 rounded-lg border border-slate-200 hover:border-blue-500 hover:bg-blue-50 text-left text-xs transition-all relative select-none" data-value="37">
                           <span class="font-bold block text-blue-600">IAF 37</span> 교육
                         </button>
-                        <button type="button" class="iaf-btn p-2 rounded-lg border border-slate-200 hover:border-blue-500 hover:bg-blue-50 text-left text-xs transition-all relative" data-value="38">
+                        <button type="button" class="iaf-btn p-2 rounded-lg border border-slate-200 hover:border-blue-500 hover:bg-blue-50 text-left text-xs transition-all relative select-none" data-value="38">
                           <span class="font-bold block text-blue-600">IAF 38</span> 보건/사회
                         </button>
                       </div>
@@ -170,40 +171,69 @@ export const Rfq = (props: { user?: any, lang?: string }) => {
                   </div>
                 </div>
 
-                {/* Step 2: File Upload */}
+                {/* Step 2: File Upload (Drag & Drop) */}
                 <div class="p-8 border-b border-slate-100 bg-slate-50/30">
                   <h2 class="text-lg font-bold text-slate-900 mb-6 flex items-center">
                     <span class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-sm font-bold mr-3">2</span>
-                    도면 및 요구사항 파일 업로드
+                    도면 및 요구사항 파일 업로드 (드래그 앤 드롭)
                   </h2>
                   
                   <div class="grid md:grid-cols-2 gap-6">
-                    <div class="border-2 border-dashed border-slate-300 rounded-xl p-6 text-center hover:bg-blue-50 hover:border-blue-400 transition-colors cursor-pointer bg-white relative group">
+                    {/* Drawing Drop Zone */}
+                    <div id="drop-zone-drawing" class="drop-zone border-2 border-dashed border-slate-300 rounded-xl p-8 text-center hover:bg-blue-50 hover:border-blue-400 transition-all cursor-pointer bg-white relative group">
                       <input type="file" id="drawing-file" name="drawing" multiple class="hidden" />
-                      <label for="drawing-file" class="cursor-pointer block">
-                        <div class="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
-                          <i class="fas fa-pencil-ruler text-xl"></i>
+                      
+                      {/* Default State */}
+                      <div class="upload-placeholder pointer-events-none">
+                        <div class="w-14 h-14 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                          <i class="fas fa-pencil-ruler text-2xl"></i>
                         </div>
-                        <h3 class="text-sm font-bold text-slate-800 mb-1">도면 파일 (DWG/PDF)</h3>
-                        <p class="text-xs text-slate-500 mb-3">치수/공차 확인용</p>
-                        <span class="inline-block px-3 py-1 bg-white border border-slate-200 rounded text-xs font-medium text-slate-600 group-hover:border-indigo-500 group-hover:text-indigo-600">파일 선택</span>
-                      </label>
+                        <h3 class="text-sm font-bold text-slate-800 mb-1">도면 파일 업로드</h3>
+                        <p class="text-xs text-slate-500 mb-4">여기로 파일을 끌어다 놓으세요<br/>(DWG, PDF, STEP)</p>
+                        <span class="inline-block px-4 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-600 group-hover:border-indigo-500 group-hover:text-indigo-600 transition-colors">
+                          파일 선택
+                        </span>
+                      </div>
+
+                      {/* File Selected State (Hidden initially) */}
+                      <div class="file-info hidden flex-col items-center justify-center animate-fade-in-up">
+                        <div class="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center mb-2">
+                          <i class="fas fa-check text-xl"></i>
+                        </div>
+                        <p class="text-sm font-bold text-indigo-900 file-name break-all px-4">filename.dwg</p>
+                        <p class="text-xs text-slate-500 file-size mt-1">2.4 MB</p>
+                        <button type="button" class="mt-3 text-xs text-red-500 hover:text-red-700 underline font-medium remove-file-btn">삭제</button>
+                      </div>
                     </div>
-                    <div class="border-2 border-dashed border-slate-300 rounded-xl p-6 text-center hover:bg-blue-50 hover:border-blue-400 transition-colors cursor-pointer bg-white relative group">
+
+                    {/* Photo Drop Zone */}
+                    <div id="drop-zone-photo" class="drop-zone border-2 border-dashed border-slate-300 rounded-xl p-8 text-center hover:bg-blue-50 hover:border-blue-400 transition-all cursor-pointer bg-white relative group">
                       <input type="file" id="photo-file" name="photo" multiple class="hidden" />
-                      <label for="photo-file" class="cursor-pointer block">
-                        <div class="w-12 h-12 bg-teal-50 text-teal-600 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
-                          <i class="fas fa-camera text-xl"></i>
+                      
+                      <div class="upload-placeholder pointer-events-none">
+                        <div class="w-14 h-14 bg-teal-50 text-teal-600 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                          <i class="fas fa-camera text-2xl"></i>
                         </div>
                         <h3 class="text-sm font-bold text-slate-800 mb-1">참고 사진/이미지</h3>
-                        <p class="text-xs text-slate-500 mb-3">형상 이해도 향상용</p>
-                        <span class="inline-block px-3 py-1 bg-white border border-slate-200 rounded text-xs font-medium text-slate-600 group-hover:border-teal-500 group-hover:text-teal-600">파일 선택</span>
-                      </label>
+                        <p class="text-xs text-slate-500 mb-4">여기로 파일을 끌어다 놓으세요<br/>(JPG, PNG)</p>
+                        <span class="inline-block px-4 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-600 group-hover:border-teal-500 group-hover:text-teal-600 transition-colors">
+                          파일 선택
+                        </span>
+                      </div>
+
+                      <div class="file-info hidden flex-col items-center justify-center animate-fade-in-up">
+                        <div class="w-12 h-12 bg-teal-100 text-teal-600 rounded-full flex items-center justify-center mb-2">
+                          <i class="fas fa-check text-xl"></i>
+                        </div>
+                        <p class="text-sm font-bold text-teal-900 file-name break-all px-4">image.jpg</p>
+                        <p class="text-xs text-slate-500 file-size mt-1">1.2 MB</p>
+                        <button type="button" class="mt-3 text-xs text-red-500 hover:text-red-700 underline font-medium remove-file-btn">삭제</button>
+                      </div>
                     </div>
                   </div>
                 </div>
 
-                {/* Step 3: Project Details (Enhanced) */}
+                {/* Step 3: Project Details (Same as before) */}
                 <div class="p-8">
                   <h2 class="text-lg font-bold text-slate-900 mb-6 flex items-center">
                     <span class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-sm font-bold mr-3">3</span>
@@ -334,25 +364,8 @@ export const Rfq = (props: { user?: any, lang?: string }) => {
                           <optgroup label="산업 특화">
                             <option value="iatf16949">IATF 16949 (자동차부품)</option>
                             <option value="as9100">AS 9100 (항공우주)</option>
-                            <option value="tl9000">TL 9000 (정보통신)</option>
-                            <option value="sq">SQ 인증 (현대기아 2자)</option>
-                          </optgroup>
-                          <optgroup label="의료/식품/화장품">
                             <option value="iso13485">ISO 13485 (의료기기)</option>
-                            <option value="iso22000">ISO 22000 (식품안전)</option>
-                            <option value="fssc22000">FSSC 22000 (식품안전)</option>
-                            <option value="iso22716">ISO 22716 (화장품GMP)</option>
-                            <option value="haccp">HACCP (식품안전)</option>
-                          </optgroup>
-                          <optgroup label="IT/보안/에너지">
-                            <option value="iso27001">ISO 27001 (정보보안)</option>
-                            <option value="iso27701">ISO 27701 (개인정보보호)</option>
-                            <option value="iso20000">ISO 20000 (IT서비스)</option>
-                            <option value="iso50001">ISO 50001 (에너지경영)</option>
-                          </optgroup>
-                          <optgroup label="기타/규범">
-                            <option value="iso37001">ISO 37001 (부패방지)</option>
-                            <option value="iso37301">ISO 37301 (준법경영)</option>
+                            <option value="sq">SQ 인증 (현대기아 2자)</option>
                           </optgroup>
                         </select>
                       </div>
@@ -520,54 +533,131 @@ export const Rfq = (props: { user?: any, lang?: string }) => {
 
       <script dangerouslySetInnerHTML={{ __html: `
         document.addEventListener('DOMContentLoaded', () => {
-          // IAF Selection Logic
+          // --- 1. Multi-Select IAF Logic ---
           const iafBtns = document.querySelectorAll('.iaf-btn');
           const hiddenInput = document.getElementById('iaf_code_input');
+          const selectedCodes = new Set(); // Store selected codes
 
           iafBtns.forEach(btn => {
             btn.addEventListener('click', () => {
-              // Deselect all
-              iafBtns.forEach(b => {
-                b.classList.remove('border-blue-600', 'bg-blue-50', 'ring-2', 'ring-blue-200');
-                b.classList.add('border-slate-200');
-                b.querySelector('.check-icon').classList.remove('opacity-100');
-                b.querySelector('.check-icon').classList.add('opacity-0');
-              });
+              const val = btn.dataset.value;
+              const checkIcon = btn.querySelector('.check-icon');
 
-              // Select clicked
-              btn.classList.remove('border-slate-200');
-              btn.classList.add('border-blue-600', 'bg-blue-50', 'ring-2', 'ring-blue-200');
-              btn.querySelector('.check-icon').classList.remove('opacity-0');
-              btn.querySelector('.check-icon').classList.add('opacity-100');
+              if (selectedCodes.has(val)) {
+                // Deselect
+                selectedCodes.delete(val);
+                btn.classList.remove('border-blue-600', 'bg-blue-50', 'ring-2', 'ring-blue-200');
+                btn.classList.add('border-slate-200');
+                checkIcon.classList.remove('scale-100', 'opacity-100');
+                checkIcon.classList.add('scale-0', 'opacity-0');
+              } else {
+                // Select
+                selectedCodes.add(val);
+                btn.classList.remove('border-slate-200');
+                btn.classList.add('border-blue-600', 'bg-blue-50', 'ring-2', 'ring-blue-200');
+                checkIcon.classList.remove('scale-0', 'opacity-0');
+                checkIcon.classList.add('scale-100', 'opacity-100');
+              }
 
-              // Update input
-              if(hiddenInput) hiddenInput.value = btn.dataset.value;
+              // Update Hidden Input (Comma separated)
+              if(hiddenInput) hiddenInput.value = Array.from(selectedCodes).join(',');
             });
           });
 
-          // Form Submission
+          // --- 2. Drag and Drop Logic ---
+          function setupDragAndDrop(zoneId, inputId) {
+            const dropZone = document.getElementById(zoneId);
+            const input = document.getElementById(inputId);
+            
+            if(!dropZone || !input) return;
+
+            const placeholder = dropZone.querySelector('.upload-placeholder');
+            const fileInfo = dropZone.querySelector('.file-info');
+            const fileName = dropZone.querySelector('.file-name');
+            const fileSize = dropZone.querySelector('.file-size');
+            const removeBtn = dropZone.querySelector('.remove-file-btn');
+
+            // Drag Events
+            dropZone.addEventListener('dragover', (e) => {
+              e.preventDefault();
+              dropZone.classList.add('border-blue-500', 'bg-blue-50', 'scale-[1.02]');
+            });
+
+            dropZone.addEventListener('dragleave', (e) => {
+              e.preventDefault();
+              dropZone.classList.remove('border-blue-500', 'bg-blue-50', 'scale-[1.02]');
+            });
+
+            dropZone.addEventListener('drop', (e) => {
+              e.preventDefault();
+              dropZone.classList.remove('border-blue-500', 'bg-blue-50', 'scale-[1.02]');
+              
+              if (e.dataTransfer.files.length > 0) {
+                handleFile(e.dataTransfer.files[0]);
+              }
+            });
+
+            // Click Event (Trigger Input)
+            dropZone.addEventListener('click', (e) => {
+              if (e.target !== removeBtn) input.click();
+            });
+
+            // Input Change Event
+            input.addEventListener('change', () => {
+              if (input.files.length > 0) {
+                handleFile(input.files[0]);
+              }
+            });
+
+            // Remove File
+            if(removeBtn) {
+              removeBtn.addEventListener('click', (e) => {
+                e.stopPropagation(); // Prevent opening file dialog
+                input.value = ''; // Clear input
+                resetUI();
+              });
+            }
+
+            function handleFile(file) {
+              placeholder.classList.add('hidden');
+              fileInfo.classList.remove('hidden');
+              fileInfo.classList.add('flex');
+              fileName.textContent = file.name;
+              fileSize.textContent = (file.size / (1024*1024)).toFixed(2) + ' MB';
+              dropZone.classList.add('border-blue-500', 'bg-blue-50'); // Keep active style
+            }
+
+            function resetUI() {
+              placeholder.classList.remove('hidden');
+              fileInfo.classList.add('hidden');
+              fileInfo.classList.remove('flex');
+              dropZone.classList.remove('border-blue-500', 'bg-blue-50');
+            }
+          }
+
+          // Initialize D&D for both zones
+          setupDragAndDrop('drop-zone-drawing', 'drawing-file');
+          setupDragAndDrop('drop-zone-photo', 'photo-file');
+
+
+          // --- 3. Form Submission ---
           document.getElementById('rfqForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            // Check if IAF code selected
+            // Check if at least one IAF code is selected
             if (!hiddenInput.value) {
-              alert('산업 분야(IAF Code)를 선택해주세요.');
-              // Scroll to top
+              alert('산업 분야(IAF Code)를 최소 1개 이상 선택해주세요.');
               document.getElementById('iaf-selector').scrollIntoView({ behavior: 'smooth' });
               return;
             }
             
-            // Submit simulation
             const btn = e.target.querySelector('button[type="submit"]');
-            const originalText = btn.innerHTML;
             btn.disabled = true;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> 경영인증평가원 심사보고서 대조 중...';
 
-            // Simulate API delay
             setTimeout(() => {
-              // Redirect to AI Matching Result Page
               window.location.href = '/rfq/result';
-            }, 800);
+            }, 1000);
           });
         });
       ` }} />

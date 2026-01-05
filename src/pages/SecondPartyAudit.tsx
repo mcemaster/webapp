@@ -22,8 +22,11 @@ export const SecondPartyAudit = (props: { user?: any }) => {
               공급망 품질 수준을 상향 평준화하는 최적의 솔루션
             </p>
             <div class="flex justify-center gap-4">
-              <a href="/rfq" class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-bold transition">
-                심사 대행 문의
+              <a href="/audit/apply" class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-bold transition shadow-lg transform hover:-translate-y-1">
+                2자 심사 신청하기
+              </a>
+              <a href="/rfq" class="bg-white text-slate-900 border border-slate-200 px-8 py-3 rounded-lg font-bold hover:bg-slate-50 transition">
+                공급사 찾기
               </a>
             </div>
           </div>
@@ -168,11 +171,11 @@ export const SecondPartyAudit = (props: { user?: any }) => {
               귀사의 공급망 리스크를 완벽하게 관리해 드립니다.
             </p>
             <div class="flex flex-col sm:flex-row justify-center gap-4">
-              <a href="/rfq" class="bg-blue-500 hover:bg-blue-600 text-white px-8 py-3 rounded-lg font-bold transition">
-                심사 기준 수립 상담
+              <a href="/audit/apply" class="bg-blue-500 hover:bg-blue-600 text-white px-8 py-3 rounded-lg font-bold transition">
+                2자 심사 지금 신청하기
               </a>
-              <a href="/partners" class="bg-transparent border border-white/30 hover:bg-white/10 text-white px-8 py-3 rounded-lg font-bold transition">
-                2자 심사 제안서 받기
+              <a href="/rfq" class="bg-transparent border border-white/30 hover:bg-white/10 text-white px-8 py-3 rounded-lg font-bold transition">
+                공급사 찾기 바로가기
               </a>
             </div>
           </div>
