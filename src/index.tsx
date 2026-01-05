@@ -34,6 +34,56 @@ const app = new Hono<{ Bindings: Bindings }>()
 app.use(renderer)
 app.use('/static/*', serveStatic({ root: './public' }))
 
+// --- IMWEB INTEGRATION API ---
+app.post('/api/imweb/users/sync', async (c) => {
+  const apiKey = c.env.IMWEB_API_KEY;
+  const secretKey = c.env.IMWEB_SECRET_KEY;
+
+  if (!apiKey || !secretKey) {
+    return c.json({ success: false, message: '아임웹 API 키가 설정되지 않았습니다.' });
+  }
+
+  try {
+    // 1. Get Access Token
+    const authRes = await fetch('https://api.imweb.me/v2/auth', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key: apiKey, secret: secretKey })
+    });
+    
+    if (!authRes.ok) throw new Error('아임웹 인증 실패 (API Key 확인 필요)');
+    const { access_token } = await authRes.json() as any;
+
+    // 2. Fetch Users from Imweb
+    const usersRes = await fetch('https://api.imweb.me/v2/member/members', {
+      headers: { 'access-token': access_token }
+    });
+    const imwebData: any = await usersRes.json();
+    
+    if (imwebData.code !== 200) throw new Error(imwebData.msg || '회원 목록 가져오기 실패');
+
+    // 3. Sync to Local DB (Upsert)
+    let syncCount = 0;
+    const members = imwebData.data.list;
+
+    for (const m of members) {
+      // 아임웹 회원을 우리 DB 구조에 맞춰 매핑
+      // m.email, m.name, m.phone 등
+      await c.env.DB.prepare(`
+        INSERT INTO users (email, name, role, company_name) 
+        VALUES (?, ?, 'user', '아임웹연동')
+        ON CONFLICT(email) DO UPDATE SET name = excluded.name
+      `).bind(m.email, m.name || '이름없음').run();
+      syncCount++;
+    }
+
+    return c.json({ success: true, message: `${syncCount}명의 아임웹 회원을 동기화했습니다.` });
+
+  } catch (e: any) {
+    return c.json({ success: false, message: e.message });
+  }
+});
+
 // --- COMPANY AUTOCOMPLETE API ---
 app.get('/api/search/company', async (c) => {
   const query = c.req.query('q');
