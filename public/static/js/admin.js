@@ -8,6 +8,31 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
+async function triggerDeploy() {
+  if (!confirm('정말 배포를 시작하시겠습니까?\n약 3~5분이 소요됩니다.')) return;
+
+  try {
+    const btn = document.querySelector('button[onclick="triggerDeploy()"]');
+    const originalText = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> 요청 중...';
+
+    const response = await fetch('/api/admin/deploy', { method: 'POST' });
+    const result = await response.json();
+
+    if (result.success) {
+      alert(result.message);
+    } else {
+      alert('오류: ' + result.message);
+    }
+    
+    btn.disabled = false;
+    btn.innerHTML = originalText;
+  } catch (e) {
+    alert('배포 요청 중 오류가 발생했습니다.');
+  }
+}
+
 async function fetchAdminStats() {
   try {
     const response = await fetch('/api/admin/stats');

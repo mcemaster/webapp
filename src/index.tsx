@@ -25,13 +25,39 @@ import puppeteer from '@cloudflare/puppeteer'
 type Bindings = {
   DB: D1Database;
   OPENAI_API_KEY: string;
-  MYBROWSER: any; // Browser Rendering Binding
+  MYBROWSER: any;
+  DEPLOY_HOOK: string; // Add Deploy Hook
 }
 
 const app = new Hono<{ Bindings: Bindings }>()
 
 app.use(renderer)
 app.use('/static/*', serveStatic({ root: './public' }))
+
+// --- ADMIN DEPLOY ENDPOINT ---
+app.post('/api/admin/deploy', async (c) => {
+  const userSession = getCookie(c, 'user_session')
+  if (!userSession) return c.json({ error: 'Unauthorized' }, 401)
+  
+  const user = JSON.parse(userSession)
+  if (user.role !== 'admin') return c.json({ error: 'Forbidden' }, 403)
+
+  const deployUrl = c.env.DEPLOY_HOOK;
+  if (!deployUrl) {
+    return c.json({ success: false, message: '배포 후크 URL이 설정되지 않았습니다.' });
+  }
+
+  try {
+    const response = await fetch(deployUrl, { method: 'POST' });
+    if (response.ok) {
+      return c.json({ success: true, message: '배포가 시작되었습니다! 약 3분 후 완료됩니다.' });
+    } else {
+      return c.json({ success: false, message: 'Cloudflare 호출 실패' });
+    }
+  } catch (e: any) {
+    return c.json({ success: false, message: e.message });
+  }
+})
 
 // --- ADMIN STATS ENDPOINT ---
 app.get('/api/admin/stats', async (c) => {

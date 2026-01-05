@@ -442,17 +442,17 @@ export const Admin = (props: { user: any, tab?: string }) => {
                 
                 {/* 1. Domain Settings */}
                 <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-                  <h3 class="text-lg font-bold text-slate-900 mb-1">도메인 및 기본 설정</h3>
-                  <p class="text-sm text-slate-500 mb-6">서비스 기본 URL 및 보안 설정을 관리합니다.</p>
+                  <h3 class="text-lg font-bold text-slate-900 mb-1">시스템 업데이트 및 관리</h3>
+                  <p class="text-sm text-slate-500 mb-6">최신 코드를 서버에 반영하거나 재시작합니다.</p>
                   
-                  <div class="grid gap-6">
-                    <div class="flex items-center justify-between p-4 bg-slate-50 rounded-lg border border-slate-100">
-                      <div>
-                        <span class="block text-sm font-bold text-slate-700">대표 도메인</span>
-                        <span class="text-xs text-green-600 font-bold"><i class="fas fa-lock mr-1"></i> https://www.mce.ai.kr</span>
-                      </div>
-                      <span class="bg-blue-100 text-blue-700 text-xs px-3 py-1 rounded-full font-bold">Primary</span>
+                  <div class="flex items-center justify-between p-4 bg-slate-50 rounded-lg border border-slate-100">
+                    <div>
+                      <span class="block text-sm font-bold text-slate-700">사이트 즉시 배포 (Update)</span>
+                      <span class="text-xs text-slate-500">GitHub의 최신 변경사항을 반영합니다.</span>
                     </div>
+                    <button onclick="triggerDeploy()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-bold shadow transition-all flex items-center">
+                      <i class="fas fa-rocket mr-2"></i> 배포 시작
+                    </button>
                   </div>
                 </div>
 
