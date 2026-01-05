@@ -68,25 +68,33 @@ app.get('/api/admin/stats', async (c) => {
   if (user.role !== 'admin') return c.json({ error: 'Forbidden' }, 403)
 
   try {
-    // 1. AI Usage Count (from analysis_logs)
-    const aiCount = await c.env.DB.prepare('SELECT COUNT(*) as count FROM analysis_logs').first('count');
+    // 1. AI Usage Count (Safe Query)
+    const aiResult: any = await c.env.DB.prepare('SELECT COUNT(*) as count FROM analysis_logs').first();
+    const aiCount = aiResult?.count || 0;
     
-    // 2. Crawler Data Count (from grants)
-    // We assume grants with specific agencies or descriptions are crawled, or just count all for now.
-    // Or we can count grants inserted today.
-    const today = new Date().toISOString().split('T')[0];
-    const crawledCount = await c.env.DB.prepare("SELECT COUNT(*) as count FROM grants WHERE description LIKE '%브라우저%' OR agency = '자동수집(AI)'").first('count');
+    // 2. Crawler Data Count (Safe Query)
+    // Simplify query to avoid syntax errors
+    const crawlResult: any = await c.env.DB.prepare("SELECT COUNT(*) as count FROM grants WHERE agency = '자동수집(AI)'").first();
+    const crawledCount = crawlResult?.count || 0;
     
-    // 3. Total Users
-    const userCount = await c.env.DB.prepare('SELECT COUNT(*) as count FROM users').first('count');
+    // 3. Total Users (Safe Query)
+    const userResult: any = await c.env.DB.prepare('SELECT COUNT(*) as count FROM users').first();
+    const userCount = userResult?.count || 0;
 
     return c.json({
-      ai_usage: aiCount || 0,
-      crawler_usage: crawledCount || 0,
-      total_users: userCount || 0
+      ai_usage: aiCount,
+      crawler_usage: crawledCount,
+      total_users: userCount
     });
   } catch (e: any) {
-    return c.json({ error: e.message }, 500)
+    console.error("Admin Stats Error:", e.message);
+    // Return 0 values instead of 500 error to keep dashboard alive
+    return c.json({
+      ai_usage: 0,
+      crawler_usage: 0,
+      total_users: 0,
+      error: e.message // Include error message for debugging
+    });
   }
 })
 
