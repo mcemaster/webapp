@@ -25,8 +25,8 @@ export const Layout = (props: { children: any; title?: string; user?: any }) => 
                 <button class="px-4 text-[15px] font-bold text-slate-600 group-hover:text-blue-600 transition-colors flex items-center h-full">
                   평가/인증 <i class="fas fa-chevron-down ml-1.5 text-xs opacity-50 group-hover:opacity-100 transition-opacity"></i>
                 </button>
-                {/* Fixed: Center Alignment + Invisible Bridge */}
-                <div class="absolute top-full left-1/2 transform -translate-x-1/2 w-48 bg-white rounded-b-xl shadow-xl border border-slate-100 overflow-hidden hidden group-hover:block animate-fade-in-up before:absolute before:-top-4 before:left-0 before:w-full before:h-4 before:content-['']">
+                {/* Fixed: Removed animation, used robust visibility transition, stronger bridge */}
+                <div class="absolute top-full left-1/2 transform -translate-x-1/2 w-48 bg-white rounded-b-xl shadow-xl border border-slate-100 overflow-hidden invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-all duration-200 before:absolute before:-top-6 before:left-0 before:w-full before:h-6 before:content-['']">
                   <div class="py-2">
                     <a href="/services/spec" class="block px-5 py-3 text-sm text-slate-600 hover:bg-slate-50 hover:text-blue-600 font-medium transition-colors">기업 SPEC 평가</a>
                     <a href="/services/certification" class="block px-5 py-3 text-sm text-slate-600 hover:bg-slate-50 hover:text-blue-600 font-medium transition-colors">ISO 인증</a>
@@ -84,8 +84,8 @@ export const Layout = (props: { children: any; title?: string; user?: any }) => 
                     <span>{user.name}님</span>
                     <i class="fas fa-chevron-down text-xs text-slate-400"></i>
                   </button>
-                  {/* Fixed: Invisible Bridge & Right Alignment */}
-                  <div class="absolute top-full right-0 w-64 bg-white rounded-b-xl shadow-xl border border-slate-100 overflow-hidden hidden group-hover:block animate-fade-in-up before:absolute before:-top-4 before:left-0 before:w-full before:h-4 before:content-['']">
+                  {/* Fixed: Robust transition, stronger bridge */}
+                  <div class="absolute top-full right-0 w-64 bg-white rounded-b-xl shadow-xl border border-slate-100 overflow-hidden invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-all duration-200 before:absolute before:-top-6 before:left-0 before:w-full before:h-6 before:content-['']">
                     <div class="px-6 py-5 border-b border-slate-100 bg-slate-50">
                       <p class="text-base font-bold text-slate-900">{user.name}</p>
                       <p class="text-xs text-slate-500 truncate mt-1">{user.email}</p>
