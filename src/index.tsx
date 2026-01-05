@@ -56,6 +56,15 @@ app.get('/api/search/company', async (c) => {
   }
 })
 
+app.get('/api/policy/:type', async (c) => {
+  const type = c.req.param('type');
+  try {
+    const key = `policy_${type}`;
+    const result: any = await c.env.DB.prepare('SELECT value FROM settings WHERE key = ?').bind(key).first();
+    return c.json({ content: result?.value || '내용이 없습니다.' });
+  } catch (e: any) { return c.json({ error: e.message }, 500); }
+});
+
 // --- ADMIN FULL API SUITE ---
 
 // 1. Users Management
@@ -104,6 +113,31 @@ app.get('/api/admin/banners', async (c) => {
   try {
     const { results } = await c.env.DB.prepare('SELECT * FROM banners ORDER BY id DESC').all();
     return c.json({ results });
+  } catch (e: any) { return c.json({ error: e.message }, 500); }
+});
+
+// 5. Policy Management
+app.get('/api/admin/policy/:type', async (c) => {
+  const type = c.req.param('type');
+  try {
+    const key = `policy_${type}`; // policy_terms, policy_privacy, policy_finance
+    const result: any = await c.env.DB.prepare('SELECT value FROM settings WHERE key = ?').bind(key).first();
+    return c.json({ content: result?.value || '' });
+  } catch (e: any) { return c.json({ error: e.message }, 500); }
+});
+
+app.post('/api/admin/policy', async (c) => {
+  try {
+    const { type, content } = await c.req.json();
+    const key = `policy_${type}`;
+    
+    // UPSERT logic using SQLite syntax
+    await c.env.DB.prepare(`
+      INSERT INTO settings (key, value) VALUES (?, ?)
+      ON CONFLICT(key) DO UPDATE SET value = excluded.value
+    `).bind(key, content).run();
+    
+    return c.json({ success: true });
   } catch (e: any) { return c.json({ error: e.message }, 500); }
 });
 
@@ -787,219 +821,4 @@ app.get('/auth/:provider', (c) => {
 
   // Mock user login
   const userData = {
-    id: '12345',
-    name: '홍길동',
-    email: 'user@example.com',
-    role: 'user',
-    isCertified: provider === 'kakao', // Mock: kakao users are certified
-    provider: provider,
-    profileImage: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80'
-  }
-  
-  setCookie(c, 'user_session', JSON.stringify(userData), {
-    path: '/',
-    secure: false,
-    httpOnly: true,
-    maxAge: 86400,
-  })
-  
-  return c.redirect('/')
-})
-
-app.get('/logout', (c) => {
-  deleteCookie(c, 'user_session')
-  return c.redirect('/')
-})
-
-// API Routes
-app.post('/auth/login', async (c) => {
-  try {
-    const body = await c.req.parseBody()
-    const email = body['email'] as string
-    const password = body['password'] as string
-
-    // 1. Admin Login Check
-    if (email === 'mce@mce.re.kr' && password === '1q2w3e4r5t!') {
-      const adminData = {
-        id: 'admin',
-        name: '최고관리자',
-        email: 'mce@mce.re.kr',
-        role: 'admin',
-        isCertified: true,
-        profileImage: 'https://ui-avatars.com/api/?name=Admin&background=0D8ABC&color=fff'
-      }
-      setCookie(c, 'user_session', JSON.stringify(adminData), {
-        path: '/',
-        secure: false,
-        httpOnly: true,
-        maxAge: 86400,
-      })
-      return c.redirect('/admin')
-    }
-
-    // 2. Mock User Login Check (for demo)
-    if (email && (email.includes('user') || email.includes('test'))) {
-      return c.redirect('/auth/kakao')
-    }
-
-    // 3. Fail - Redirect back with error
-    return c.html(
-      <html lang="ko">
-        <head>
-          <meta charset="UTF-8" />
-          <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-          <title>로그인 오류</title>
-          <script dangerouslySetInnerHTML={{
-            __html: `alert('아이디 또는 비밀번호가 일치하지 않습니다.'); window.history.back();`
-          }} />
-        </head>
-      </html>
-    )
-  } catch (e) {
-    return c.redirect('/login')
-  }
-})
-
-app.post('/api/rfq', async (c) => {
-  const body = await c.req.json()
-  console.log('RFQ Received:', body)
-  return c.json({ 
-    success: true, 
-    message: '공급사 매칭 요청이 접수되었습니다. 담당자가 검토 후 연락드리겠습니다.',
-    data: body 
-  })
-})
-
-app.post('/api/register', async (c) => {
-  const body = await c.req.json()
-  console.log('Registration Received:', body)
-  return c.json({
-    success: true,
-    message: '회원가입 완료'
-  })
-})
-
-// Page Routes
-app.get('/', (c) => {
-  const userSession = getCookie(c, 'user_session')
-  const user = userSession ? JSON.parse(userSession) : undefined
-  return c.render(<Home user={user} />)
-})
-
-app.get('/rfq', (c) => {
-  const userSession = getCookie(c, 'user_session')
-  const user = userSession ? JSON.parse(userSession) : undefined
-  return c.render(<Rfq user={user} />)
-})
-
-app.get('/rfq/result', (c) => {
-  const userSession = getCookie(c, 'user_session')
-  const user = userSession ? JSON.parse(userSession) : undefined
-  return c.render(<RfqResult user={user} />)
-})
-
-app.get('/services', (c) => {
-  const userSession = getCookie(c, 'user_session')
-  const user = userSession ? JSON.parse(userSession) : undefined
-  return c.render(<Services user={user} />)
-})
-
-app.get('/services/spec', (c) => {
-  const userSession = getCookie(c, 'user_session')
-  const user = userSession ? JSON.parse(userSession) : undefined
-  return c.render(<SpecEvaluation user={user} />)
-})
-
-app.get('/services/scm', (c) => {
-  const userSession = getCookie(c, 'user_session')
-  const user = userSession ? JSON.parse(userSession) : undefined
-  return c.render(<SecondPartyAudit user={user} />)
-})
-
-app.get('/partners', (c) => {
-  const userSession = getCookie(c, 'user_session')
-  const user = userSession ? JSON.parse(userSession) : undefined
-  return c.render(<Partners user={user} />)
-})
-
-app.get('/support-matching', (c) => {
-  const userSession = getCookie(c, 'user_session')
-  const user = userSession ? JSON.parse(userSession) : undefined
-  return c.render(<SupportMatching user={user} />)
-})
-
-app.get('/faq', (c) => {
-  const userSession = getCookie(c, 'user_session')
-  const user = userSession ? JSON.parse(userSession) : undefined
-  return c.render(<FAQ user={user} />)
-})
-
-app.get('/admin', (c) => {
-  const userSession = getCookie(c, 'user_session')
-  if (!userSession) return c.redirect('/login')
-  
-  const user = JSON.parse(userSession)
-  if (user.role !== 'admin') return c.redirect('/')
-    
-  return c.render(<Admin user={user} tab={c.req.query('tab')} />)
-})
-
-app.get('/partnership', (c) => {
-  const userSession = getCookie(c, 'user_session')
-  const user = userSession ? JSON.parse(userSession) : undefined
-  return c.render(<PartnershipProposal user={user} />)
-})
-
-app.get('/register', (c) => {
-  return c.render(<Register />)
-})
-
-app.get('/legal', (c) => {
-  const userSession = getCookie(c, 'user_session')
-  const user = userSession ? JSON.parse(userSession) : undefined
-  return c.render(<Legal user={user} tab={c.req.query('tab')} />)
-})
-
-// --- SCHEDULED TASK (CRON TRIGGER) ---
-const scheduled = async (event: any, env: Bindings, ctx: any) => {
-  console.log("⏰ 알람이 울렸습니다! 자동 수집을 시작합니다.");
-  
-  try {
-    if (!env.MYBROWSER) return;
-
-    // 1. Launch Browser
-    const browser = await puppeteer.launch(env.MYBROWSER);
-    const page = await browser.newPage();
-
-    // 2. Crawl K-Startup
-    await page.goto('https://www.k-startup.go.kr/web/contents/bizPbanc.do');
-    const pageTitle = await page.title();
-    
-    // 3. Insert Data (Auto)
-    // 실제로는 여기서 DOM을 긁어옵니다. 데모용으로 '자동수집' 데이터 추가.
-    await env.DB.prepare(`
-      INSERT INTO grants (title, agency, type, description, max_amount, url, deadline)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
-    `).bind(
-      `[자동수집] ${new Date().toISOString().split('T')[0]} 신규 지원사업`, 
-      'AI-Bot', 
-      'Auto', 
-      `매일 아침 9시에 자동 수집된 ${pageTitle} 데이터입니다.`, 
-      100000, 
-      'https://www.k-startup.go.kr', 
-      '2026-12-31'
-    ).run();
-
-    await browser.close();
-    console.log("✅ 자동 수집 완료!");
-
-  } catch (e) {
-    console.error("❌ 자동 수집 실패:", e);
-  }
-}
-
-// Export both Fetch (Web) and Scheduled (Cron) handlers
-export default {
-  fetch: app.fetch,
-  scheduled
-}
+   
