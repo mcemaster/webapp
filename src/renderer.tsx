@@ -39,6 +39,7 @@ export const renderer = jsxRenderer(({ children }) => {
           `
         }} />
         <link href="/static/style.css" rel="stylesheet" />
+        <script src="/static/js/core.js"></script>
         <script defer src="/static/app.js"></script>
       </head>
       <body>

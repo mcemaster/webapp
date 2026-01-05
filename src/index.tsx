@@ -148,6 +148,7 @@ app.get('/login', (c) => {
           </div>
         </div>
 
+        <script src="/static/js/core.js"></script>
         <script src="/static/js/auth.js"></script>
       </body>
     </html>

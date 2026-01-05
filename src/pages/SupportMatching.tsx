@@ -348,6 +348,7 @@ export const SupportMatching = ({ user }: SupportMatchingProps) => {
 
       </div>
 
+      <script src="/static/js/core.js"></script>
       <script src="/static/js/matching.js"></script>
     </Layout>
   )
