@@ -86,7 +86,10 @@ export const Admin = (props: { user: any, tab?: string }) => {
           <header class="bg-white border-b border-slate-200 h-16 flex items-center justify-between px-8 sticky top-0 z-20">
             <h2 class="text-xl font-bold text-slate-800 capitalize">
               {activeTab === 'rfq' ? '공급사 매칭 및 통합 알림 발송' : 
-               activeTab === 'audit' ? '심사보고서 및 ERP 연동 관리' : 
+               activeTab === 'audit' ? '심사보고서 및 ERP 연동 관리' :
+               activeTab === 'partners' ? '파트너사 가입 승인' :
+               activeTab === 'banners' ? '배너 및 팝업 관리' :
+               activeTab === 'seo' ? 'SEO 및 마케팅 설정' :
                activeTab.replace('-', ' ')}
             </h2>
             <div class="flex items-center space-x-4">
@@ -99,6 +102,151 @@ export const Admin = (props: { user: any, tab?: string }) => {
 
           <div class="p-8">
             
+            {/* === Tab: Partner Approval (Restored) === */}
+            {activeTab === 'partners' && (
+              <div class="bg-white rounded-xl shadow-sm border border-slate-200 animate-fade-in-up">
+                <div class="p-6 border-b border-slate-100 flex justify-between items-center">
+                  <h3 class="font-bold text-lg text-slate-900">가입 대기 파트너 (5)</h3>
+                  <div class="flex space-x-2">
+                    <input type="text" placeholder="기업명 검색" class="text-sm border border-slate-300 rounded-lg px-3 py-1.5 w-64" />
+                    <button class="bg-slate-800 text-white px-4 py-1.5 rounded-lg text-sm font-bold">검색</button>
+                  </div>
+                </div>
+                <table class="w-full text-sm text-left">
+                  <thead class="bg-slate-50 text-slate-500">
+                    <tr>
+                      <th class="px-6 py-4">기업명</th>
+                      <th class="px-6 py-4">대표자</th>
+                      <th class="px-6 py-4">사업자번호</th>
+                      <th class="px-6 py-4">신청일</th>
+                      <th class="px-6 py-4">서류</th>
+                      <th class="px-6 py-4">상태</th>
+                      <th class="px-6 py-4 text-right">관리</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-slate-100">
+                    {[1,2,3,4,5].map(i => (
+                      <tr class="hover:bg-slate-50">
+                        <td class="px-6 py-4 font-bold text-slate-800">(주)미래테크_{i}</td>
+                        <td class="px-6 py-4">김대표</td>
+                        <td class="px-6 py-4 text-slate-500">123-45-6789{i}</td>
+                        <td class="px-6 py-4 text-slate-500">2026-01-05</td>
+                        <td class="px-6 py-4"><span class="text-blue-600 underline cursor-pointer"><i class="fas fa-file-pdf mr-1"></i>사업자등록증</span></td>
+                        <td class="px-6 py-4"><span class="bg-yellow-100 text-yellow-700 px-2 py-1 rounded text-xs font-bold">승인 대기</span></td>
+                        <td class="px-6 py-4 text-right space-x-2">
+                          <button class="text-green-600 font-bold hover:underline">승인</button>
+                          <span class="text-slate-300">|</span>
+                          <button class="text-red-500 font-bold hover:underline">반려</button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+
+            {/* === Tab: Banner/Popup (Restored) === */}
+            {activeTab === 'banners' && (
+              <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 animate-fade-in-up">
+                {/* Main Banner */}
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+                  <div class="flex justify-between items-center mb-6">
+                    <h3 class="font-bold text-lg text-slate-900">메인 배너 관리</h3>
+                    <button class="text-blue-600 text-sm font-bold"><i class="fas fa-plus mr-1"></i>새 배너 등록</button>
+                  </div>
+                  <div class="space-y-4">
+                    <div class="border border-slate-200 rounded-lg overflow-hidden group relative">
+                      <img src="https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&w=800&q=80" class="w-full h-32 object-cover" />
+                      <div class="absolute inset-0 bg-black/50 hidden group-hover:flex items-center justify-center space-x-3">
+                        <button class="text-white hover:text-blue-200"><i class="fas fa-edit"></i> 수정</button>
+                        <button class="text-white hover:text-red-200"><i class="fas fa-trash"></i> 삭제</button>
+                      </div>
+                      <div class="p-3 bg-slate-50 flex justify-between items-center">
+                        <span class="text-xs font-bold text-slate-700">2026 정부지원사업 통합공고 안내</span>
+                        <span class="bg-green-100 text-green-700 text-[10px] px-2 py-0.5 rounded font-bold">노출중</span>
+                      </div>
+                    </div>
+                    <div class="border border-slate-200 rounded-lg overflow-hidden group relative opacity-60">
+                      <img src="https://images.unsplash.com/photo-1551836022-d5d88e9218df?auto=format&fit=crop&w=800&q=80" class="w-full h-32 object-cover" />
+                      <div class="p-3 bg-slate-50 flex justify-between items-center">
+                        <span class="text-xs font-bold text-slate-700">ISO 인증 할인 프로모션</span>
+                        <span class="bg-slate-200 text-slate-500 text-[10px] px-2 py-0.5 rounded font-bold">대기</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Popup Settings */}
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+                  <h3 class="font-bold text-lg text-slate-900 mb-6">팝업(Popup) 설정</h3>
+                  <div class="space-y-6">
+                    <div class="flex items-center justify-between p-4 bg-slate-50 rounded-lg border border-slate-100">
+                      <div>
+                        <span class="block text-sm font-bold text-slate-800">공지사항 팝업 (긴급)</span>
+                        <span class="text-xs text-slate-500">서버 점검 안내 (2026-01-10)</span>
+                      </div>
+                      <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" class="sr-only peer" />
+                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                      </label>
+                    </div>
+                    <div class="flex items-center justify-between p-4 bg-slate-50 rounded-lg border border-slate-100">
+                      <div>
+                        <span class="block text-sm font-bold text-slate-800">마케팅 팝업</span>
+                        <span class="text-xs text-slate-500">신규 회원 가입 이벤트</span>
+                      </div>
+                      <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" checked class="sr-only peer" />
+                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* === Tab: SEO (Restored) === */}
+            {activeTab === 'seo' && (
+              <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-sm border border-slate-200 p-8 animate-fade-in-up">
+                <h3 class="font-bold text-lg text-slate-900 mb-6">검색엔진 최적화 (SEO) 설정</h3>
+                
+                <div class="space-y-6">
+                  <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-2">사이트 제목 (Title)</label>
+                    <input type="text" value="기업지원-경인평 | 경영인증평가원" class="w-full border-slate-300 rounded-lg text-sm px-4 py-2" />
+                    <p class="text-xs text-slate-400 mt-1">브라우저 탭과 검색 결과 제목에 표시됩니다.</p>
+                  </div>
+                  <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-2">메타 설명 (Description)</label>
+                    <textarea class="w-full border-slate-300 rounded-lg text-sm px-4 py-2 h-24">기업 인증, 평가, 매칭 솔루션 전문 기관. ISO 인증부터 정부지원사업 매칭까지 원스톱으로 지원합니다.</textarea>
+                  </div>
+                  <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-2">키워드 (Keywords)</label>
+                    <input type="text" value="경영인증평가원, ISO인증, 기업평가, 정부지원사업, 바우처" class="w-full border-slate-300 rounded-lg text-sm px-4 py-2" />
+                  </div>
+                  
+                  <div class="pt-6 border-t border-slate-100">
+                    <h4 class="font-bold text-sm text-slate-800 mb-4">Open Graph (SNS 공유 설정)</h4>
+                    <div class="flex gap-6">
+                      <div class="w-32 h-32 bg-slate-100 rounded-lg border border-slate-200 flex items-center justify-center text-slate-400">
+                        <i class="fas fa-image text-3xl"></i>
+                      </div>
+                      <div class="flex-1 space-y-4">
+                        <input type="text" value="https://www.mce.ai.kr/static/og-image.png" class="w-full border-slate-300 rounded-lg text-sm px-4 py-2" placeholder="이미지 URL" />
+                        <button class="bg-white border border-slate-300 text-slate-700 px-4 py-2 rounded-lg text-xs font-bold hover:bg-slate-50">이미지 업로드</button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="flex justify-end pt-6">
+                    <button class="bg-blue-600 text-white px-6 py-2.5 rounded-lg font-bold hover:bg-blue-700 transition-colors shadow-lg">
+                      설정 저장
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* === Tab: Supply Matching & Notification (RFQ) === */}
             {activeTab === 'rfq' && (
               <div class="flex flex-col lg:flex-row gap-8 h-[calc(100vh-140px)] animate-fade-in-up">
@@ -587,7 +735,7 @@ export const Admin = (props: { user: any, tab?: string }) => {
             )}
             
             {/* Placeholder for other tabs */}
-            {activeTab !== 'overview' && activeTab !== 'audit' && activeTab !== 'rfq' && activeTab !== 'settings' && (
+            {activeTab !== 'overview' && activeTab !== 'audit' && activeTab !== 'rfq' && activeTab !== 'settings' && activeTab !== 'partners' && activeTab !== 'banners' && activeTab !== 'seo' && (
               <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-12 text-center animate-fade-in-up">
                 <div class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6 text-slate-300">
                   <i class="fas fa-tools text-3xl"></i>
