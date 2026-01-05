@@ -134,9 +134,9 @@ export const Admin = (props: { user: any, tab?: string }) => {
                         <td class="px-6 py-4"><span class="text-blue-600 underline cursor-pointer"><i class="fas fa-file-pdf mr-1"></i>사업자등록증</span></td>
                         <td class="px-6 py-4"><span class="bg-yellow-100 text-yellow-700 px-2 py-1 rounded text-xs font-bold">승인 대기</span></td>
                         <td class="px-6 py-4 text-right space-x-2">
-                          <button class="text-green-600 font-bold hover:underline">승인</button>
+                          <button class="btn-approve text-green-600 font-bold hover:underline">승인</button>
                           <span class="text-slate-300">|</span>
-                          <button class="text-red-500 font-bold hover:underline">반려</button>
+                          <button class="btn-reject text-red-500 font-bold hover:underline">반려</button>
                         </td>
                       </tr>
                     ))}
@@ -152,7 +152,7 @@ export const Admin = (props: { user: any, tab?: string }) => {
                 <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
                   <div class="flex justify-between items-center mb-6">
                     <h3 class="font-bold text-lg text-slate-900">메인 배너 관리</h3>
-                    <button class="text-blue-600 text-sm font-bold"><i class="fas fa-plus mr-1"></i>새 배너 등록</button>
+                    <button id="btn-add-banner" class="text-blue-600 text-sm font-bold"><i class="fas fa-plus mr-1"></i>새 배너 등록</button>
                   </div>
                   <div class="space-y-4">
                     <div class="border border-slate-200 rounded-lg overflow-hidden group relative">
@@ -239,7 +239,7 @@ export const Admin = (props: { user: any, tab?: string }) => {
                   </div>
 
                   <div class="flex justify-end pt-6">
-                    <button class="bg-blue-600 text-white px-6 py-2.5 rounded-lg font-bold hover:bg-blue-700 transition-colors shadow-lg">
+                    <button id="btn-save-seo" class="bg-blue-600 text-white px-6 py-2.5 rounded-lg font-bold hover:bg-blue-700 transition-colors shadow-lg">
                       설정 저장
                     </button>
                   </div>
@@ -584,7 +584,7 @@ export const Admin = (props: { user: any, tab?: string }) => {
                     </div>
                     <div class="bg-slate-50 p-4 rounded-lg border border-slate-100">
                        <span class="text-xs text-slate-500 block mb-1">API 호출량 (오늘)</span>
-                      <strong class="text-xl font-bold text-blue-600">342</strong>
+                      <strong id="api-call-count" class="text-xl font-bold text-blue-600">342</strong>
                       <span class="text-xs text-slate-400 ml-1">calls</span>
                     </div>
                   </div>
@@ -593,7 +593,7 @@ export const Admin = (props: { user: any, tab?: string }) => {
                     <button class="bg-white border border-slate-300 text-slate-700 px-4 py-2 rounded-lg text-sm font-bold hover:bg-slate-50 mr-2">
                       <i class="fas fa-history mr-2"></i>로그 보기
                     </button>
-                    <button class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-blue-700 shadow-sm">
+                    <button id="btn-sync-erp" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-blue-700 shadow-sm">
                       <i class="fas fa-sync mr-2"></i>즉시 동기화
                     </button>
                   </div>
@@ -749,29 +749,8 @@ export const Admin = (props: { user: any, tab?: string }) => {
         </main>
       </div>
 
-      <script dangerouslySetInnerHTML={{ __html: `
-        function sendNotifications() {
-          const btn = document.getElementById('send-noti-btn');
-          const originalText = btn.innerHTML;
-          
-          btn.disabled = true;
-          btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> 발송 중...';
-          
-          setTimeout(() => {
-            alert('선택한 채널(알림톡, 문자 등)로 발송이 완료되었습니다.');
-            btn.innerHTML = '<i class="fas fa-check mr-2"></i> 발송 완료';
-            btn.classList.remove('bg-blue-600', 'hover:bg-blue-700');
-            btn.classList.add('bg-green-600', 'hover:bg-green-700');
-            
-            setTimeout(() => {
-              btn.innerHTML = originalText;
-              btn.disabled = false;
-              btn.classList.add('bg-blue-600', 'hover:bg-blue-700');
-              btn.classList.remove('bg-green-600', 'hover:bg-green-700');
-            }, 3000);
-          }, 1500);
-        }
-      ` }} />
+      <script src="/static/js/core.js"></script>
+      <script src="/static/js/admin.js"></script>
     </Layout>
   )
 }
