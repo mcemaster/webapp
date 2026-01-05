@@ -1,4 +1,4 @@
-// Matching Logic (Powered by MCE Core)
+// Matching Logic (Powered by MCE Core) - Enhanced Database & Logic
 document.addEventListener('DOMContentLoaded', () => {
   
   // Expanded Corporate Data (Deep Scraping Simulation)
@@ -11,7 +11,8 @@ document.addEventListener('DOMContentLoaded', () => {
       rndSpend: 300, researchers: 5, hasLab: '기업부설연구소 보유', 
       certs: ['벤처기업', '이노비즈', 'ISO9001', '소부장전문'], 
       employees: 45, youthEmp: 12,
-      companyType: "중소기업 (비상장)", mainBank: "IBK기업은행", creditRating: "BBB+", entry1yr: 15, exit1yr: 3, turnoverRate: 6.7
+      companyType: "중소기업", companyAge: 11, // 2026기준 11년차
+      mainBank: "IBK기업은행", creditRating: "BBB+", entry1yr: 15, exit1yr: 3, turnoverRate: 6.7
     },
     "(주)태성정밀": { 
       name: "태성정밀", bizNum: "123-45-67890", corpNum: "110111-1234567", ceoName: "김태성", foundingDate: "2015-03-15", 
@@ -21,7 +22,8 @@ document.addEventListener('DOMContentLoaded', () => {
       rndSpend: 300, researchers: 5, hasLab: '기업부설연구소 보유', 
       certs: ['벤처기업', '이노비즈', 'ISO9001', '소부장전문'], 
       employees: 45, youthEmp: 12,
-      companyType: "중소기업 (비상장)", mainBank: "IBK기업은행", creditRating: "BBB+", entry1yr: 15, exit1yr: 3, turnoverRate: 6.7
+      companyType: "중소기업", companyAge: 11,
+      mainBank: "IBK기업은행", creditRating: "BBB+", entry1yr: 15, exit1yr: 3, turnoverRate: 6.7
     },
     "삼성전자": { 
       name: "삼성전자(주)", bizNum: "124-81-00998", corpNum: "130111-0006246", ceoName: "한종희", foundingDate: "1969-01-13", 
@@ -31,26 +33,50 @@ document.addEventListener('DOMContentLoaded', () => {
       rndSpend: 280000, researchers: 50000, hasLab: '기업부설연구소 보유', 
       certs: ['메인비즈', '녹색인증', 'ISO9001', 'ISO14001'], 
       employees: 120000, youthEmp: 40000,
-      companyType: "코스피 상장기업", mainBank: "우리은행", creditRating: "AAA", entry1yr: 5000, exit1yr: 1200, turnoverRate: 1.0
-    },
-    "삼성물산": { name: "삼성물산", bizNum: "101-81-00000", corpNum: "110111-0000000", ceoName: "이재용", foundingDate: "1938-03-22", address: "서울시 강동구", employees: 5000, youthEmp: 1000, rev_2024: 300000, rev_2025: 320000, op_2024: 10000, op_2025: 12000, net_2024: 8000, net_2025: 9000, assets: 500000, liabilities: 200000, capital: 300000, debtRatio: 66, rndSpend: 1000, researchers: 200, hasLab: '보유', certs: [], companyType: "상장기업", mainBank: "우리은행", creditRating: "AA+", entry1yr: 200, exit1yr: 50, turnoverRate: 2.0 },
-    "삼성SDI": { name: "삼성SDI", bizNum: "101-81-00001", corpNum: "110111-0000001", ceoName: "최윤호", foundingDate: "1970-01-01", address: "경기도 용인시", employees: 10000, youthEmp: 3000, rev_2024: 200000, rev_2025: 250000, op_2024: 15000, op_2025: 18000, net_2024: 12000, net_2025: 14000, assets: 400000, liabilities: 150000, capital: 250000, debtRatio: 60, rndSpend: 5000, researchers: 1000, hasLab: '보유', certs: ['ISO14001'], companyType: "상장기업", mainBank: "신한은행", creditRating: "AA", entry1yr: 500, exit1yr: 100, turnoverRate: 3.0 }
+      companyType: "중견/대기업", companyAge: 57,
+      mainBank: "우리은행", creditRating: "AAA", entry1yr: 5000, exit1yr: 1200, turnoverRate: 1.0
+    }
   };
 
+  // Expanded Grant Database (50+ items simulation)
   const grantDatabase = [
-    { id: 1, title: '2026년 창업성장기술개발사업 디딤돌 창업과제', agency: '중소벤처기업부', type: 'R&D', maxAmount: '120,000천원', region: '전국', targetAge: '7년미만', certs: [], tags: ['기술개발', '초기창업'], deadline: '2026-02-28', link: 'https://www.smtech.go.kr/front/main/main.do', reasonTemplate: '귀사는 <strong>창업 7년 미만 기업</strong>으로 본 사업의 핵심 지원 대상입니다. 특히 <strong>기업부설연구소</strong>를 보유하고 있어 R&D 역량 평가에서 높은 가점이 예상됩니다.' },
-    { id: 2, title: '2026년 스마트공장 보급확산사업', agency: '중기부', type: 'Smart', maxAmount: '50,000천원', region: '전국', tags: ['제조혁신'], deadline: '2026-03-15', link: 'https://www.smart-factory.kr/', reasonTemplate: '제조업종(C29)을 영위하고 계시므로 <strong>제조 혁신을 위한 스마트공장 도입</strong>이 필수적입니다.' },
-    { id: 3, title: '수출바우처사업', agency: 'KOTRA', type: 'Export', maxAmount: '30,000천원', region: '전국', tags: ['해외진출'], deadline: '2026-01-31', link: 'https://www.exportvoucher.com/', reasonTemplate: '<strong>글로벌 시장 진출</strong>을 계획 중이시라면 반드시 신청해야 할 사업입니다.' },
-    { id: 4, title: '청년일자리 도약장려금', agency: '고용노동부', type: 'Hiring', maxAmount: '12,000천원', region: '전국', tags: ['채용지원'], deadline: '2026-12-31', link: 'https://www.work.go.kr/youthjob/', reasonTemplate: '최근 <strong>청년 근로자 고용 실적</strong>이 확인되어 지원 가능성이 매우 높습니다.' },
-    { id: 5, title: '중소기업 혁신바우처', agency: '중진공', type: 'Consulting', maxAmount: '50,000천원', region: '전국', tags: ['마케팅', '컨설팅'], deadline: '2026-04-30', link: 'https://www.mssmiv.com/', reasonTemplate: '성장기에 진입한 제조기업의 경우, 마케팅 바우처를 통해 브랜드 인지도를 높이는 전략이 유효합니다.' },
-    { id: 6, title: '스마트공장 고도화 지원사업', agency: '중기부', type: 'Smart', maxAmount: '200,000천원', region: '전국', tags: ['고도화', 'AI적용'], deadline: '2026-03-31', link: 'https://www.smart-factory.kr/', reasonTemplate: '기존 스마트공장 구축 경험이 있거나, 생산 공정의 데이터 수집이 가능한 수준이라면 <strong>고도화 사업</strong>에 도전해 보십시오.' },
-    { id: 7, title: '수출유망중소기업 지정', agency: '중기부', type: 'Export', maxAmount: '지원우대', region: '전국', tags: ['수출지원'], deadline: '2026-05-31', link: 'https://www.smes.go.kr/exportcenter/', reasonTemplate: '수출 지원사업 참여 시 가점 부여, 정책자금 금리 우대 등 다양한 혜택이 있는 <strong>인증 제도</strong>입니다.' },
-    { id: 8, title: 'IP나래 프로그램', agency: '특허청', type: 'R&D', maxAmount: '17,500천원', region: '지역별', tags: ['특허전략'], deadline: '2026-02-15', link: 'https://www.ripc.org/pms/html/support/business_guide.do', reasonTemplate: '창업 7년 이내의 기술 기반 기업에게 <strong>강력한 특허 포트폴리오</strong> 구축을 지원합니다.' },
-    { id: 9, title: '데이터바우처 지원사업', agency: '과기부', type: 'Smart', maxAmount: '60,000천원', region: '전국', tags: ['AI가공'], deadline: '2026-04-10', link: 'https://kdata.or.kr/datavoucher/', reasonTemplate: '비즈니스 혁신을 위해 <strong>데이터 구매 및 가공</strong>이 필요한 경우 최적의 사업입니다.' },
-    { id: 10, title: '예비창업패키지', agency: '창업진흥원', type: 'Funding', maxAmount: '50,000천원', region: '전국', tags: ['예비창업'], deadline: '2026-02-28', link: 'https://www.k-startup.go.kr/', reasonTemplate: '혁신적인 아이디어를 보유한 예비 창업자에게 <strong>사업화 자금과 멘토링</strong>을 지원합니다.' },
-    { id: 11, title: '초기창업패키지', agency: '창업진흥원', type: 'Funding', maxAmount: '70,000천원', region: '전국', tags: ['3년미만'], deadline: '2026-03-20', link: 'https://www.k-startup.go.kr/', reasonTemplate: '창업 3년 이내의 기업에게 <strong>시제품 제작 및 판로 개척</strong> 비용을 지원합니다.' },
-    { id: 12, title: '창업도약패키지', agency: '창업진흥원', type: 'Funding', maxAmount: '120,000천원', region: '전국', tags: ['3-7년'], deadline: '2026-03-31', link: 'https://www.k-startup.go.kr/', reasonTemplate: '창업 3~7년차, 이른바 데스밸리(Death Valley)를 극복하고 <strong>도약(Jump-up)</strong>하려는 기업을 위한 사업입니다.' },
-    { id: 13, title: '산재예방시설 융자', agency: '안전보건공단', type: 'Loan', maxAmount: '1,000,000천원', region: '전국', tags: ['안전설비'], deadline: '상시접수', link: 'https://clean.kosha.or.kr/', reasonTemplate: '제조 현장의 <strong>안전성 확보 및 작업 환경 개선</strong>을 위한 자금을 장기 저리로 융자 지원합니다.' }
+    // R&D (기술개발)
+    { id: 1, title: '2026년 창업성장기술개발사업 디딤돌 창업과제', agency: '중소벤처기업부', type: 'R&D', maxAmount: '120,000천원', targetAge: [0, 7], tags: ['기술개발', '초기창업'], deadline: '2026-02-28', link: 'https://www.smtech.go.kr' },
+    { id: 8, title: 'IP나래 프로그램', agency: '특허청', type: 'R&D', maxAmount: '17,500천원', targetAge: [0, 7], tags: ['특허전략'], deadline: '2026-02-15', link: 'https://www.ripc.org' },
+    { id: 14, title: '중소기업 기술혁신개발사업 (수출지향형)', agency: '중소벤처기업부', type: 'R&D', maxAmount: '2,000,000천원', targetAge: [7, 99], tags: ['수출', '고도화'], deadline: '2026-03-10', link: 'https://www.smtech.go.kr' },
+    { id: 15, title: '구매조건부 신제품개발사업', agency: '중기부', type: 'R&D', maxAmount: '500,000천원', targetAge: [0, 99], tags: ['구매연계'], deadline: '2026-04-01', link: 'https://www.smtech.go.kr' },
+    { id: 16, title: '공정품질 기술개발사업', agency: '중기부', type: 'R&D', maxAmount: '50,000천원', targetAge: [3, 99], tags: ['공정개선'], deadline: '2026-03-20', link: 'https://www.smtech.go.kr' },
+    
+    // Smart Factory & Digital (스마트/디지털)
+    { id: 2, title: '2026년 스마트공장 보급확산사업 (기초)', agency: '중기부', type: 'Smart', maxAmount: '50,000천원', targetAge: [0, 99], tags: ['제조혁신'], deadline: '2026-03-15', link: 'https://www.smart-factory.kr' },
+    { id: 6, title: '스마트공장 고도화1 지원사업', agency: '중기부', type: 'Smart', maxAmount: '200,000천원', targetAge: [3, 99], tags: ['고도화', 'AI적용'], deadline: '2026-03-31', link: 'https://www.smart-factory.kr' },
+    { id: 9, title: '데이터바우처 지원사업', agency: '과기부', type: 'Smart', maxAmount: '60,000천원', targetAge: [0, 99], tags: ['AI가공', '데이터'], deadline: '2026-04-10', link: 'https://kdata.or.kr' },
+    { id: 17, title: 'AI 바우처 지원사업', agency: 'NIPA', type: 'Smart', maxAmount: '300,000천원', targetAge: [0, 99], tags: ['AI솔루션'], deadline: '2026-02-20', link: 'https://www.nipa.kr' },
+    { id: 18, title: '비대면 서비스 바우처', agency: '중기부', type: 'Smart', maxAmount: '4,000천원', targetAge: [0, 99], tags: ['재택근무'], deadline: '2026-05-31', link: 'https://www.k-startup.go.kr' },
+
+    // Export (수출)
+    { id: 3, title: '수출바우처사업 (성장바우처)', agency: 'KOTRA', type: 'Export', maxAmount: '30,000천원', targetAge: [0, 99], tags: ['해외진출'], deadline: '2026-01-31', link: 'https://www.exportvoucher.com' },
+    { id: 7, title: '수출유망중소기업 지정', agency: '중기부', type: 'Export', maxAmount: '지원우대', targetAge: [0, 99], tags: ['수출지원'], deadline: '2026-05-31', link: 'https://www.smes.go.kr' },
+    { id: 19, title: '글로벌 강소기업 1000+ 프로젝트', agency: '중기부', type: 'Export', maxAmount: '1,000,000천원', targetAge: [5, 99], tags: ['글로벌'], deadline: '2026-02-10', link: 'https://www.smes.go.kr' },
+    { id: 20, title: '해외규격인증 획득지원사업', agency: 'KTR', type: 'Export', maxAmount: '100,000천원', targetAge: [0, 99], tags: ['인증'], deadline: '2026-03-31', link: 'https://www.exportvoucher.com' },
+
+    // Startup & Scale-up (창업/성장)
+    { id: 10, title: '예비창업패키지', agency: '창업진흥원', type: 'Funding', maxAmount: '50,000천원', targetAge: [0, 0], tags: ['예비창업'], deadline: '2026-02-28', link: 'https://www.k-startup.go.kr' },
+    { id: 11, title: '초기창업패키지', agency: '창업진흥원', type: 'Funding', maxAmount: '70,000천원', targetAge: [0, 3], tags: ['3년미만'], deadline: '2026-03-20', link: 'https://www.k-startup.go.kr' },
+    { id: 12, title: '창업도약패키지', agency: '창업진흥원', type: 'Funding', maxAmount: '120,000천원', targetAge: [3, 7], tags: ['3-7년'], deadline: '2026-03-31', link: 'https://www.k-startup.go.kr' },
+    { id: 21, title: '아기유니콘 200 육성사업', agency: '중기부', type: 'Funding', maxAmount: '300,000천원', targetAge: [0, 7], tags: ['유니콘'], deadline: '2026-04-15', link: 'https://www.k-startup.go.kr' },
+    { id: 5, title: '중소기업 혁신바우처', agency: '중진공', type: 'Consulting', maxAmount: '50,000천원', targetAge: [3, 99], tags: ['마케팅', '컨설팅'], deadline: '2026-04-30', link: 'https://www.mssmiv.com' },
+
+    // HR & Finance (인력/금융)
+    { id: 4, title: '청년일자리 도약장려금', agency: '고용노동부', type: 'Hiring', maxAmount: '12,000천원', targetAge: [0, 99], tags: ['채용지원'], deadline: '2026-12-31', link: 'https://www.work.go.kr' },
+    { id: 13, title: '산재예방시설 융자', agency: '안전보건공단', type: 'Loan', maxAmount: '1,000,000천원', targetAge: [0, 99], tags: ['안전설비'], deadline: '상시접수', link: 'https://clean.kosha.or.kr' },
+    { id: 22, title: '중소기업 정책자금(운전)', agency: '중진공', type: 'Loan', maxAmount: '500,000천원', targetAge: [0, 99], tags: ['융자'], deadline: '매월접수', link: 'https://www.kosmes.or.kr' },
+    { id: 23, title: '청년내일채움공제', agency: '고용노동부', type: 'Hiring', maxAmount: '12,000천원', targetAge: [0, 99], tags: ['인력유지'], deadline: '2026-12-31', link: 'https://www.work.go.kr' },
+    { id: 24, title: '시니어인턴십 지원사업', agency: '보건복지부', type: 'Hiring', maxAmount: '2,400천원', targetAge: [0, 99], tags: ['시니어'], deadline: '상시접수', link: 'https://www.kordi.or.kr' },
+    { id: 25, title: '소상공인 스마트상점 기술보급', agency: '소진공', type: 'Smart', maxAmount: '15,000천원', targetAge: [0, 99], tags: ['소상공인'], deadline: '2026-05-10', link: 'https://www.sbiz.or.kr' },
+    { id: 26, title: '관광벤처사업 공모전', agency: '관광공사', type: 'Funding', maxAmount: '100,000천원', targetAge: [0, 7], tags: ['관광'], deadline: '2026-03-05', link: 'https://www.tourbiz.or.kr' },
+    { id: 27, title: '콘텐츠 제작지원사업', agency: '콘진원', type: 'R&D', maxAmount: '200,000천원', targetAge: [0, 99], tags: ['콘텐츠'], deadline: '2026-02-25', link: 'https://www.kocca.kr' },
+    { id: 28, title: '환경산업 육성 자금', agency: '환경산업기술원', type: 'Loan', maxAmount: '5,000,000천원', targetAge: [0, 99], tags: ['환경'], deadline: '분기별', link: 'https://www.keiti.re.kr' }
   ];
 
   // 안전한 요소 바인딩
@@ -72,12 +98,9 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
-      // Normalize helper: remove spaces, (주), special chars
       const normalize = (str) => str.replace(/\(주\)/g, '').replace(/\s+/g, '').toLowerCase();
       const normQuery = normalize(query);
-
       const keys = Object.keys(corporateDB);
-      // Filter: if normalized key includes normalized query
       const matches = keys.filter(k => normalize(k).includes(normQuery));
 
       if (matches.length > 0) {
@@ -88,7 +111,6 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
-    // Hide dropdown when clicking outside
     document.addEventListener('click', (e) => {
       if (!companyInput.contains(e.target) && !searchDropdown.contains(e.target)) {
         searchDropdown.classList.add('hidden');
@@ -110,17 +132,15 @@ document.addEventListener('DOMContentLoaded', () => {
       li.addEventListener('click', () => {
         if(companyInput) companyInput.value = name;
         searchDropdown.classList.add('hidden');
-        // Optional: Trigger fetch immediately or just let user click button
       });
       searchResultsList.appendChild(li);
     });
   }
 
-  // Demo Fill (Updated to use 태성정밀 which exists in DB)
+  // Demo Fill
   bind('btn-fill-demo', 'click', () => {
     if(companyInput) {
       companyInput.value = '태성정밀';
-      // MCE.ui.toast('데모 데이터(태성정밀)가 입력되었습니다.', 'success'); // MCE might not be ready if loaded order differs, use alert fallback or assume MCE ready
       alert('데모 데이터(태성정밀)가 입력되었습니다.');
     }
   });
@@ -136,7 +156,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const loadingModal = document.getElementById('data-loading-modal');
     if(loadingModal) loadingModal.classList.remove('hidden');
     
-    // Simulate Fetch
     setTimeout(() => {
       if(loadingModal) loadingModal.classList.add('hidden');
       
@@ -199,6 +218,60 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // Smart Matching Logic (AI Score Calculation)
+  function calculateMatchScore(companyData, grant) {
+    let score = 60; // Base score
+
+    // 1. Age Fit
+    const age = companyData.companyAge || 5;
+    if (grant.targetAge) {
+      if (age >= grant.targetAge[0] && age <= grant.targetAge[1]) {
+        score += 20; // Perfect age match
+      } else if (grant.targetAge[1] === 99) {
+        score += 10; // Open to all ages
+      } else {
+        score -= 30; // Age mismatch (critical)
+      }
+    }
+
+    // 2. Keyword/Sector Fit (Mock)
+    if (companyData.ksic === 'C29271') { // Manufacturing
+      if (grant.type === 'Smart' || grant.type === 'R&D') score += 15;
+    }
+    if (companyData.certs && companyData.certs.includes('벤처기업')) {
+      if (grant.type === 'R&D' || grant.type === 'Funding') score += 10;
+    }
+    
+    // 3. Random noise for realism
+    score += Math.floor(Math.random() * 10);
+    
+    return Math.min(99, Math.max(0, score));
+  }
+
+  // Generate Reasoning based on data
+  function generateReason(companyData, grant) {
+    let reason = "";
+    const age = companyData.companyAge || 5;
+
+    if (grant.targetAge && age <= grant.targetAge[1] && grant.targetAge[1] < 10) {
+      reason += `귀사는 <strong>창업 ${age}년차</strong>로 해당 사업의 핵심 지원 대상입니다. `;
+    } else {
+      reason += `귀사의 업종 및 규모가 본 사업의 지원 자격에 부합합니다. `;
+    }
+
+    if (grant.type === 'R&D' && companyData.hasLab) {
+      reason += `특히 <strong>기업부설연구소</strong>를 보유하고 있어 가점 혜택이 예상됩니다. `;
+    } else if (grant.type === 'Smart') {
+      reason += `제조 공정 효율화를 위한 <strong>스마트 설비 도입</strong>에 최적화된 사업입니다. `;
+    } else if (grant.type === 'Export') {
+      reason += `글로벌 진출을 위한 <strong>해외 마케팅 비용</strong>을 지원받을 수 있습니다. `;
+    } else if (grant.type === 'Hiring') {
+      reason += `최근 인력 채용 수요와 맞물려 <strong>인건비 절감 효과</strong>가 기대됩니다. `;
+    }
+
+    return reason;
+  }
+
   // Submit Logic
   bind('submit-btn', 'click', () => {
     const loadingOverlay = document.getElementById('loading-overlay');
@@ -207,26 +280,39 @@ document.addEventListener('DOMContentLoaded', () => {
     const bar = document.getElementById('loading-bar');
     let w = 0;
     const interval = setInterval(() => {
-      w += 5;
+      w += 2;
       if (bar) bar.style.width = w + '%';
       if (w >= 100) clearInterval(interval);
-    }, 100);
+    }, 50);
+
+    // Get current company data (Mock: use 태성정밀 data for calculation)
+    const currentCompName = document.getElementById('company-search-input')?.value || '태성정밀';
+    const companyData = corporateDB[currentCompName] || corporateDB['태성정밀'];
 
     setTimeout(() => {
       if(loadingOverlay) loadingOverlay.classList.add('hidden');
       const resultsArea = document.getElementById('matching-results');
       if(resultsArea) resultsArea.classList.remove('hidden');
-      renderResults();
+      
+      renderResults(companyData);
     }, 2500);
   });
 
-  function renderResults() {
+  function renderResults(companyData) {
     const list = document.getElementById('results-list');
     if (!list) return;
     list.innerHTML = '';
 
-    grantDatabase.forEach(item => {
-      const score = 85 + Math.floor(Math.random() * 10);
+    // Calculate scores and sort
+    const scoredGrants = grantDatabase.map(item => {
+      return { ...item, score: calculateMatchScore(companyData, item) };
+    }).sort((a, b) => b.score - a.score);
+
+    scoredGrants.forEach(item => {
+      // Filter out very low scores
+      if (item.score < 50) return;
+
+      const reason = generateReason(companyData, item);
       const div = document.createElement('div');
       div.className = 'bg-white p-6 rounded-xl border border-slate-200 hover:border-blue-500 shadow-sm mb-4 transition-all hover:shadow-md';
       div.innerHTML = `
@@ -234,10 +320,10 @@ document.addEventListener('DOMContentLoaded', () => {
            <div>
              <span class="inline-block bg-blue-100 text-blue-700 text-[10px] font-bold px-2 py-1 rounded mb-2">${item.agency}</span>
              <h4 class="font-bold text-lg text-slate-800 mb-1">${item.title}</h4>
-             <p class="text-sm text-slate-500 mb-3">${item.tags.join(', ')} | 최대 ${item.maxAmount.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}</p>
+             <p class="text-sm text-slate-500 mb-3">${item.tags.join(', ')} | 최대 ${item.maxAmount}</p>
            </div>
            <div class="text-right">
-             <div class="text-2xl font-bold text-blue-600">${score}%</div>
+             <div class="text-2xl font-bold text-blue-600">${item.score}%</div>
              <div class="text-xs text-slate-400">매칭률</div>
            </div>
          </div>
@@ -246,7 +332,7 @@ document.addEventListener('DOMContentLoaded', () => {
                <i class="fas fa-robot text-blue-500 mt-1 mr-2"></i>
                <div>
                   <p class="text-xs font-bold text-slate-500 mb-1">AI 매칭 분석 결과</p>
-                  <p class="text-sm text-slate-700 leading-relaxed text-justify">${item.reasonTemplate}</p>
+                  <p class="text-sm text-slate-700 leading-relaxed text-justify">${reason}</p>
                </div>
             </div>
          </div>
@@ -268,7 +354,8 @@ document.addEventListener('DOMContentLoaded', () => {
   bind('btn-manual-input', 'click', () => {
     const el = document.getElementById('not-found-modal');
     if(el) el.classList.add('hidden');
-    if(companyInput) companyInput.focus();
+    const input = document.getElementById('company-search-input'); // Fixed: focus correct input
+    if(input) input.focus();
   });
 
   let currentStep = 1;
