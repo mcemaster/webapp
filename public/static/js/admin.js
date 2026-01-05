@@ -42,6 +42,9 @@ async function fetchAdminStats() {
     const data = await response.json();
     console.log("Admin Stats Loaded:", data); // Debug log
     
+    // [DEBUG] Show alert to confirm data arrival
+    alert("[DEBUG] 관리자 데이터 수신 성공!\n" + JSON.stringify(data, null, 2));
+    
     // 1. Total Users
     const totalUsersCard = document.querySelector('div.bg-white:nth-child(1) h3');
     if (totalUsersCard) totalUsersCard.innerText = (data.total_users || 0).toLocaleString();
