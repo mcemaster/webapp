@@ -921,8 +921,8 @@ export const Admin = (props: { user: any, tab?: string }) => {
         </main>
       </div>
 
-      <script src="/static/js/core.js"></script>
-      <script src="/static/js/admin.js"></script>
+      <script src={`/static/js/core.js?v=${new Date().getTime()}`}></script>
+      <script src={`/static/js/admin.js?v=${new Date().getTime()}`}></script>
     </Layout>
   )
 }
