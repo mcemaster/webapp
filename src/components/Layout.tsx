@@ -244,27 +244,7 @@ export const Layout = (props: { children: any; title?: string; user?: any }) => 
         </div>
       </div>
 
-      <script dangerouslySetInnerHTML={{ __html: `
-        document.addEventListener('DOMContentLoaded', () => {
-          const btn = document.getElementById('mobile-menu-btn');
-          const menu = document.getElementById('mobile-menu');
-          if(btn && menu) btn.addEventListener('click', () => menu.classList.toggle('hidden'));
-
-          const chatBtn = document.getElementById('quick-chat-btn');
-          const chatWin = document.getElementById('chat-window');
-          const closeChat = document.getElementById('close-chat-btn');
-          
-          if(chatBtn && chatWin) {
-            chatBtn.addEventListener('click', (e) => {
-              e.preventDefault();
-              chatWin.classList.toggle('hidden');
-            });
-          }
-          if(closeChat && chatWin) {
-            closeChat.addEventListener('click', () => chatWin.classList.add('hidden'));
-          }
-        });
-      ` }} />
+      <script src="/static/js/layout.js"></script>
     </div>
   )
 }
