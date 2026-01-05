@@ -1,12 +1,7 @@
-// Auth & Login Logic (Powered by MCE Core)
+// Auth & Login Logic (Native Form Submission Mode)
 document.addEventListener('DOMContentLoaded', () => {
-  if (typeof MCE === 'undefined') {
-    alert('시스템 오류: MCE Core가 로드되지 않았습니다. 관리자에게 문의하세요.');
-    return;
-  }
-
   
-  // 1. Tab Switching (안전한 요소 선택 사용)
+  // 1. Tab Switching
   const tabEnterprise = MCE.$('#tab-enterprise');
   const tabInstitution = MCE.$('#tab-institution');
 
@@ -25,77 +20,55 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // 2. Login Handling (방어적 코딩 적용)
+  // 2. Login Handling
   const loginForm = document.querySelector('form[action="/auth/login"]');
   if (loginForm) {
     loginForm.addEventListener('submit', handleLogin);
   }
 
   function handleLogin(e) {
-    e.preventDefault(); // 폼 기본 동작 차단
+    // 주의: 여기서 e.preventDefault()를 호출하지 않습니다.
+    // 유효성 검사가 통과하면 브라우저가 자동으로 서버(/auth/login)로 데이터를 전송합니다.
 
     const emailInput = MCE.$('#email');
     const passInput = MCE.$('#password');
-    
-    // 요소가 없으면 중단 (안전장치)
-    if (!emailInput || !passInput) {
-      MCE.ui.toast('로그인 입력창을 찾을 수 없습니다.', 'error');
-      return;
-    }
+    const btn = MCE.$('#login-btn');
+    const errorMsg = MCE.$('#error-msg');
+    const errorText = MCE.$('#error-text');
 
     const email = emailInput.value.trim();
     const password = passInput.value.trim();
 
-    // 유효성 검사
+    // Reset UI
+    if(errorMsg) errorMsg.classList.add('hidden');
+    emailInput.classList.remove('border-red-500', 'bg-red-50');
+    passInput.classList.remove('border-red-500', 'bg-red-50');
+
+    // [유효성 검사] 실패 시에만 전송을 막습니다.
     if (!email || !password) {
-      MCE.ui.toast('아이디와 비밀번호를 입력해주세요.', 'error');
-      highlightError(emailInput, passInput);
+      e.preventDefault(); // 전송 중단
+      showError('아이디와 비밀번호를 모두 입력해주세요.');
+      
+      if(!email) emailInput.classList.add('border-red-500', 'bg-red-50');
+      if(!password) passInput.classList.add('border-red-500', 'bg-red-50');
       return;
     }
 
-    // 로딩 시작
-    const btn = MCE.$('#login-btn');
-    const originalText = btn ? btn.innerHTML : '로그인';
+    // [성공 시] 로딩 UI만 보여주고, 전송은 브라우저에게 맡깁니다.
     if(btn) {
-      btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>인증 중...';
-      btn.disabled = true;
+      const originalText = btn.innerText;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>로그인 중...';
+      btn.style.opacity = '0.8';
+      // 버튼을 disable 하면 전송이 안 될 수 있으므로 클릭만 방지
+      btn.style.pointerEvents = 'none';
     }
 
-    // 로그인 시뮬레이션 (서버 통신 대용)
-    setTimeout(() => {
-      // Admin Logic
-      if (email === 'mce@mce.re.kr') {
-        if (password === '1q2w3e4r5t!') {
-          MCE.ui.toast('최고관리자님 환영합니다.', 'success');
-          window.location.href = '/auth/admin';
-        } else {
-          loginFailed('비밀번호가 일치하지 않습니다.');
-        }
-      } 
-      // Mock User
-      else if (email.includes('user') || email.includes('test')) {
-         window.location.href = '/auth/kakao'; 
-      } 
-      // Fail
-      else {
-        loginFailed('등록되지 않은 계정입니다.');
-      }
-    }, 800);
-
-    function loginFailed(msg) {
-      MCE.ui.toast(msg, 'error');
-      highlightError(emailInput, passInput);
-      if(btn) {
-        btn.innerHTML = originalText;
-        btn.disabled = false;
-      }
-    }
-
-    function highlightError(...inputs) {
-      inputs.forEach(input => {
-        input.classList.add('border-red-500', 'bg-red-50', 'animate-pulse');
-        setTimeout(() => input.classList.remove('border-red-500', 'bg-red-50', 'animate-pulse'), 1500);
-      });
+    // Helper
+    function showError(msg) {
+      if(errorText) errorText.innerText = msg;
+      if(errorMsg) errorMsg.classList.remove('hidden');
+      loginForm.classList.add('animate-pulse');
+      setTimeout(() => loginForm.classList.remove('animate-pulse'), 500);
     }
   }
 });
