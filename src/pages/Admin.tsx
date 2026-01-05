@@ -670,66 +670,72 @@ export const Admin = (props: { user: any, tab?: string }) => {
             {activeTab === 'overview' && (
               <div class="space-y-8 animate-fade-in-up">
                 
-                {/* 1. Key Metrics Cards */}
+                {/* 1. Key Metrics Cards (ID Added for Real-time Updates) */}
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                  {/* ... (Existing Cards) ... */}
+                  {/* Card 1: Total Users */}
                   <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
                     <div class="flex justify-between items-start">
                       <div>
-                        <p class="text-xs font-bold text-slate-500 uppercase tracking-wide">Total Users</p>
-                        <h3 class="text-2xl font-extrabold text-slate-800 mt-1">12,345</h3>
+                        <p class="text-xs font-bold text-slate-500 uppercase tracking-wide">총 회원 수</p>
+                        <h3 id="stat-total-users" class="text-2xl font-extrabold text-slate-800 mt-1">-</h3>
                       </div>
                       <div class="p-2 bg-blue-50 rounded-lg text-blue-600">
                         <i class="fas fa-users"></i>
                       </div>
                     </div>
                     <div class="mt-4 flex items-center text-xs">
-                      <span class="text-green-500 font-bold flex items-center"><i class="fas fa-arrow-up mr-1"></i> 12%</span>
-                      <span class="text-slate-400 ml-2">vs last month</span>
+                      <span class="text-green-500 font-bold flex items-center"><i class="fas fa-arrow-up mr-1"></i> 실시간</span>
+                      <span class="text-slate-400 ml-2">집계 중...</span>
                     </div>
                   </div>
+
+                  {/* Card 2: AI Analysis Usage */}
                   <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
                     <div class="flex justify-between items-start">
                       <div>
-                        <p class="text-xs font-bold text-slate-500 uppercase tracking-wide">Active Partners</p>
-                        <h3 class="text-2xl font-extrabold text-slate-800 mt-1">1,240</h3>
+                        <p class="text-xs font-bold text-slate-500 uppercase tracking-wide">AI 분석 횟수</p>
+                        <h3 id="stat-ai-usage" class="text-2xl font-extrabold text-slate-800 mt-1">-</h3>
                       </div>
                       <div class="p-2 bg-indigo-50 rounded-lg text-indigo-600">
-                        <i class="fas fa-handshake"></i>
+                        <i class="fas fa-robot"></i>
                       </div>
                     </div>
                      <div class="mt-4 flex items-center text-xs">
-                      <span class="text-green-500 font-bold flex items-center"><i class="fas fa-arrow-up mr-1"></i> 5%</span>
-                      <span class="text-slate-400 ml-2">vs last month</span>
+                      <span class="text-indigo-500 font-bold flex items-center"><i class="fas fa-chart-bar mr-1"></i> 누적</span>
+                      <span class="text-slate-400 ml-2">OpenAI API 호출</span>
                     </div>
                   </div>
+
+                  {/* Card 3: Crawled Data */}
                   <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
                     <div class="flex justify-between items-start">
                       <div>
-                        <p class="text-xs font-bold text-slate-500 uppercase tracking-wide">RFQ Requests</p>
-                        <h3 class="text-2xl font-extrabold text-slate-800 mt-1">482</h3>
+                        <p class="text-xs font-bold text-slate-500 uppercase tracking-wide">수집된 공고 데이터</p>
+                        <h3 id="stat-crawler-usage" class="text-2xl font-extrabold text-slate-800 mt-1">-</h3>
                       </div>
                       <div class="p-2 bg-emerald-50 rounded-lg text-emerald-600">
-                        <i class="fas fa-file-invoice-dollar"></i>
+                        <i class="fas fa-spider"></i>
                       </div>
                     </div>
                      <div class="mt-4 flex items-center text-xs">
-                      <span class="text-red-500 font-bold flex items-center"><i class="fas fa-arrow-down mr-1"></i> 2%</span>
-                      <span class="text-slate-400 ml-2">vs last month</span>
+                      <span class="text-emerald-500 font-bold flex items-center"><i class="fas fa-sync mr-1"></i> 자동</span>
+                      <span class="text-slate-400 ml-2">크롤링 수집 건수</span>
                     </div>
                   </div>
+
+                  {/* Card 4: Pending (Static for now) */}
                   <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
                     <div class="flex justify-between items-start">
                       <div>
-                        <p class="text-xs font-bold text-slate-500 uppercase tracking-wide">Pending Approval</p>
-                        <h3 class="text-2xl font-extrabold text-slate-800 mt-1">15</h3>
+                        <p class="text-xs font-bold text-slate-500 uppercase tracking-wide">승인 대기</p>
+                        <h3 class="text-2xl font-extrabold text-slate-800 mt-1">0</h3>
                       </div>
                       <div class="p-2 bg-orange-50 rounded-lg text-orange-600">
                         <i class="fas fa-clock"></i>
                       </div>
                     </div>
                      <div class="mt-4 flex items-center text-xs">
-                      <span class="text-slate-400">Requires action</span>
+                      <span class="text-slate-400">관리자 확인 필요</span>
                     </div>
                   </div>
                 </div>
