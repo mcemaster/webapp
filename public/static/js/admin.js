@@ -57,6 +57,21 @@ document.addEventListener('DOMContentLoaded', () => {
         if(row) row.remove();
       }
     }
+
+    // --- User Management Actions ---
+    // 회원 수정
+    if (target.matches('.btn-user-edit') || target.closest('.btn-user-edit')) {
+      MCE.ui.toast('회원 정보 수정 팝업을 엽니다. (기능 준비중)', 'info');
+    }
+
+    // 회원 차단
+    if (target.matches('.btn-user-block') || target.closest('.btn-user-block')) {
+      if(confirm('해당 회원을 차단하시겠습니까?')) {
+        MCE.ui.toast('회원이 차단되었습니다.', 'error');
+        const row = target.closest('tr');
+        if(row) row.classList.add('opacity-50', 'bg-red-50');
+      }
+    }
   });
 
   // --- 3. SEO Settings Save ---

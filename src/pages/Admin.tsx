@@ -668,74 +668,246 @@ export const Admin = (props: { user: any, tab?: string }) => {
             )}
 
             {activeTab === 'overview' && (
-              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 animate-fade-in-up">
-                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-                  <div class="flex justify-between items-start">
-                    <div>
-                      <p class="text-xs font-bold text-slate-500 uppercase tracking-wide">Total Users</p>
-                      <h3 class="text-2xl font-extrabold text-slate-800 mt-1">12,345</h3>
-                    </div>
-                    <div class="p-2 bg-blue-50 rounded-lg text-blue-600">
-                      <i class="fas fa-users"></i>
-                    </div>
-                  </div>
-                  <div class="mt-4 flex items-center text-xs">
-                    <span class="text-green-500 font-bold flex items-center"><i class="fas fa-arrow-up mr-1"></i> 12%</span>
-                    <span class="text-slate-400 ml-2">vs last month</span>
-                  </div>
-                </div>
+              <div class="space-y-8 animate-fade-in-up">
                 
-                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-                  <div class="flex justify-between items-start">
-                    <div>
-                      <p class="text-xs font-bold text-slate-500 uppercase tracking-wide">Active Partners</p>
-                      <h3 class="text-2xl font-extrabold text-slate-800 mt-1">1,240</h3>
+                {/* 1. Key Metrics Cards */}
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  {/* ... (Existing Cards) ... */}
+                  <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                    <div class="flex justify-between items-start">
+                      <div>
+                        <p class="text-xs font-bold text-slate-500 uppercase tracking-wide">Total Users</p>
+                        <h3 class="text-2xl font-extrabold text-slate-800 mt-1">12,345</h3>
+                      </div>
+                      <div class="p-2 bg-blue-50 rounded-lg text-blue-600">
+                        <i class="fas fa-users"></i>
+                      </div>
                     </div>
-                    <div class="p-2 bg-indigo-50 rounded-lg text-indigo-600">
-                      <i class="fas fa-handshake"></i>
+                    <div class="mt-4 flex items-center text-xs">
+                      <span class="text-green-500 font-bold flex items-center"><i class="fas fa-arrow-up mr-1"></i> 12%</span>
+                      <span class="text-slate-400 ml-2">vs last month</span>
                     </div>
                   </div>
-                   <div class="mt-4 flex items-center text-xs">
-                    <span class="text-green-500 font-bold flex items-center"><i class="fas fa-arrow-up mr-1"></i> 5%</span>
-                    <span class="text-slate-400 ml-2">vs last month</span>
+                  <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                    <div class="flex justify-between items-start">
+                      <div>
+                        <p class="text-xs font-bold text-slate-500 uppercase tracking-wide">Active Partners</p>
+                        <h3 class="text-2xl font-extrabold text-slate-800 mt-1">1,240</h3>
+                      </div>
+                      <div class="p-2 bg-indigo-50 rounded-lg text-indigo-600">
+                        <i class="fas fa-handshake"></i>
+                      </div>
+                    </div>
+                     <div class="mt-4 flex items-center text-xs">
+                      <span class="text-green-500 font-bold flex items-center"><i class="fas fa-arrow-up mr-1"></i> 5%</span>
+                      <span class="text-slate-400 ml-2">vs last month</span>
+                    </div>
+                  </div>
+                  <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                    <div class="flex justify-between items-start">
+                      <div>
+                        <p class="text-xs font-bold text-slate-500 uppercase tracking-wide">RFQ Requests</p>
+                        <h3 class="text-2xl font-extrabold text-slate-800 mt-1">482</h3>
+                      </div>
+                      <div class="p-2 bg-emerald-50 rounded-lg text-emerald-600">
+                        <i class="fas fa-file-invoice-dollar"></i>
+                      </div>
+                    </div>
+                     <div class="mt-4 flex items-center text-xs">
+                      <span class="text-red-500 font-bold flex items-center"><i class="fas fa-arrow-down mr-1"></i> 2%</span>
+                      <span class="text-slate-400 ml-2">vs last month</span>
+                    </div>
+                  </div>
+                  <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                    <div class="flex justify-between items-start">
+                      <div>
+                        <p class="text-xs font-bold text-slate-500 uppercase tracking-wide">Pending Approval</p>
+                        <h3 class="text-2xl font-extrabold text-slate-800 mt-1">15</h3>
+                      </div>
+                      <div class="p-2 bg-orange-50 rounded-lg text-orange-600">
+                        <i class="fas fa-clock"></i>
+                      </div>
+                    </div>
+                     <div class="mt-4 flex items-center text-xs">
+                      <span class="text-slate-400">Requires action</span>
+                    </div>
                   </div>
                 </div>
 
-                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-                  <div class="flex justify-between items-start">
-                    <div>
-                      <p class="text-xs font-bold text-slate-500 uppercase tracking-wide">RFQ Requests</p>
-                      <h3 class="text-2xl font-extrabold text-slate-800 mt-1">482</h3>
+                {/* 2. Charts & Activity (Restored & Enhanced) */}
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                  {/* Left: Traffic Chart (CSS Based Visualization) */}
+                  <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                    <div class="flex justify-between items-center mb-6">
+                      <h3 class="font-bold text-lg text-slate-900">월별 방문자 및 가입 추이</h3>
+                      <select class="text-xs border border-slate-200 rounded px-2 py-1">
+                        <option>2026년</option>
+                        <option>2025년</option>
+                      </select>
                     </div>
-                    <div class="p-2 bg-emerald-50 rounded-lg text-emerald-600">
-                      <i class="fas fa-file-invoice-dollar"></i>
+                    <div class="h-64 flex items-end justify-between space-x-2 px-2">
+                      {[40, 55, 45, 60, 75, 65, 80, 70, 85, 90, 85, 95].map((h, i) => (
+                        <div class="flex flex-col items-center flex-1 group">
+                          <div class="relative w-full bg-blue-50 rounded-t-sm overflow-hidden h-full flex items-end">
+                             <div style={{height: h + '%'}} class="w-full bg-blue-500 rounded-t-sm group-hover:bg-blue-600 transition-all relative">
+                               <div class="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-slate-800 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                                 {h * 123}명
+                               </div>
+                             </div>
+                          </div>
+                          <span class="text-[10px] text-slate-400 mt-2">{i+1}월</span>
+                        </div>
+                      ))}
                     </div>
                   </div>
-                   <div class="mt-4 flex items-center text-xs">
-                    <span class="text-red-500 font-bold flex items-center"><i class="fas fa-arrow-down mr-1"></i> 2%</span>
-                    <span class="text-slate-400 ml-2">vs last month</span>
+
+                  {/* Right: Recent Logs */}
+                  <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                    <h3 class="font-bold text-lg text-slate-900 mb-4">실시간 활동 로그</h3>
+                    <div class="space-y-4">
+                      <div class="flex items-start">
+                        <div class="w-2 h-2 bg-green-500 rounded-full mt-1.5 mr-3 flex-shrink-0"></div>
+                        <div>
+                          <p class="text-sm text-slate-700"><span class="font-bold">김철수</span>님이 파트너 가입을 신청했습니다.</p>
+                          <span class="text-xs text-slate-400">10분 전</span>
+                        </div>
+                      </div>
+                      <div class="flex items-start">
+                        <div class="w-2 h-2 bg-blue-500 rounded-full mt-1.5 mr-3 flex-shrink-0"></div>
+                        <div>
+                          <p class="text-sm text-slate-700">새로운 견적 요청(RFQ)이 등록되었습니다.</p>
+                          <span class="text-xs text-slate-400">32분 전</span>
+                        </div>
+                      </div>
+                      <div class="flex items-start">
+                        <div class="w-2 h-2 bg-slate-300 rounded-full mt-1.5 mr-3 flex-shrink-0"></div>
+                        <div>
+                          <p class="text-sm text-slate-700">관리자(Admin)가 시스템 설정을 변경했습니다.</p>
+                          <span class="text-xs text-slate-400">1시간 전</span>
+                        </div>
+                      </div>
+                      <div class="flex items-start">
+                        <div class="w-2 h-2 bg-red-500 rounded-full mt-1.5 mr-3 flex-shrink-0"></div>
+                        <div>
+                          <p class="text-sm text-slate-700">비정상적인 접근 시도가 차단되었습니다.</p>
+                          <span class="text-xs text-slate-400">3시간 전</span>
+                        </div>
+                      </div>
+                    </div>
+                    <button class="w-full mt-6 py-2 text-xs font-bold text-slate-500 border border-slate-200 rounded hover:bg-slate-50">
+                      로그 더보기
+                    </button>
                   </div>
                 </div>
 
-                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-                  <div class="flex justify-between items-start">
+              </div>
+            )}
+            
+            {/* === Tab: User Management (Restored) === */}
+            {activeTab === 'users' && (
+              <div class="space-y-6 animate-fade-in-up">
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+                  <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
                     <div>
-                      <p class="text-xs font-bold text-slate-500 uppercase tracking-wide">Pending Approval</p>
-                      <h3 class="text-2xl font-extrabold text-slate-800 mt-1">15</h3>
+                      <h3 class="font-bold text-lg text-slate-900">전체 회원 관리</h3>
+                      <p class="text-sm text-slate-500">가입된 기업 및 개인 회원을 조회하고 관리합니다.</p>
                     </div>
-                    <div class="p-2 bg-orange-50 rounded-lg text-orange-600">
-                      <i class="fas fa-clock"></i>
+                    <div class="flex space-x-2 w-full md:w-auto">
+                      <select class="border border-slate-300 rounded-lg text-sm px-3 py-2 bg-white">
+                        <option>전체 회원</option>
+                        <option>기업 회원</option>
+                        <option>기관/심사원</option>
+                        <option>차단된 회원</option>
+                      </select>
+                      <input type="text" placeholder="이름, 이메일 검색" class="border border-slate-300 rounded-lg text-sm px-3 py-2 flex-grow" />
+                      <button class="bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-bold whitespace-nowrap">검색</button>
                     </div>
                   </div>
-                   <div class="mt-4 flex items-center text-xs">
-                    <span class="text-slate-400">Requires action</span>
+
+                  <div class="overflow-x-auto">
+                    <table class="w-full text-sm text-left">
+                      <thead class="bg-slate-50 text-slate-500 font-bold border-y border-slate-200">
+                        <tr>
+                          <th class="px-4 py-3">회원유형</th>
+                          <th class="px-4 py-3">이름/기업명</th>
+                          <th class="px-4 py-3">이메일 (ID)</th>
+                          <th class="px-4 py-3">가입일</th>
+                          <th class="px-4 py-3">최근접속</th>
+                          <th class="px-4 py-3">상태</th>
+                          <th class="px-4 py-3 text-center">관리</th>
+                        </tr>
+                      </thead>
+                      <tbody class="divide-y divide-slate-100">
+                        <tr class="hover:bg-slate-50 transition-colors">
+                          <td class="px-4 py-3"><span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs font-bold">기업</span></td>
+                          <td class="px-4 py-3 font-medium text-slate-900">김철수 (태성정밀)</td>
+                          <td class="px-4 py-3 text-slate-500">kim@taesung.co.kr</td>
+                          <td class="px-4 py-3 text-slate-400">2026-01-01</td>
+                          <td class="px-4 py-3 text-slate-600">방금 전</td>
+                          <td class="px-4 py-3"><span class="text-green-600 font-bold text-xs">● 정상</span></td>
+                          <td class="px-4 py-3 text-center">
+                            <button class="btn-user-edit text-slate-400 hover:text-blue-600 mx-1"><i class="fas fa-edit"></i></button>
+                            <button class="btn-user-block text-slate-400 hover:text-red-600 mx-1"><i class="fas fa-ban"></i></button>
+                          </td>
+                        </tr>
+                        <tr class="hover:bg-slate-50 transition-colors">
+                          <td class="px-4 py-3"><span class="bg-slate-100 text-slate-700 px-2 py-0.5 rounded text-xs font-bold">심사원</span></td>
+                          <td class="px-4 py-3 font-medium text-slate-900">이영희 심사역</td>
+                          <td class="px-4 py-3 text-slate-500">auditor_lee@mce.re.kr</td>
+                          <td class="px-4 py-3 text-slate-400">2025-12-15</td>
+                          <td class="px-4 py-3 text-slate-600">3시간 전</td>
+                          <td class="px-4 py-3"><span class="text-green-600 font-bold text-xs">● 정상</span></td>
+                          <td class="px-4 py-3 text-center">
+                            <button class="btn-user-edit text-slate-400 hover:text-blue-600 mx-1"><i class="fas fa-edit"></i></button>
+                            <button class="btn-user-block text-slate-400 hover:text-red-600 mx-1"><i class="fas fa-ban"></i></button>
+                          </td>
+                        </tr>
+                        <tr class="hover:bg-slate-50 transition-colors bg-red-50/30">
+                          <td class="px-4 py-3"><span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs font-bold">기업</span></td>
+                          <td class="px-4 py-3 font-medium text-slate-900">박사기 (페이퍼컴퍼니)</td>
+                          <td class="px-4 py-3 text-slate-500">scam@fake.com</td>
+                          <td class="px-4 py-3 text-slate-400">2026-01-04</td>
+                          <td class="px-4 py-3 text-slate-600">어제</td>
+                          <td class="px-4 py-3"><span class="text-red-600 font-bold text-xs">차단됨</span></td>
+                          <td class="px-4 py-3 text-center">
+                            <button class="text-slate-400 hover:text-blue-600 mx-1"><i class="fas fa-undo"></i></button>
+                          </td>
+                        </tr>
+                        {/* More rows simulation */}
+                        {[1,2,3].map(i => (
+                          <tr class="hover:bg-slate-50 transition-colors">
+                            <td class="px-4 py-3"><span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs font-bold">기업</span></td>
+                            <td class="px-4 py-3 font-medium text-slate-900">최대표 (미래산업_{i})</td>
+                            <td class="px-4 py-3 text-slate-500">ceo{i}@mirae.com</td>
+                            <td class="px-4 py-3 text-slate-400">2026-01-0{i}</td>
+                            <td class="px-4 py-3 text-slate-600">{i}일 전</td>
+                            <td class="px-4 py-3"><span class="text-green-600 font-bold text-xs">● 정상</span></td>
+                            <td class="px-4 py-3 text-center">
+                              <button class="btn-user-edit text-slate-400 hover:text-blue-600 mx-1"><i class="fas fa-edit"></i></button>
+                              <button class="btn-user-block text-slate-400 hover:text-red-600 mx-1"><i class="fas fa-ban"></i></button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                  
+                  {/* Pagination */}
+                  <div class="flex justify-center mt-6">
+                    <div class="flex space-x-1">
+                      <button class="w-8 h-8 flex items-center justify-center rounded border border-slate-200 hover:bg-slate-50"><i class="fas fa-chevron-left text-xs"></i></button>
+                      <button class="w-8 h-8 flex items-center justify-center rounded bg-blue-600 text-white font-bold">1</button>
+                      <button class="w-8 h-8 flex items-center justify-center rounded border border-slate-200 hover:bg-slate-50">2</button>
+                      <button class="w-8 h-8 flex items-center justify-center rounded border border-slate-200 hover:bg-slate-50">3</button>
+                      <button class="w-8 h-8 flex items-center justify-center rounded border border-slate-200 hover:bg-slate-50"><i class="fas fa-chevron-right text-xs"></i></button>
+                    </div>
                   </div>
                 </div>
               </div>
             )}
-            
+
             {/* Placeholder for other tabs */}
-            {activeTab !== 'overview' && activeTab !== 'audit' && activeTab !== 'rfq' && activeTab !== 'settings' && activeTab !== 'partners' && activeTab !== 'banners' && activeTab !== 'seo' && (
+            {activeTab !== 'overview' && activeTab !== 'audit' && activeTab !== 'rfq' && activeTab !== 'settings' && activeTab !== 'partners' && activeTab !== 'banners' && activeTab !== 'seo' && activeTab !== 'users' && (
               <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-12 text-center animate-fade-in-up">
                 <div class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6 text-slate-300">
                   <i class="fas fa-tools text-3xl"></i>
