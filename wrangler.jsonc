@@ -15,5 +15,10 @@
   ],
   "browser": {
     "binding": "MYBROWSER"
+  },
+  "triggers": {
+    "crons": [
+      "0 0 * * *"
+    ]
   }
 }
