@@ -12,5 +12,8 @@
       "database_name": "webapp-production",
       "database_id": "4f2b491e-f8de-4bc0-85d1-a044b33cc4a5"
     }
-  ]
+  ],
+  "browser": {
+    "binding": "MYBROWSER"
+  }
 }

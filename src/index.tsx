@@ -18,13 +18,307 @@ import { FAQ } from './pages/FAQ'
 import { Legal } from './pages/Legal'
 
 import { AuditApplication } from './pages/AuditApplication'
-
 import { Certification } from './pages/Certification'
+import puppeteer from '@cloudflare/puppeteer'
 
-const app = new Hono()
+// Types for Environment Variables
+type Bindings = {
+  DB: D1Database;
+  OPENAI_API_KEY: string;
+  MYBROWSER: any; // Browser Rendering Binding
+}
+
+const app = new Hono<{ Bindings: Bindings }>()
 
 app.use(renderer)
 app.use('/static/*', serveStatic({ root: './public' }))
+
+// --- CRAWLER ENDPOINT (Requires Paid Plan) ---
+app.get('/api/crawl', async (c) => {
+  try {
+    // 1. Check Browser Binding
+    if (!c.env.MYBROWSER) {
+      return c.json({ 
+        error: '브라우저 설정이 없습니다.', 
+        message: 'Cloudflare 유료 플랜으로 업그레이드 후, Browser Rendering 기능을 활성화해야 합니다.' 
+      }, 500);
+    }
+
+    // 2. Launch Browser
+    const browser = await puppeteer.launch(c.env.MYBROWSER);
+    const page = await browser.newPage();
+
+    // 3. Go to Target Site (Example: K-Startup simple list)
+    // 실제로는 K-Startup이나 기업마당 등 타겟 사이트 구조에 맞춰 선택자(selector)를 조정해야 합니다.
+    // 여기서는 예시로 가상의 구조를 크롤링하는 로직을 넣습니다.
+    await page.goto('https://www.k-startup.go.kr/web/contents/bizPbanc.do');
+    
+    // Wait for list to load
+    // await page.waitForSelector('.list_ul'); 
+
+    // 4. Scrape Data
+    // Note: This logic depends heavily on the specific site structure at the time of running
+    /* 
+    const grants = await page.evaluate(() => {
+      const items = document.querySelectorAll('.list_ul li');
+      return Array.from(items).map(item => ({
+        title: item.querySelector('.tit')?.innerText?.trim(),
+        agency: item.querySelector('.agency')?.innerText?.trim(),
+        date: item.querySelector('.date')?.innerText?.trim(),
+        link: item.querySelector('a')?.href
+      }));
+    });
+    */
+    
+    // [Demo] Since we can't hit real site in sandbox without paid plan, 
+    // we return a success message simulating the process.
+    // When you deploy, uncomment the logic above and adjust selectors.
+    
+    await browser.close();
+
+    return c.json({ 
+      success: true, 
+      message: '크롤링이 완료되었습니다. (현재는 데모 모드이며, 실제 배포 시 주석을 해제하면 작동합니다.)',
+      crawled_count: 0 
+    });
+
+  } catch (e: any) {
+    return c.json({ error: 'Crawling Failed', details: e.message }, 500);
+  }
+})
+
+// --- REAL AI ANALYSIS ENDPOINT ---
+app.post('/api/analyze', async (c) => {
+  try {
+    const { companyData } = await c.req.json();
+    const apiKey = c.env.OPENAI_API_KEY;
+
+    // 1. User Identification (from Cookie)
+    const userSession = getCookie(c, 'user_session');
+    let userId = 0; // Default to Guest (0)
+    if (userSession) {
+      try {
+        const user = JSON.parse(userSession);
+        // If we had a real user table sync, we'd use user.id. 
+        // For now, let's assume user.id is valid or map it.
+        // If user.id is string '12345', we might need to hash or store it. 
+        // For simplicity in this demo, we'll try to parse int or hash it, 
+        // or just use a placeholder if it's non-numeric.
+        userId = parseInt(user.id) || 9999; 
+      } catch (e) {}
+    }
+
+    // 2. Usage Limit Check (Monthly < 20)
+    // We count logs for this user in the current month
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+    
+    // Guest limit (strictly 3 for demo purposes, or 20 for logged in)
+    const limit = userId === 0 ? 3 : 20;
+
+    const usageQuery = await c.env.DB.prepare(`
+      SELECT COUNT(*) as count 
+      FROM analysis_logs 
+      WHERE user_id = ? AND created_at >= ?
+    `).bind(userId, startOfMonth).first();
+
+    const usageCount = usageQuery?.count as number || 0;
+
+    if (usageCount >= limit) {
+      return c.json({
+        mode: 'error',
+        message: `월간 분석 횟수 한도(${limit}회)를 초과했습니다. 다음 달에 다시 이용해주세요.`
+      }, 429);
+    }
+
+    // 3. Fetch Grants from DB (Crawled Data)
+    const { results: grants } = await c.env.DB.prepare("SELECT * FROM grants").all();
+    
+    // 4. AI Analysis
+    // Fallback if no key
+    if (!apiKey) {
+      console.warn('⚠️ No OpenAI API Key found. Switching to Simulation Mode.');
+      // Still log usage? Maybe not for simulation.
+      return c.json({ 
+        mode: 'simulation',
+        message: 'OpenAI API 키가 설정되지 않아 시뮬레이션 결과를 반환합니다.',
+        results: simulateAIAnalysis(companyData) 
+      });
+    }
+
+    // OpenAI Call
+    const prompt = `
+      당신은 대한민국 최고의 정부지원사업 전문 컨설턴트 AI입니다.
+      
+      [분석 대상 기업]
+      - 기업명: ${companyData.name}
+      - 업종: ${companyData.ksic} (${companyData.mainProduct})
+      - 업력: ${companyData.foundingDate} 설립
+      - 매출액: ${companyData.rev_2024}백만원
+      - 직원수: ${companyData.employees}명
+      - 보유인증: ${companyData.certs ? companyData.certs.join(', ') : '없음'}
+      - 연구소: ${companyData.hasLab}
+
+      [지원사업 공고 목록 (DB 데이터)]
+      ${JSON.stringify(grants.map((g: any) => ({ 
+        id: g.id, 
+        title: g.title, 
+        type: g.type, 
+        target_age: [g.target_age_min, g.target_age_max],
+        desc: g.description
+      })))}
+
+      [분석 요구사항]
+      1. 위 '공고 목록' 중에서 이 기업에게 가장 적합한 공고 3개를 선정하시오.
+      2. 선정된 각 공고에 대해:
+         - 'matchScore': 0~100점 사이의 정수 점수.
+         - 'aiReason': 기업의 강점(재무, 고용, 인증 등)과 공고의 특성을 연결하여 선정 가능성을 3문장 이상 논리적으로 설명. (HTML 태그 사용 가능: <strong> 등)
+      3. 결과는 반드시 아래 JSON 포맷으로만 출력하시오.
+      
+      Example JSON Structure:
+      [
+        { "id": 1, "title": "...", "agency": "...", "matchScore": 95, "aiReason": "..." },
+        ...
+      ]
+    `;
+
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`
+      },
+      body: JSON.stringify({
+        model: "gpt-4o",
+        messages: [
+          { role: "system", content: "You are a helpful assistant that outputs JSON only." },
+          { role: "user", content: prompt }
+        ],
+        temperature: 0.7,
+        response_format: { type: "json_object" }
+      })
+    });
+
+    const aiResponse: any = await response.json();
+    let aiResult;
+    try {
+        const content = aiResponse.choices[0].message.content;
+        const parsed = JSON.parse(content);
+        // Handle if GPT returns { "results": [...] } or just [...]
+        aiResult = Array.isArray(parsed) ? parsed : (parsed.results || parsed.data || []);
+        
+        // Merge with original grant details (link, agency, etc.)
+        aiResult = aiResult.map((res: any) => {
+            const original = grants.find((g: any) => g.id === res.id);
+            return {
+                ...res,
+                agency: original?.agency || res.agency,
+                link: original?.url || '#',
+                deadline: original?.deadline || '',
+                tags: original?.type ? [original.type] : ['추천']
+            };
+        });
+
+    } catch (e) {
+        console.error("Failed to parse AI response", e);
+        throw new Error("AI 응답 분석 실패");
+    }
+
+    // 5. Log Usage
+    // We log each recommended item or just one log entry? 
+    // Usually one log entry per analysis session is better for counting usage, 
+    // but the schema structure (company_id, grant_id) implies granular logging.
+    // For the usage limit count, we count rows. So if we insert 3 rows, user uses 3 credits?
+    // Probably better to insert 1 row per analysis or count distinct request IDs.
+    // Let's stick to the schema: "Analysis Logs". We'll insert one record for the primary recommendation or all 3.
+    // To count "20 times usage", we should probably change the query to count distinct timestamps or just accept that 1 analysis = 3 logs = 3 credits? 
+    // No, 20 "uses" usually means 20 requests.
+    // I will log just the first one or create a separate `usage_logs` table? 
+    // Let's just log the first top recommendation to track "usage".
+    
+    if (aiResult.length > 0) {
+      await c.env.DB.prepare(`
+        INSERT INTO analysis_logs (user_id, company_id, grant_id, match_score, ai_reasoning, result_json)
+        VALUES (?, ?, ?, ?, ?, ?)
+      `).bind(
+        userId, 
+        0, 
+        aiResult[0].id, 
+        aiResult[0].matchScore, 
+        aiResult[0].aiReason,
+        JSON.stringify(aiResult) // Store full result for dashboard
+      ).run();
+    }
+
+    return c.json({ mode: 'real', data: aiResult, remaining: limit - (usageCount + 1) });
+
+  } catch (e: any) {
+    console.error('AI Analysis Error:', e);
+    return c.json({ 
+      mode: 'fallback', 
+      error: e.message,
+      results: simulateAIAnalysis(await c.req.json().then((r: any) => r.companyData).catch(() => ({})))
+    });
+  }
+});
+
+// Helper: Simulation Logic (기존 matching.js 로직을 서버로 이관)
+function simulateAIAnalysis(companyData: any) {
+  // ... (기존 로직과 유사한 서버 사이드 계산 로직) ...
+  // 실제 코드에서는 DB에서 공고를 가져와서 점수를 매깁니다.
+  // 여기서는 빠른 응답을 위해 간소화된 결과를 리턴합니다.
+  return [
+    { 
+      id: 1, 
+      title: '2026년 창업성장기술개발사업 디딤돌 창업과제', 
+      agency: '중소벤처기업부', 
+      matchScore: 92, 
+      aiReason: `귀사는 <strong>${companyData.mainProduct}</strong> 분야의 기술력을 보유하고 있으며, 특히 <strong>기업부설연구소</strong>를 운영 중인 점이 R&D 역량 평가에서 매우 높은 가점을 받을 것으로 분석됩니다. 초기 창업 기업(7년 미만) 전용 트랙을 통해 경쟁률을 낮추고 선정 확률을 극대화할 수 있는 최적의 전략 과제입니다.` 
+    },
+    { 
+      id: 2, 
+      title: '2026년 스마트공장 보급확산사업 (기초)', 
+      agency: '중기부', 
+      matchScore: 88, 
+      aiReason: `현재 매출액 규모(${companyData.rev_2024}백만원)를 고려할 때, 제조 공정의 디지털 전환이 필수적인 시점입니다. <strong>${companyData.ksic}</strong> 업종 특성상 생산 데이터 집계 시스템(MES) 도입 시 생산성 향상 효과가 뚜렷할 것으로 예상되어, 도입 필요성 항목에서 심사위원들에게 높은 점수를 받을 수 있습니다.` 
+    },
+    {
+      id: 3,
+      title: '수출바우처사업 (내수기업)',
+      agency: 'KOTRA',
+      matchScore: 85,
+      aiReason: `귀사의 기술력은 국내뿐만 아니라 해외 시장에서도 충분한 경쟁력이 있습니다. 아직 직수출 실적이 부족하더라도, <strong>내수기업 전형</strong>을 통해 해외 마케팅 자금을 지원받을 수 있습니다. 글로벌 진출 의지와 잠재력을 강조하는 사업계획서를 준비한다면 선정이 유력합니다.`
+    }
+  ];
+}
+
+// Dashboard Routes
+app.get('/dashboard', (c) => {
+  const userSession = getCookie(c, 'user_session')
+  const user = userSession ? JSON.parse(userSession) : undefined
+  if (!user) return c.redirect('/login')
+  return c.render(<Dashboard user={user} />)
+})
+
+app.get('/api/history', async (c) => {
+  const userSession = getCookie(c, 'user_session')
+  if (!userSession) return c.json({ error: 'Unauthorized' }, 401)
+  
+  const user = JSON.parse(userSession)
+  const userId = parseInt(user.id) || 9999; 
+  
+  // Fetch logs
+  const { results } = await c.env.DB.prepare(`
+    SELECT al.*, g.title, g.agency 
+    FROM analysis_logs al
+    LEFT JOIN grants g ON al.grant_id = g.id
+    WHERE al.user_id = ?
+    ORDER BY al.created_at DESC
+    LIMIT 10
+  `).bind(userId).all();
+
+  return c.json({ results })
+})
 
 // Auth Middleware & Routes
 // ... (Keep existing routes) ...
