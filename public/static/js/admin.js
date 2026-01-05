@@ -23,6 +23,9 @@
     case 'banners':
       await fetchBanners();
       break;
+    case 'policy':
+      await fetchPolicy();
+      break;
     case 'settings':
       // Settings logic is mostly static for now, or handled by inline events
       break;
