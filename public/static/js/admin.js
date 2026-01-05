@@ -37,13 +37,17 @@ async function fetchAdminStats() {
   try {
     // Add timestamp to prevent caching
     const response = await fetch('/api/admin/stats?t=' + new Date().getTime());
-    if (!response.ok) return;
+    
+    if (!response.ok) {
+      alert("⚠️ 데이터 불러오기 실패!\n상태 코드: " + response.status + "\n(로그인이 필요하거나 DB가 비어있을 수 있습니다.)");
+      return;
+    }
 
     const data = await response.json();
     console.log("Admin Stats Loaded:", data); // Debug log
     
     // [DEBUG] Show alert to confirm data arrival
-    alert("[DEBUG] 관리자 데이터 수신 성공!\n" + JSON.stringify(data, null, 2));
+    alert("✅ 관리자 데이터 수신 성공!\n" + JSON.stringify(data, null, 2));
     
     // 1. Total Users
     const totalUsersCard = document.querySelector('div.bg-white:nth-child(1) h3');
