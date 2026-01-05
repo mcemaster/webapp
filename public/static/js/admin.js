@@ -1,82 +1,73 @@
-document.addEventListener('DOMContentLoaded', () => {
-  // Check if we are on the Overview tab
+// [DEBUG] 1. 파일이 로드되었는지 즉시 확인
+console.log("Admin JS Loaded");
+// alert("1단계: 자바스크립트 파일 로딩 성공!"); // 너무 시끄러우면 주석 처리
+
+// 메인 실행 함수
+(async function initDashboard() {
+  
+  // 현재 탭 확인 (없으면 overview로 간주)
   const urlParams = new URLSearchParams(window.location.search);
   const tab = urlParams.get('tab') || 'overview';
 
-  if (tab === 'overview') {
-    fetchAdminStats();
-  }
-});
+  console.log("Current Tab:", tab);
 
-async function triggerDeploy() {
-  if (!confirm('정말 배포를 시작하시겠습니까?\n약 3~5분이 소요됩니다.')) return;
+  // overview 탭이 아니면 실행 중단 (다른 탭에서 불필요한 호출 방지)
+  if (tab !== 'overview') return;
 
   try {
-    const btn = document.querySelector('button[onclick="triggerDeploy()"]');
-    const originalText = btn.innerHTML;
-    btn.disabled = true;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> 요청 중...';
-
-    const response = await fetch('/api/admin/deploy', { method: 'POST' });
-    const result = await response.json();
-
-    if (result.success) {
-      alert(result.message);
-    } else {
-      alert('오류: ' + result.message);
-    }
+    console.log("Fetching stats...");
     
-    btn.disabled = false;
-    btn.innerHTML = originalText;
-  } catch (e) {
-    alert('배포 요청 중 오류가 발생했습니다.');
-  }
-}
-
-async function fetchAdminStats() {
-  try {
-    // Add timestamp to prevent caching
+    // API 호출 (캐시 방지 적용)
     const response = await fetch('/api/admin/stats?t=' + new Date().getTime());
     
+    // [DEBUG] 2. API 응답 상태 확인
     if (!response.ok) {
-      alert("⚠️ 데이터 불러오기 실패!\n상태 코드: " + response.status + "\n(로그인이 필요하거나 DB가 비어있을 수 있습니다.)");
+      alert(`⚠️ 서버 연결 실패! (Status: ${response.status})\n로그인이 풀렸거나, 권한이 없습니다.`);
       return;
     }
 
     const data = await response.json();
-    console.log("Admin Stats Loaded:", data); // Debug log
-    
-    // [DEBUG] Show alert to confirm data arrival
-    alert("✅ 관리자 데이터 수신 성공!\n" + JSON.stringify(data, null, 2));
-    
-    // 1. Total Users
-    const totalUsersCard = document.querySelector('div.bg-white:nth-child(1) h3');
-    if (totalUsersCard) totalUsersCard.innerText = (data.total_users || 0).toLocaleString();
+    console.log("Data received:", data);
 
-    // 2. AI Analysis Count (Use 2nd card)
-    const aiCardTitle = document.querySelector('div.bg-white:nth-child(2) p');
-    const aiCardValue = document.querySelector('div.bg-white:nth-child(2) h3');
-    if (aiCardTitle) aiCardTitle.innerText = 'TOTAL AI ANALYSIS';
-    if (aiCardValue) aiCardValue.innerText = (data.ai_usage || 0).toLocaleString();
+    // [DEBUG] 3. 데이터 수신 확인
+    // alert("✅ 데이터 수신 성공!\n" + JSON.stringify(data, null, 2));
 
-    // 3. Crawler Count (Use 3rd card)
-    const crawlCardTitle = document.querySelector('div.bg-white:nth-child(3) p');
-    const crawlCardValue = document.querySelector('div.bg-white:nth-child(3) h3');
-    if (crawlCardTitle) crawlCardTitle.innerText = 'CRAWLED GRANTS';
-    if (crawlCardValue) crawlCardValue.innerText = (data.crawler_usage || 0).toLocaleString();
+    // DOM 업데이트
+    updateDashboardUI(data);
 
   } catch (e) {
-    console.error("Failed to fetch admin stats", e);
+    console.error("Error:", e);
+    alert("❌ 에러 발생: " + e.message);
   }
+})();
+
+// UI 업데이트 함수 (안전하게 요소 찾기)
+function updateDashboardUI(data) {
+  // 1. Total Users (첫 번째 카드)
+  const card1 = document.querySelector('div.bg-white:nth-child(1) h3');
+  if (card1) card1.innerText = (data.total_users || 0).toLocaleString();
+
+  // 2. AI Analysis (두 번째 카드)
+  const card2Title = document.querySelector('div.bg-white:nth-child(2) p');
+  const card2Value = document.querySelector('div.bg-white:nth-child(2) h3');
+  if (card2Title) card2Title.innerText = 'AI 분석 횟수';
+  if (card2Value) card2Value.innerText = (data.ai_usage || 0).toLocaleString();
+
+  // 3. Crawler Data (세 번째 카드)
+  const card3Title = document.querySelector('div.bg-white:nth-child(3) p');
+  const card3Value = document.querySelector('div.bg-white:nth-child(3) h3');
+  if (card3Title) card3Title.innerText = '수집된 공고 수';
+  if (card3Value) card3Value.innerText = (data.crawler_usage || 0).toLocaleString();
 }
 
-function updateCardValue(label, newValue) {
-  // Helper to find card by label text
-  const titles = document.querySelectorAll('p.text-xs.font-bold.text-slate-500');
-  titles.forEach(p => {
-    if (p.innerText.includes(label)) {
-      const h3 = p.nextElementSibling;
-      if (h3) h3.innerText = newValue.toLocaleString();
-    }
-  });
+// 배포 버튼 함수
+async function triggerDeploy() {
+  if (!confirm('정말 배포를 시작하시겠습니까?')) return;
+  try {
+    const res = await fetch('/api/admin/deploy', { method: 'POST' });
+    const json = await res.json();
+    alert(json.message);
+  } catch(e) {
+    alert('배포 요청 실패');
+  }
 }
