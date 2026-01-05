@@ -34,6 +34,41 @@ const app = new Hono<{ Bindings: Bindings }>()
 app.use(renderer)
 app.use('/static/*', serveStatic({ root: './public' }))
 
+// --- COMPANY AUTOCOMPLETE API ---
+app.get('/api/search/company', async (c) => {
+  const query = c.req.query('q');
+  
+  if (!query || query.length < 1) {
+    return c.json({ results: [] });
+  }
+
+  try {
+    // [Demo Mode] Mock Data for Autocomplete
+    // In production, this would query: SELECT * FROM companies WHERE name LIKE ?
+    const demoCompanies = [
+      { name: "삼성전자", code: "005930", category: "전자부품 제조업", boss: "한종희" },
+      { name: "삼성물산", code: "028260", category: "도소매업", boss: "고정석" },
+      { name: "삼성SDI", code: "006400", category: "전지 제조업", boss: "최윤호" },
+      { name: "LG전자", code: "066570", category: "전자제품", boss: "조주완" },
+      { name: "LG화학", code: "051910", category: "화학", boss: "신학철" },
+      { name: "태성정밀", code: "123-45-67890", category: "금형 제조업", boss: "김태성" },
+      { name: "태성산업", code: "504-81-12345", category: "플라스틱 사출", boss: "박철민" },
+      { name: "현대자동차", code: "005380", category: "자동차 제조", boss: "정의선" },
+      { name: "SK하이닉스", code: "000660", category: "반도체", boss: "곽노정" },
+      { name: "카카오", code: "035720", category: "IT 서비스", boss: "정신아" },
+      { name: "네이버", code: "035420", category: "IT 서비스", boss: "최수연" }
+    ];
+
+    const results = demoCompanies.filter(company => 
+      company.name.includes(query)
+    );
+
+    return c.json({ results });
+  } catch (e: any) {
+    return c.json({ results: [], error: e.message });
+  }
+})
+
 // --- ADMIN DEPLOY ENDPOINT ---
 app.post('/api/admin/deploy', async (c) => {
   const userSession = getCookie(c, 'user_session')

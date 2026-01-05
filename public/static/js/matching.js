@@ -44,32 +44,52 @@ document.addEventListener('DOMContentLoaded', () => {
     if (el) el.addEventListener(event, handler);
   };
 
-  // --- Autocomplete Logic ---
+  // --- Autocomplete Logic (Updated) ---
   const companyInput = document.getElementById('company-search-input');
-  const searchDropdown = document.getElementById('search-dropdown');
+  
+  // Create Dropdown Element dynamically if not exists
+  let searchDropdown = document.getElementById('search-dropdown');
+  if (!searchDropdown) {
+    const wrapper = document.createElement('div');
+    wrapper.id = 'search-dropdown';
+    wrapper.className = 'hidden absolute top-full left-0 w-full bg-white border border-slate-200 rounded-xl shadow-xl z-50 mt-2 max-h-60 overflow-y-auto';
+    wrapper.innerHTML = '<ul id="search-results-list" class="divide-y divide-slate-100"></ul>';
+    
+    // Insert after input's parent div (to align with the search bar)
+    if (companyInput) {
+       companyInput.parentElement.style.position = 'relative'; // Make parent relative
+       companyInput.parentElement.appendChild(wrapper);
+    }
+    searchDropdown = wrapper;
+  }
   const searchResultsList = document.getElementById('search-results-list');
 
   if (companyInput && searchDropdown && searchResultsList) {
-    companyInput.addEventListener('input', (e) => {
+    companyInput.addEventListener('input', async (e) => {
       const query = e.target.value.trim();
+      
       if (query.length < 1) {
         searchDropdown.classList.add('hidden');
         return;
       }
 
-      const normalize = (str) => str.replace(/\(주\)/g, '').replace(/\s+/g, '').toLowerCase();
-      const normQuery = normalize(query);
-      const keys = Object.keys(corporateDB);
-      const matches = keys.filter(k => normalize(k).includes(normQuery));
+      // Fetch from API
+      try {
+        const res = await fetch(`/api/search/company?q=${encodeURIComponent(query)}`);
+        const { results } = await res.json();
 
-      if (matches.length > 0) {
-        renderDropdown(matches);
-        searchDropdown.classList.remove('hidden');
-      } else {
-        searchDropdown.classList.add('hidden');
+        if (results.length > 0) {
+          renderDropdown(results);
+          searchDropdown.classList.remove('hidden');
+        } else {
+          searchDropdown.classList.add('hidden');
+        }
+      } catch (err) {
+        console.error(err);
       }
     });
 
+    // Hide when clicking outside
     document.addEventListener('click', (e) => {
       if (!companyInput.contains(e.target) && !searchDropdown.contains(e.target)) {
         searchDropdown.classList.add('hidden');
@@ -79,18 +99,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function renderDropdown(matches) {
     searchResultsList.innerHTML = '';
-    matches.forEach(name => {
+    matches.forEach(item => {
       const li = document.createElement('li');
-      li.className = 'px-6 py-3 hover:bg-slate-50 cursor-pointer text-sm text-slate-700 font-medium flex justify-between items-center';
+      li.className = 'px-5 py-3 hover:bg-slate-50 cursor-pointer text-sm flex justify-between items-center group transition-colors';
       
-      const data = corporateDB[name];
-      const typeLabel = data.companyType.includes('상장') ? '<span class="text-[10px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded ml-2">상장</span>' : '<span class="text-[10px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded ml-2">일반</span>';
-      
-      li.innerHTML = `<span>${name}${typeLabel}</span> <span class="text-xs text-slate-400">${data.bizNum}</span>`;
+      li.innerHTML = `
+        <div class="flex items-center">
+          <div class="w-8 h-8 bg-slate-100 rounded-full flex items-center justify-center text-slate-500 mr-3 group-hover:bg-blue-100 group-hover:text-blue-600 transition-colors">
+            <i class="fas fa-building"></i>
+          </div>
+          <div>
+            <p class="font-bold text-slate-800 group-hover:text-blue-700">${item.name}</p>
+            <p class="text-xs text-slate-400">${item.category} | 대표: ${item.boss}</p>
+          </div>
+        </div>
+        <i class="fas fa-chevron-right text-xs text-slate-300 group-hover:text-blue-400"></i>
+      `;
       
       li.addEventListener('click', () => {
-        if(companyInput) companyInput.value = name;
+        if(companyInput) companyInput.value = item.name;
         searchDropdown.classList.add('hidden');
+        
+        // Optional: Auto fetch data when clicked
+        // document.getElementById('btn-auto-fetch').click();
       });
       searchResultsList.appendChild(li);
     });
