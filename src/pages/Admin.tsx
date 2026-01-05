@@ -30,7 +30,23 @@ export const Admin = (props: { user: any, tab?: string }) => {
               </div>
             </div>
 
-            {/* Group 2: Management */}
+            {/* Group 2: Data & Contents (NEW) */}
+            <div>
+              <h3 class="px-4 text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Data & Contents</h3>
+              <div class="space-y-1">
+                <a href="/admin?tab=companies" class={`flex items-center px-4 py-2.5 text-sm font-medium rounded-lg transition-colors ${activeTab === 'companies' ? 'bg-indigo-50 text-indigo-600' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'}`}>
+                  <i class="fas fa-building w-6"></i> 기업 DB 관리
+                </a>
+                <a href="/admin?tab=grants" class={`flex items-center px-4 py-2.5 text-sm font-medium rounded-lg transition-colors ${activeTab === 'grants' ? 'bg-indigo-50 text-indigo-600' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'}`}>
+                  <i class="fas fa-bullhorn w-6"></i> 지원사업 공고
+                </a>
+                <a href="/admin?tab=logs" class={`flex items-center px-4 py-2.5 text-sm font-medium rounded-lg transition-colors ${activeTab === 'logs' ? 'bg-indigo-50 text-indigo-600' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'}`}>
+                  <i class="fas fa-history w-6"></i> AI 분석 내역
+                </a>
+              </div>
+            </div>
+
+            {/* Group 3: Management */}
             <div>
               <h3 class="px-4 text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Management</h3>
               <div class="space-y-1">
@@ -819,101 +835,120 @@ export const Admin = (props: { user: any, tab?: string }) => {
             {activeTab === 'users' && (
               <div class="space-y-6 animate-fade-in-up">
                 <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+                  {/* ... (Existing User Table Content) ... */}
                   <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
                     <div>
                       <h3 class="font-bold text-lg text-slate-900">전체 회원 관리</h3>
                       <p class="text-sm text-slate-500">가입된 기업 및 개인 회원을 조회하고 관리합니다.</p>
                     </div>
-                    <div class="flex space-x-2 w-full md:w-auto">
-                      <select class="border border-slate-300 rounded-lg text-sm px-3 py-2 bg-white">
-                        <option>전체 회원</option>
-                        <option>기업 회원</option>
-                        <option>기관/심사원</option>
-                        <option>차단된 회원</option>
-                      </select>
-                      <input type="text" placeholder="이름, 이메일 검색" class="border border-slate-300 rounded-lg text-sm px-3 py-2 flex-grow" />
-                      <button class="bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-bold whitespace-nowrap">검색</button>
-                    </div>
                   </div>
-
                   <div class="overflow-x-auto">
                     <table class="w-full text-sm text-left">
                       <thead class="bg-slate-50 text-slate-500 font-bold border-y border-slate-200">
                         <tr>
-                          <th class="px-4 py-3">회원유형</th>
-                          <th class="px-4 py-3">이름/기업명</th>
-                          <th class="px-4 py-3">이메일 (ID)</th>
+                          <th class="px-4 py-3">ID</th>
+                          <th class="px-4 py-3">이름</th>
+                          <th class="px-4 py-3">이메일</th>
+                          <th class="px-4 py-3">소속기업</th>
+                          <th class="px-4 py-3">권한</th>
                           <th class="px-4 py-3">가입일</th>
-                          <th class="px-4 py-3">최근접속</th>
-                          <th class="px-4 py-3">상태</th>
                           <th class="px-4 py-3 text-center">관리</th>
                         </tr>
                       </thead>
-                      <tbody class="divide-y divide-slate-100">
-                        <tr class="hover:bg-slate-50 transition-colors">
-                          <td class="px-4 py-3"><span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs font-bold">기업</span></td>
-                          <td class="px-4 py-3 font-medium text-slate-900">김철수 (태성정밀)</td>
-                          <td class="px-4 py-3 text-slate-500">kim@taesung.co.kr</td>
-                          <td class="px-4 py-3 text-slate-400">2026-01-01</td>
-                          <td class="px-4 py-3 text-slate-600">방금 전</td>
-                          <td class="px-4 py-3"><span class="text-green-600 font-bold text-xs">● 정상</span></td>
-                          <td class="px-4 py-3 text-center">
-                            <button class="btn-user-edit text-slate-400 hover:text-blue-600 mx-1"><i class="fas fa-edit"></i></button>
-                            <button class="btn-user-block text-slate-400 hover:text-red-600 mx-1"><i class="fas fa-ban"></i></button>
-                          </td>
-                        </tr>
-                        <tr class="hover:bg-slate-50 transition-colors">
-                          <td class="px-4 py-3"><span class="bg-slate-100 text-slate-700 px-2 py-0.5 rounded text-xs font-bold">심사원</span></td>
-                          <td class="px-4 py-3 font-medium text-slate-900">이영희 심사역</td>
-                          <td class="px-4 py-3 text-slate-500">auditor_lee@mce.re.kr</td>
-                          <td class="px-4 py-3 text-slate-400">2025-12-15</td>
-                          <td class="px-4 py-3 text-slate-600">3시간 전</td>
-                          <td class="px-4 py-3"><span class="text-green-600 font-bold text-xs">● 정상</span></td>
-                          <td class="px-4 py-3 text-center">
-                            <button class="btn-user-edit text-slate-400 hover:text-blue-600 mx-1"><i class="fas fa-edit"></i></button>
-                            <button class="btn-user-block text-slate-400 hover:text-red-600 mx-1"><i class="fas fa-ban"></i></button>
-                          </td>
-                        </tr>
-                        <tr class="hover:bg-slate-50 transition-colors bg-red-50/30">
-                          <td class="px-4 py-3"><span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs font-bold">기업</span></td>
-                          <td class="px-4 py-3 font-medium text-slate-900">박사기 (페이퍼컴퍼니)</td>
-                          <td class="px-4 py-3 text-slate-500">scam@fake.com</td>
-                          <td class="px-4 py-3 text-slate-400">2026-01-04</td>
-                          <td class="px-4 py-3 text-slate-600">어제</td>
-                          <td class="px-4 py-3"><span class="text-red-600 font-bold text-xs">차단됨</span></td>
-                          <td class="px-4 py-3 text-center">
-                            <button class="text-slate-400 hover:text-blue-600 mx-1"><i class="fas fa-undo"></i></button>
-                          </td>
-                        </tr>
-                        {/* More rows simulation */}
-                        {[1,2,3].map(i => (
-                          <tr class="hover:bg-slate-50 transition-colors">
-                            <td class="px-4 py-3"><span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs font-bold">기업</span></td>
-                            <td class="px-4 py-3 font-medium text-slate-900">최대표 (미래산업_{i})</td>
-                            <td class="px-4 py-3 text-slate-500">ceo{i}@mirae.com</td>
-                            <td class="px-4 py-3 text-slate-400">2026-01-0{i}</td>
-                            <td class="px-4 py-3 text-slate-600">{i}일 전</td>
-                            <td class="px-4 py-3"><span class="text-green-600 font-bold text-xs">● 정상</span></td>
-                            <td class="px-4 py-3 text-center">
-                              <button class="btn-user-edit text-slate-400 hover:text-blue-600 mx-1"><i class="fas fa-edit"></i></button>
-                              <button class="btn-user-block text-slate-400 hover:text-red-600 mx-1"><i class="fas fa-ban"></i></button>
-                            </td>
-                          </tr>
-                        ))}
+                      <tbody id="user-list" class="divide-y divide-slate-100">
+                        <tr><td colspan="7" class="text-center py-4">로딩 중...</td></tr>
                       </tbody>
                     </table>
                   </div>
-                  
-                  {/* Pagination */}
-                  <div class="flex justify-center mt-6">
-                    <div class="flex space-x-1">
-                      <button class="w-8 h-8 flex items-center justify-center rounded border border-slate-200 hover:bg-slate-50"><i class="fas fa-chevron-left text-xs"></i></button>
-                      <button class="w-8 h-8 flex items-center justify-center rounded bg-blue-600 text-white font-bold">1</button>
-                      <button class="w-8 h-8 flex items-center justify-center rounded border border-slate-200 hover:bg-slate-50">2</button>
-                      <button class="w-8 h-8 flex items-center justify-center rounded border border-slate-200 hover:bg-slate-50">3</button>
-                      <button class="w-8 h-8 flex items-center justify-center rounded border border-slate-200 hover:bg-slate-50"><i class="fas fa-chevron-right text-xs"></i></button>
-                    </div>
+                </div>
+              </div>
+            )}
+
+            {/* === [NEW] Tab: Companies Management === */}
+            {activeTab === 'companies' && (
+              <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 animate-fade-in-up">
+                <div class="flex justify-between items-center mb-6">
+                  <div>
+                    <h3 class="font-bold text-lg text-slate-900">기업 DB 관리 (Companies)</h3>
+                    <p class="text-sm text-slate-500">크롤링 및 수동 등록된 기업 데이터베이스입니다.</p>
                   </div>
+                  <div class="flex space-x-2">
+                    <input type="text" placeholder="기업명 검색..." class="border border-slate-300 rounded-lg text-sm px-3 py-2" />
+                    <button class="bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-bold">검색</button>
+                  </div>
+                </div>
+                <div class="overflow-x-auto">
+                  <table class="w-full text-sm text-left">
+                    <thead class="bg-slate-50 text-slate-500 font-bold border-y border-slate-200">
+                      <tr>
+                        <th class="px-4 py-3">기업명</th>
+                        <th class="px-4 py-3">대표자</th>
+                        <th class="px-4 py-3">업종</th>
+                        <th class="px-4 py-3">매출액 (백만원)</th>
+                        <th class="px-4 py-3">직원수</th>
+                        <th class="px-4 py-3">출처</th>
+                        <th class="px-4 py-3 text-right">관리</th>
+                      </tr>
+                    </thead>
+                    <tbody id="company-list" class="divide-y divide-slate-100">
+                      <tr><td colspan="7" class="text-center py-10 text-slate-400">데이터를 불러오는 중입니다...</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
+            {/* === [NEW] Tab: Grants Management === */}
+            {activeTab === 'grants' && (
+              <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 animate-fade-in-up">
+                <div class="flex justify-between items-center mb-6">
+                  <div>
+                    <h3 class="font-bold text-lg text-slate-900">지원사업 공고 관리 (Grants)</h3>
+                    <p class="text-sm text-slate-500">K-Startup 등에서 수집된 공고 내역입니다.</p>
+                  </div>
+                  <a href="/api/crawl" target="_blank" class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-green-700">
+                    <i class="fas fa-sync mr-2"></i>즉시 크롤링 실행
+                  </a>
+                </div>
+                <div class="overflow-x-auto">
+                  <table class="w-full text-sm text-left">
+                    <thead class="bg-slate-50 text-slate-500 font-bold border-y border-slate-200">
+                      <tr>
+                        <th class="px-4 py-3 w-1/3">공고명</th>
+                        <th class="px-4 py-3">지원기관</th>
+                        <th class="px-4 py-3">유형</th>
+                        <th class="px-4 py-3">지원금(최대)</th>
+                        <th class="px-4 py-3">마감일</th>
+                        <th class="px-4 py-3 text-right">관리</th>
+                      </tr>
+                    </thead>
+                    <tbody id="grant-list" class="divide-y divide-slate-100">
+                       <tr><td colspan="6" class="text-center py-10 text-slate-400">데이터를 불러오는 중입니다...</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
+            {/* === [NEW] Tab: AI Analysis Logs === */}
+            {activeTab === 'logs' && (
+              <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 animate-fade-in-up">
+                <h3 class="font-bold text-lg text-slate-900 mb-6">AI 분석 이력 (Analysis Logs)</h3>
+                <div class="overflow-x-auto">
+                  <table class="w-full text-sm text-left">
+                    <thead class="bg-slate-50 text-slate-500 font-bold border-y border-slate-200">
+                      <tr>
+                        <th class="px-4 py-3">일시</th>
+                        <th class="px-4 py-3">사용자</th>
+                        <th class="px-4 py-3">추천 공고명</th>
+                        <th class="px-4 py-3">매칭 점수</th>
+                        <th class="px-4 py-3 w-1/3">AI 추천 사유</th>
+                      </tr>
+                    </thead>
+                    <tbody id="log-list" class="divide-y divide-slate-100">
+                       <tr><td colspan="5" class="text-center py-10 text-slate-400">데이터를 불러오는 중입니다...</td></tr>
+                    </tbody>
+                  </table>
                 </div>
               </div>
             )}

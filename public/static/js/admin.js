@@ -26,6 +26,15 @@
     case 'policy':
       await fetchPolicy();
       break;
+    case 'companies':
+      await fetchCompanies();
+      break;
+    case 'grants':
+      await fetchGrants();
+      break;
+    case 'logs':
+      await fetchLogs();
+      break;
     case 'settings':
       await initSettings();
       break;
@@ -42,6 +51,117 @@ async function fetchAdminStats() {
     setText('stat-total-users', (data.total_users || 0).toLocaleString());
     setText('stat-ai-usage', (data.ai_usage || 0).toLocaleString());
     setText('stat-crawler-usage', (data.crawler_usage || 0).toLocaleString());
+  } catch (e) { console.error(e); }
+}
+
+// ==========================================
+// [New] Admin 2.0 Logic Functions
+// ==========================================
+
+// --- Companies Management ---
+async function fetchCompanies() {
+  const list = document.getElementById('company-list');
+  if (!list) return;
+
+  try {
+    const res = await fetch('/api/admin/companies?t=' + new Date().getTime());
+    const { results } = await res.json();
+
+    list.innerHTML = '';
+    if (!results || results.length === 0) {
+      list.innerHTML = '<tr><td colspan="7" class="px-6 py-10 text-center text-slate-400">등록된 기업 정보가 없습니다.</td></tr>';
+      return;
+    }
+
+    results.forEach(c => {
+      const tr = document.createElement('tr');
+      tr.className = 'hover:bg-slate-50 transition-colors';
+      tr.innerHTML = `
+        <td class="px-4 py-3 font-bold text-slate-800">${c.name}</td>
+        <td class="px-4 py-3 text-slate-600">${c.ceo || '-'}</td>
+        <td class="px-4 py-3 text-slate-500">${c.industry || '-'}</td>
+        <td class="px-4 py-3 font-mono text-slate-600">${(c.revenue || 0).toLocaleString()}</td>
+        <td class="px-4 py-3 text-slate-600">${c.employee_count || 0}명</td>
+        <td class="px-4 py-3"><span class="bg-slate-100 text-slate-600 px-2 py-0.5 rounded text-xs">${c.source || 'Manual'}</span></td>
+        <td class="px-4 py-3 text-right">
+          <button class="text-blue-600 hover:underline mr-2">수정</button>
+          <button class="text-red-500 hover:underline">삭제</button>
+        </td>
+      `;
+      list.appendChild(tr);
+    });
+  } catch (e) { console.error(e); list.innerHTML = '<tr><td colspan="7" class="text-center text-red-500 py-4">로딩 실패</td></tr>'; }
+}
+
+// --- Grants Management ---
+async function fetchGrants() {
+  const list = document.getElementById('grant-list');
+  if (!list) return;
+
+  try {
+    const res = await fetch('/api/admin/grants?t=' + new Date().getTime());
+    const { results } = await res.json();
+
+    list.innerHTML = '';
+    if (!results || results.length === 0) {
+      list.innerHTML = '<tr><td colspan="6" class="px-6 py-10 text-center text-slate-400">수집된 공고가 없습니다.</td></tr>';
+      return;
+    }
+
+    results.forEach(g => {
+      const tr = document.createElement('tr');
+      tr.className = 'hover:bg-slate-50 transition-colors';
+      tr.innerHTML = `
+        <td class="px-4 py-3 font-bold text-slate-800">
+          <a href="${g.url}" target="_blank" class="hover:text-blue-600 hover:underline flex items-center">
+             ${g.title} <i class="fas fa-external-link-alt ml-1 text-[10px] text-slate-400"></i>
+          </a>
+        </td>
+        <td class="px-4 py-3 text-slate-600">${g.agency}</td>
+        <td class="px-4 py-3"><span class="bg-blue-50 text-blue-600 px-2 py-0.5 rounded text-xs font-bold">${g.type}</span></td>
+        <td class="px-4 py-3 font-mono text-slate-600">${(g.max_amount || 0).toLocaleString()}만원</td>
+        <td class="px-4 py-3 text-red-500 font-bold text-xs">${g.deadline}</td>
+        <td class="px-4 py-3 text-right">
+          <button class="text-red-500 hover:underline text-xs">삭제</button>
+        </td>
+      `;
+      list.appendChild(tr);
+    });
+  } catch (e) { console.error(e); }
+}
+
+// --- AI Analysis Logs ---
+async function fetchLogs() {
+  const list = document.getElementById('log-list');
+  if (!list) return;
+
+  try {
+    const res = await fetch('/api/admin/logs?t=' + new Date().getTime());
+    const { results } = await res.json();
+
+    list.innerHTML = '';
+    if (!results || results.length === 0) {
+      list.innerHTML = '<tr><td colspan="5" class="px-6 py-10 text-center text-slate-400">분석 이력이 없습니다.</td></tr>';
+      return;
+    }
+
+    results.forEach(log => {
+      const tr = document.createElement('tr');
+      tr.className = 'hover:bg-slate-50 transition-colors';
+      tr.innerHTML = `
+        <td class="px-4 py-3 text-slate-400 text-xs">${new Date(log.created_at).toLocaleString()}</td>
+        <td class="px-4 py-3">
+          <div class="font-bold text-slate-800">${log.user_name || 'Guest'}</div>
+          <div class="text-xs text-slate-400">${log.user_email || '-'}</div>
+        </td>
+        <td class="px-4 py-3 font-medium text-indigo-600">${log.grant_title || '추천 결과'}</td>
+        <td class="px-4 py-3 font-bold text-slate-800">${log.match_score}점</td>
+        <td class="px-4 py-3 text-xs text-slate-500 line-clamp-2" title="${log.ai_reasoning || ''}">
+          ${(log.ai_reasoning || '').replace(/<[^>]*>/g, '')}
+        </td>
+      `;
+      list.appendChild(tr);
+    });
   } catch (e) { console.error(e); }
 }
 

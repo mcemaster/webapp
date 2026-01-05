@@ -191,6 +191,60 @@ app.post('/api/admin/policy', async (c) => {
   } catch (e: any) { return c.json({ error: e.message }, 500); }
 });
 
+// ==========================================
+// [New] Admin 2.0 Comprehensive Data APIs
+// ==========================================
+
+// 1. Company Database Management
+app.get('/api/admin/companies', async (c) => {
+  const userSession = getCookie(c, 'user_session')
+  if (!userSession) return c.json({ error: 'Unauthorized' }, 401)
+  const user = JSON.parse(userSession)
+  if (user.role !== 'admin') return c.json({ error: 'Unauthorized' }, 401);
+
+  const { env } = c;
+  const { results } = await env.DB.prepare(`
+    SELECT * FROM companies ORDER BY id DESC LIMIT 100
+  `).all();
+  return c.json({ results });
+})
+
+// 2. Grants (Crawled Data) Management
+app.get('/api/admin/grants', async (c) => {
+  const userSession = getCookie(c, 'user_session')
+  if (!userSession) return c.json({ error: 'Unauthorized' }, 401)
+  const user = JSON.parse(userSession)
+  if (user.role !== 'admin') return c.json({ error: 'Unauthorized' }, 401);
+
+  const { env } = c;
+  const { results } = await env.DB.prepare(`
+    SELECT * FROM grants ORDER BY id DESC LIMIT 100
+  `).all();
+  return c.json({ results });
+})
+
+// 3. AI Analysis Logs (Insight)
+app.get('/api/admin/logs', async (c) => {
+  const userSession = getCookie(c, 'user_session')
+  if (!userSession) return c.json({ error: 'Unauthorized' }, 401)
+  const user = JSON.parse(userSession)
+  if (user.role !== 'admin') return c.json({ error: 'Unauthorized' }, 401);
+
+  const { env } = c;
+  // Join with users table to show who analyzed
+  const { results } = await env.DB.prepare(`
+    SELECT 
+      l.id, l.created_at, l.match_score, l.ai_reasoning,
+      u.name as user_name, u.email as user_email,
+      g.title as grant_title
+    FROM analysis_logs l
+    LEFT JOIN users u ON l.user_id = u.id
+    LEFT JOIN grants g ON l.grant_id = g.id
+    ORDER BY l.created_at DESC LIMIT 50
+  `).all();
+  return c.json({ results });
+})
+
 // --- ADMIN DEPLOY ENDPOINT ---
 app.post('/api/admin/deploy', async (c) => {
   const userSession = getCookie(c, 'user_session')
