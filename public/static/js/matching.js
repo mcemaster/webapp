@@ -38,19 +38,19 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   const grantDatabase = [
-    { id: 1, title: '2026년 창업성장기술개발사업 디딤돌 창업과제', agency: '중소벤처기업부', type: 'R&D', maxAmount: '1.2억원', region: '전국', targetAge: '7년미만', certs: [], tags: ['기술개발', '초기창업'], deadline: '2026-02-28', link: 'https://www.smtech.go.kr/front/main/main.do', reasonTemplate: '귀사는 <strong>창업 7년 미만 기업</strong>으로 본 사업의 핵심 지원 대상입니다. 특히 <strong>기업부설연구소</strong>를 보유하고 있어 R&D 역량 평가에서 높은 가점이 예상됩니다.' },
-    { id: 2, title: '2026년 스마트공장 보급확산사업', agency: '중기부', type: 'Smart', maxAmount: '5천만원', region: '전국', tags: ['제조혁신'], deadline: '2026-03-15', link: 'https://www.smart-factory.kr/', reasonTemplate: '제조업종(C29)을 영위하고 계시므로 <strong>제조 혁신을 위한 스마트공장 도입</strong>이 필수적입니다.' },
-    { id: 3, title: '수출바우처사업', agency: 'KOTRA', type: 'Export', maxAmount: '3천만원', region: '전국', tags: ['해외진출'], deadline: '2026-01-31', link: 'https://www.exportvoucher.com/', reasonTemplate: '<strong>글로벌 시장 진출</strong>을 계획 중이시라면 반드시 신청해야 할 사업입니다.' },
-    { id: 4, title: '청년일자리 도약장려금', agency: '고용노동부', type: 'Hiring', maxAmount: '1,200만원', region: '전국', tags: ['채용지원'], deadline: '2026-12-31', link: 'https://www.work.go.kr/youthjob/', reasonTemplate: '최근 <strong>청년 근로자 고용 실적</strong>이 확인되어 지원 가능성이 매우 높습니다.' },
-    { id: 5, title: '중소기업 혁신바우처', agency: '중진공', type: 'Consulting', maxAmount: '5천만원', region: '전국', tags: ['마케팅', '컨설팅'], deadline: '2026-04-30', link: 'https://www.mssmiv.com/', reasonTemplate: '성장기에 진입한 제조기업의 경우, 마케팅 바우처를 통해 브랜드 인지도를 높이는 전략이 유효합니다.' },
-    { id: 6, title: '스마트공장 고도화 지원사업', agency: '중기부', type: 'Smart', maxAmount: '2억원', region: '전국', tags: ['고도화', 'AI적용'], deadline: '2026-03-31', link: 'https://www.smart-factory.kr/', reasonTemplate: '기존 스마트공장 구축 경험이 있거나, 생산 공정의 데이터 수집이 가능한 수준이라면 <strong>고도화 사업</strong>에 도전해 보십시오.' },
+    { id: 1, title: '2026년 창업성장기술개발사업 디딤돌 창업과제', agency: '중소벤처기업부', type: 'R&D', maxAmount: '120,000천원', region: '전국', targetAge: '7년미만', certs: [], tags: ['기술개발', '초기창업'], deadline: '2026-02-28', link: 'https://www.smtech.go.kr/front/main/main.do', reasonTemplate: '귀사는 <strong>창업 7년 미만 기업</strong>으로 본 사업의 핵심 지원 대상입니다. 특히 <strong>기업부설연구소</strong>를 보유하고 있어 R&D 역량 평가에서 높은 가점이 예상됩니다.' },
+    { id: 2, title: '2026년 스마트공장 보급확산사업', agency: '중기부', type: 'Smart', maxAmount: '50,000천원', region: '전국', tags: ['제조혁신'], deadline: '2026-03-15', link: 'https://www.smart-factory.kr/', reasonTemplate: '제조업종(C29)을 영위하고 계시므로 <strong>제조 혁신을 위한 스마트공장 도입</strong>이 필수적입니다.' },
+    { id: 3, title: '수출바우처사업', agency: 'KOTRA', type: 'Export', maxAmount: '30,000천원', region: '전국', tags: ['해외진출'], deadline: '2026-01-31', link: 'https://www.exportvoucher.com/', reasonTemplate: '<strong>글로벌 시장 진출</strong>을 계획 중이시라면 반드시 신청해야 할 사업입니다.' },
+    { id: 4, title: '청년일자리 도약장려금', agency: '고용노동부', type: 'Hiring', maxAmount: '12,000천원', region: '전국', tags: ['채용지원'], deadline: '2026-12-31', link: 'https://www.work.go.kr/youthjob/', reasonTemplate: '최근 <strong>청년 근로자 고용 실적</strong>이 확인되어 지원 가능성이 매우 높습니다.' },
+    { id: 5, title: '중소기업 혁신바우처', agency: '중진공', type: 'Consulting', maxAmount: '50,000천원', region: '전국', tags: ['마케팅', '컨설팅'], deadline: '2026-04-30', link: 'https://www.mssmiv.com/', reasonTemplate: '성장기에 진입한 제조기업의 경우, 마케팅 바우처를 통해 브랜드 인지도를 높이는 전략이 유효합니다.' },
+    { id: 6, title: '스마트공장 고도화 지원사업', agency: '중기부', type: 'Smart', maxAmount: '200,000천원', region: '전국', tags: ['고도화', 'AI적용'], deadline: '2026-03-31', link: 'https://www.smart-factory.kr/', reasonTemplate: '기존 스마트공장 구축 경험이 있거나, 생산 공정의 데이터 수집이 가능한 수준이라면 <strong>고도화 사업</strong>에 도전해 보십시오.' },
     { id: 7, title: '수출유망중소기업 지정', agency: '중기부', type: 'Export', maxAmount: '지원우대', region: '전국', tags: ['수출지원'], deadline: '2026-05-31', link: 'https://www.smes.go.kr/exportcenter/', reasonTemplate: '수출 지원사업 참여 시 가점 부여, 정책자금 금리 우대 등 다양한 혜택이 있는 <strong>인증 제도</strong>입니다.' },
-    { id: 8, title: 'IP나래 프로그램', agency: '특허청', type: 'R&D', maxAmount: '1,750만원', region: '지역별', tags: ['특허전략'], deadline: '2026-02-15', link: 'https://www.ripc.org/pms/html/support/business_guide.do', reasonTemplate: '창업 7년 이내의 기술 기반 기업에게 <strong>강력한 특허 포트폴리오</strong> 구축을 지원합니다.' },
-    { id: 9, title: '데이터바우처 지원사업', agency: '과기부', type: 'Smart', maxAmount: '6천만원', region: '전국', tags: ['AI가공'], deadline: '2026-04-10', link: 'https://kdata.or.kr/datavoucher/', reasonTemplate: '비즈니스 혁신을 위해 <strong>데이터 구매 및 가공</strong>이 필요한 경우 최적의 사업입니다.' },
-    { id: 10, title: '예비창업패키지', agency: '창업진흥원', type: 'Funding', maxAmount: '5천만원', region: '전국', tags: ['예비창업'], deadline: '2026-02-28', link: 'https://www.k-startup.go.kr/', reasonTemplate: '혁신적인 아이디어를 보유한 예비 창업자에게 <strong>사업화 자금과 멘토링</strong>을 지원합니다.' },
-    { id: 11, title: '초기창업패키지', agency: '창업진흥원', type: 'Funding', maxAmount: '7천만원', region: '전국', tags: ['3년미만'], deadline: '2026-03-20', link: 'https://www.k-startup.go.kr/', reasonTemplate: '창업 3년 이내의 기업에게 <strong>시제품 제작 및 판로 개척</strong> 비용을 지원합니다.' },
-    { id: 12, title: '창업도약패키지', agency: '창업진흥원', type: 'Funding', maxAmount: '1.2억원', region: '전국', tags: ['3-7년'], deadline: '2026-03-31', link: 'https://www.k-startup.go.kr/', reasonTemplate: '창업 3~7년차, 이른바 데스밸리(Death Valley)를 극복하고 <strong>도약(Jump-up)</strong>하려는 기업을 위한 사업입니다.' },
-    { id: 13, title: '산재예방시설 융자', agency: '안전보건공단', type: 'Loan', maxAmount: '10억원', region: '전국', tags: ['안전설비'], deadline: '상시접수', link: 'https://clean.kosha.or.kr/', reasonTemplate: '제조 현장의 <strong>안전성 확보 및 작업 환경 개선</strong>을 위한 자금을 장기 저리로 융자 지원합니다.' }
+    { id: 8, title: 'IP나래 프로그램', agency: '특허청', type: 'R&D', maxAmount: '17,500천원', region: '지역별', tags: ['특허전략'], deadline: '2026-02-15', link: 'https://www.ripc.org/pms/html/support/business_guide.do', reasonTemplate: '창업 7년 이내의 기술 기반 기업에게 <strong>강력한 특허 포트폴리오</strong> 구축을 지원합니다.' },
+    { id: 9, title: '데이터바우처 지원사업', agency: '과기부', type: 'Smart', maxAmount: '60,000천원', region: '전국', tags: ['AI가공'], deadline: '2026-04-10', link: 'https://kdata.or.kr/datavoucher/', reasonTemplate: '비즈니스 혁신을 위해 <strong>데이터 구매 및 가공</strong>이 필요한 경우 최적의 사업입니다.' },
+    { id: 10, title: '예비창업패키지', agency: '창업진흥원', type: 'Funding', maxAmount: '50,000천원', region: '전국', tags: ['예비창업'], deadline: '2026-02-28', link: 'https://www.k-startup.go.kr/', reasonTemplate: '혁신적인 아이디어를 보유한 예비 창업자에게 <strong>사업화 자금과 멘토링</strong>을 지원합니다.' },
+    { id: 11, title: '초기창업패키지', agency: '창업진흥원', type: 'Funding', maxAmount: '70,000천원', region: '전국', tags: ['3년미만'], deadline: '2026-03-20', link: 'https://www.k-startup.go.kr/', reasonTemplate: '창업 3년 이내의 기업에게 <strong>시제품 제작 및 판로 개척</strong> 비용을 지원합니다.' },
+    { id: 12, title: '창업도약패키지', agency: '창업진흥원', type: 'Funding', maxAmount: '120,000천원', region: '전국', tags: ['3-7년'], deadline: '2026-03-31', link: 'https://www.k-startup.go.kr/', reasonTemplate: '창업 3~7년차, 이른바 데스밸리(Death Valley)를 극복하고 <strong>도약(Jump-up)</strong>하려는 기업을 위한 사업입니다.' },
+    { id: 13, title: '산재예방시설 융자', agency: '안전보건공단', type: 'Loan', maxAmount: '1,000,000천원', region: '전국', tags: ['안전설비'], deadline: '상시접수', link: 'https://clean.kosha.or.kr/', reasonTemplate: '제조 현장의 <strong>안전성 확보 및 작업 환경 개선</strong>을 위한 자금을 장기 저리로 융자 지원합니다.' }
   ];
 
   // 안전한 요소 바인딩
@@ -234,7 +234,7 @@ document.addEventListener('DOMContentLoaded', () => {
            <div>
              <span class="inline-block bg-blue-100 text-blue-700 text-[10px] font-bold px-2 py-1 rounded mb-2">${item.agency}</span>
              <h4 class="font-bold text-lg text-slate-800 mb-1">${item.title}</h4>
-             <p class="text-sm text-slate-500 mb-3">${item.tags.join(', ')} | 최대 ${item.maxAmount}</p>
+             <p class="text-sm text-slate-500 mb-3">${item.tags.join(', ')} | 최대 ${item.maxAmount.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}</p>
            </div>
            <div class="text-right">
              <div class="text-2xl font-bold text-blue-600">${score}%</div>
