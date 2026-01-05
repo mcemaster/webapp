@@ -26,8 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // --- 2. Partner Approval (List) ---
-  // 동적으로 생성되는 버튼들을 위한 위임(Delegation) 처리
+  // --- 2. Partner Approval & User Management (Event Delegation) ---
   document.body.addEventListener('click', (e) => {
     const target = e.target;
     
@@ -39,7 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if(row) {
           row.style.opacity = '0.5';
           row.style.pointerEvents = 'none';
-          const badge = row.querySelector('.status-badge');
+          const badge = row.querySelector('.status-badge') || row.querySelector('span.bg-yellow-100'); // Fallback selector
           if(badge) {
             badge.className = 'status-badge bg-green-100 text-green-700 px-2 py-1 rounded text-xs font-bold';
             badge.innerText = '승인 완료';
@@ -58,7 +57,6 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
-    // --- User Management Actions ---
     // 회원 수정
     if (target.matches('.btn-user-edit') || target.closest('.btn-user-edit')) {
       MCE.ui.toast('회원 정보 수정 팝업을 엽니다. (기능 준비중)', 'info');
@@ -72,16 +70,30 @@ document.addEventListener('DOMContentLoaded', () => {
         if(row) row.classList.add('opacity-50', 'bg-red-50');
       }
     }
+
+    // --- System & API Settings ---
+    // Imweb Config
+    if (target.id === 'btn-config-imweb') {
+      MCE.ui.toast('아임웹(Imweb) SSO 설정 팝업을 엽니다.', 'info');
+    }
+    // ECOUNT Config
+    if (target.id === 'btn-config-ecount') {
+      MCE.ui.toast('ECOUNT ERP API 키 설정 팝업을 엽니다.', 'info');
+    }
   });
 
   // --- 3. SEO Settings Save ---
   const btnSaveSeo = document.getElementById('btn-save-seo');
   if(btnSaveSeo) {
     btnSaveSeo.addEventListener('click', () => {
+      const originalText = btnSaveSeo.innerHTML;
+      btnSaveSeo.disabled = true;
       btnSaveSeo.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> 저장 중...';
+      
       setTimeout(() => {
         MCE.ui.toast('SEO 설정이 사이트에 반영되었습니다.', 'success');
-        btnSaveSeo.innerHTML = '설정 저장';
+        btnSaveSeo.innerHTML = originalText;
+        btnSaveSeo.disabled = false;
       }, 1000);
     });
   }

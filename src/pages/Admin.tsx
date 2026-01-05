@@ -534,7 +534,7 @@ export const Admin = (props: { user: any, tab?: string }) => {
                           <span class="text-xs text-slate-500">회원 DB 및 SSO 로그인</span>
                         </div>
                       </div>
-                      <button class="text-xs bg-white border border-slate-300 px-3 py-1 rounded font-bold">설정</button>
+                      <button id="btn-config-imweb" class="text-xs bg-white border border-slate-300 px-3 py-1 rounded font-bold">설정</button>
                     </div>
                     <div class="flex items-center justify-between p-4 bg-slate-50 rounded-lg border border-slate-100">
                       <div class="flex items-center">
@@ -544,7 +544,7 @@ export const Admin = (props: { user: any, tab?: string }) => {
                           <span class="text-xs text-slate-500">거래처 정보 및 재무 데이터</span>
                         </div>
                       </div>
-                      <button class="text-xs bg-white border border-slate-300 px-3 py-1 rounded font-bold">설정</button>
+                      <button id="btn-config-ecount" class="text-xs bg-white border border-slate-300 px-3 py-1 rounded font-bold">설정</button>
                     </div>
                   </div>
                 </div>

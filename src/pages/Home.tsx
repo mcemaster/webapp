@@ -49,7 +49,7 @@ export const Home = (props: { user?: any }) => {
       <section class="relative z-20 mt-[-80px] pb-20">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div class="grid md:grid-cols-3 gap-6">
-            <a href="http://www.mce.re.kr" target="_blank" class="bg-white rounded-2xl p-8 shadow-xl border border-slate-100 hover:border-blue-500 hover:shadow-2xl transition-all duration-300 group flex flex-col justify-between h-72 relative overflow-hidden">
+            <a href="/services/certification" class="bg-white rounded-2xl p-8 shadow-xl border border-slate-100 hover:border-blue-500 hover:shadow-2xl transition-all duration-300 group flex flex-col justify-between h-72 relative overflow-hidden">
               <div class="absolute top-0 left-0 w-full h-1 bg-blue-500"></div>
               <div>
                 <div class="flex items-center justify-between mb-6">
@@ -59,7 +59,7 @@ export const Home = (props: { user?: any }) => {
                   </div>
                 </div>
                 <p class="text-slate-500 text-base leading-relaxed">
-                  ISO 9001/14001, IATF 16949 등<br/>국제 표준 인증 심사 및 기업 SPEC 평가를 수행합니다.
+                  ISO 9001/14001, ESG 등<br/>국제 표준 인증 심사 및 기업 SPEC 평가를 수행합니다.
                 </p>
               </div>
               <span class="text-blue-600 font-bold text-base flex items-center mt-auto">
@@ -106,7 +106,8 @@ export const Home = (props: { user?: any }) => {
         </div>
       </section>
 
-      {/* ================= ADVANTAGE PART 1: DATA INTELLIGENCE ================= */}
+      {/* ... (Rest of sections retained) ... */}
+      {/* ================= ADVANTAGE PART 1 ================= */}
       <section class="py-24 bg-white border-t border-slate-100">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div class="lg:grid lg:grid-cols-2 gap-16 items-center">
@@ -152,7 +153,7 @@ export const Home = (props: { user?: any }) => {
         </div>
       </section>
 
-      {/* ================= ADVANTAGE PART 2: FIELD EXPERTISE ================= */}
+      {/* ================= ADVANTAGE PART 2 ================= */}
       <section class="py-24 bg-slate-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div class="lg:grid lg:grid-cols-2 gap-16 items-center">
@@ -197,7 +198,7 @@ export const Home = (props: { user?: any }) => {
         </div>
       </section>
 
-      {/* ================= ADVANTAGE PART 3: TOTAL LIFECYCLE CARE ================= */}
+      {/* ================= ADVANTAGE PART 3 ================= */}
       <section class="py-24 bg-slate-900 text-white relative overflow-hidden">
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-600 rounded-full filter blur-[150px] opacity-20"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -250,21 +251,19 @@ export const Home = (props: { user?: any }) => {
         </div>
       </section>
 
-      {/* ================= PROCESS 1: CERTIFICATION ================= */}
+      {/* ================= PROCESS ================= */}
       <section class="py-24 bg-white">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div class="text-center mb-16">
             <span className="text-blue-600 font-bold uppercase tracking-wider text-sm">System Process</span>
             <h2 className="text-3xl font-bold text-slate-900 mt-2">경영인증평가원 인증 프로세스</h2>
-            <p className="mt-4 text-slate-600">ISO, IATF 등 국제 표준 인증은 체계적이고 엄격한 절차를 통해 진행됩니다.</p>
+            <p className="mt-4 text-slate-600">국제 표준 인증은 체계적이고 엄격한 절차를 통해 진행됩니다.</p>
           </div>
 
           <div class="relative">
-            {/* Connecting Line (Desktop) */}
             <div className="hidden md:block absolute top-1/2 left-0 w-full h-1 bg-slate-100 -z-10 transform -translate-y-1/2"></div>
             
             <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-              {/* Step 1 */}
               <div className="bg-white p-6 rounded-2xl border border-slate-200 text-center shadow-sm relative group hover:-translate-y-2 transition-transform duration-300">
                 <div className="w-16 h-16 mx-auto bg-blue-50 rounded-full flex items-center justify-center text-blue-600 text-2xl mb-6 ring-4 ring-white group-hover:bg-blue-600 group-hover:text-white transition-colors">
                   <i className="fas fa-file-contract"></i>
@@ -272,7 +271,6 @@ export const Home = (props: { user?: any }) => {
                 <h3 className="text-lg font-bold text-slate-900 mb-2">1. 신청 및 접수</h3>
                 <p className="text-sm text-slate-500">인증 문의 및 상담 후<br/>정식 신청서를 제출합니다.</p>
               </div>
-              {/* Step 2 */}
               <div className="bg-white p-6 rounded-2xl border border-slate-200 text-center shadow-sm relative group hover:-translate-y-2 transition-transform duration-300">
                 <div className="w-16 h-16 mx-auto bg-blue-50 rounded-full flex items-center justify-center text-blue-600 text-2xl mb-6 ring-4 ring-white group-hover:bg-blue-600 group-hover:text-white transition-colors">
                   <i className="fas fa-search-plus"></i>
@@ -280,7 +278,6 @@ export const Home = (props: { user?: any }) => {
                 <h3 className="text-lg font-bold text-slate-900 mb-2">2. 1단계 문서심사</h3>
                 <p className="text-sm text-slate-500">경영시스템 문서가 규격 요구사항에<br/>적합한지 검토합니다.</p>
               </div>
-              {/* Step 3 */}
               <div className="bg-white p-6 rounded-2xl border border-slate-200 text-center shadow-sm relative group hover:-translate-y-2 transition-transform duration-300">
                 <div className="w-16 h-16 mx-auto bg-blue-50 rounded-full flex items-center justify-center text-blue-600 text-2xl mb-6 ring-4 ring-white group-hover:bg-blue-600 group-hover:text-white transition-colors">
                   <i className="fas fa-industry"></i>
@@ -288,7 +285,6 @@ export const Home = (props: { user?: any }) => {
                 <h3 className="text-lg font-bold text-slate-900 mb-2">3. 2단계 현장심사</h3>
                 <p className="text-sm text-slate-500">사업장을 방문하여 시스템의<br/>실제 이행 여부를 확인합니다.</p>
               </div>
-              {/* Step 4 */}
               <div className="bg-white p-6 rounded-2xl border border-slate-200 text-center shadow-sm relative group hover:-translate-y-2 transition-transform duration-300">
                 <div className="w-16 h-16 mx-auto bg-blue-50 rounded-full flex items-center justify-center text-blue-600 text-2xl mb-6 ring-4 ring-white group-hover:bg-blue-600 group-hover:text-white transition-colors">
                   <i className="fas fa-award"></i>
@@ -296,66 +292,6 @@ export const Home = (props: { user?: any }) => {
                 <h3 className="text-lg font-bold text-slate-900 mb-2">4. 인증서 발급</h3>
                 <p className="text-sm text-slate-500">심의위원회 승인을 거쳐<br/>최종 인증서를 발급합니다.</p>
               </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ================= PROCESS 2: MANUFACTURING SOURCING (UPDATED) ================= */}
-      <section class="py-24 bg-slate-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div class="text-center mb-16">
-            <span className="text-indigo-600 font-bold uppercase tracking-wider text-sm">Matching Process</span>
-            <h2 className="text-3xl font-bold text-slate-900 mt-2">제조 소싱(매칭) 프로세스</h2>
-            <p className="mt-4 text-slate-600">
-              복잡한 업체 발굴은 경영인증평가원이 미리 검증했습니다. 발주사는 선택만 하세요.
-            </p>
-          </div>
-
-          <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
-            {/* Step 1: Pre-Validation */}
-            <div class="relative text-center p-6 bg-white rounded-2xl border border-indigo-100 shadow-sm">
-              <div class="w-20 h-20 mx-auto bg-indigo-50 rounded-full flex items-center justify-center text-3xl shadow-inner text-indigo-600 mb-6">
-                1
-              </div>
-              <h3 class="text-lg font-bold text-slate-900 mb-3">3자 심사/검증</h3>
-              <p class="text-sm text-slate-600">경영인증평가원 심사원이 제조사를 방문해<br/>역량과 품질을 미리 검증합니다.</p>
-              <div class="hidden md:block absolute top-1/2 -right-4 transform -translate-y-1/2 text-slate-300 z-10">
-                <i class="fas fa-chevron-right text-2xl"></i>
-              </div>
-            </div>
-
-            {/* Step 2: Industry Select */}
-            <div class="relative text-center p-6 bg-white rounded-2xl border border-indigo-100 shadow-sm">
-              <div class="w-20 h-20 mx-auto bg-white rounded-full flex items-center justify-center text-3xl shadow-md text-indigo-600 mb-6 border-2 border-indigo-50">
-                2
-              </div>
-              <h3 class="text-lg font-bold text-slate-900 mb-3">업종 및 조건 선택</h3>
-              <p class="text-sm text-slate-600">원하는 제조 분야와<br/>필요한 스펙을 입력합니다.</p>
-              <div class="hidden md:block absolute top-1/2 -right-4 transform -translate-y-1/2 text-slate-300 z-10">
-                <i class="fas fa-chevron-right text-2xl"></i>
-              </div>
-            </div>
-
-            {/* Step 3: AI Matching */}
-            <div class="relative text-center p-6 bg-white rounded-2xl border border-indigo-100 shadow-sm">
-              <div class="w-20 h-20 mx-auto bg-white rounded-full flex items-center justify-center text-3xl shadow-md text-indigo-600 mb-6 border-2 border-indigo-50">
-                3
-              </div>
-              <h3 class="text-lg font-bold text-slate-900 mb-3">AI 스마트 매칭</h3>
-              <p class="text-sm text-slate-600">검증된 DB 내에서<br/>최적의 파트너를 연결합니다.</p>
-              <div class="hidden md:block absolute top-1/2 -right-4 transform -translate-y-1/2 text-slate-300 z-10">
-                <i class="fas fa-chevron-right text-2xl"></i>
-              </div>
-            </div>
-
-            {/* Step 4: Contract */}
-            <div class="relative text-center p-6 bg-indigo-600 rounded-2xl shadow-lg transform scale-105">
-              <div class="w-20 h-20 mx-auto bg-white rounded-full flex items-center justify-center text-3xl shadow-md text-indigo-600 mb-6">
-                4
-              </div>
-              <h3 class="text-lg font-bold text-white mb-3">계약 및 생산</h3>
-              <p class="text-sm text-indigo-100">신뢰할 수 있는 파트너와<br/>안전하게 계약을 체결합니다.</p>
             </div>
           </div>
         </div>
