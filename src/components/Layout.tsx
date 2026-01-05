@@ -28,7 +28,7 @@ export const Layout = (props: { children: any; title?: string; user?: any }) => 
                 <div class="absolute top-[calc(100%-1px)] left-1/2 transform -translate-x-1/2 w-48 bg-white rounded-b-xl shadow-xl border border-slate-100 overflow-hidden hidden group-hover:block animate-fade-in-up">
                   <div class="py-2">
                     <a href="/services/spec" class="block px-5 py-3 text-sm text-slate-600 hover:bg-slate-50 hover:text-blue-600 font-medium transition-colors">기업 SPEC 평가</a>
-                    <a href="/services/certification" class="block px-5 py-3 text-sm text-slate-600 hover:bg-slate-50 hover:text-blue-600 font-medium transition-colors">ISO/IATF 인증</a>
+                    <a href="/services/certification" class="block px-5 py-3 text-sm text-slate-600 hover:bg-slate-50 hover:text-blue-600 font-medium transition-colors">ISO 인증</a>
                   </div>
                 </div>
               </div>
@@ -70,7 +70,7 @@ export const Layout = (props: { children: any; title?: string; user?: any }) => 
 
             </div>
             
-            {/* 3. Right Side: Login | Register */}
+            {/* 3. Right Side: Login | Register (Text Links) */}
             <div class="hidden md:flex items-center ml-6 pl-6">
               {user ? (
                 /* Logged In State */
@@ -97,11 +97,11 @@ export const Layout = (props: { children: any; title?: string; user?: any }) => 
                   </div>
                 </div>
               ) : (
-                /* Guest State - Text Links Only (No Button) */
-                <div class="flex items-center text-sm font-bold">
-                  <a href="/login" class="text-slate-500 hover:text-blue-600 transition-colors px-3 py-2">로그인</a>
-                  <span class="text-slate-300 h-3 w-px bg-slate-300 mx-1"></span>
-                  <a href="/register" class="text-slate-700 hover:text-blue-600 transition-colors px-3 py-2">회원가입</a>
+                /* Guest State - Clean Text Links */
+                <div class="flex items-center space-x-4 text-sm font-bold">
+                  <a href="/login" class="text-slate-500 hover:text-blue-600 transition-colors">로그인</a>
+                  <span class="text-slate-300">|</span>
+                  <a href="/register" class="text-slate-700 hover:text-blue-600 transition-colors">회원가입</a>
                 </div>
               )}
             </div>
