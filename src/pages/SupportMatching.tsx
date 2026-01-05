@@ -264,7 +264,7 @@ export const SupportMatching = ({ user }: SupportMatchingProps) => {
             <div className="absolute inset-0 border-4 border-blue-500/30 rounded-full animate-[spin_3s_linear_infinite]"></div>
             <div className="absolute inset-4 border-4 border-t-indigo-500 border-r-transparent border-b-transparent border-l-transparent rounded-full animate-[spin_2s_linear_infinite]"></div>
             <div className="absolute inset-0 flex items-center justify-center">
-              <i className="fas fa-robot text-6xl text-blue-400 animate-pulse"></i>
+              <img src="/static/mce-symbol.png" alt="경영인증평가원 로고" className="w-20 h-20 object-contain animate-pulse" />
             </div>
           </div>
           <h3 className="text-3xl font-extrabold text-white mb-2 tracking-tight text-center"><span className="text-blue-400">경영인증평가원 AI</span>가<br/>매칭중입니다</h3>
