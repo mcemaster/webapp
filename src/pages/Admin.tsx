@@ -66,6 +66,9 @@ export const Admin = (props: { user: any, tab?: string }) => {
                 <a href="/admin?tab=settings" class={`flex items-center px-4 py-2.5 text-sm font-medium rounded-lg transition-colors ${activeTab === 'settings' ? 'bg-indigo-50 text-indigo-600' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'}`}>
                   <i class="fas fa-cog w-6"></i> 시스템 설정
                 </a>
+                <a href="/admin?tab=policy" class={`flex items-center px-4 py-2.5 text-sm font-medium rounded-lg transition-colors ${activeTab === 'policy' ? 'bg-indigo-50 text-indigo-600' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'}`}>
+                  <i class="fas fa-file-contract w-6"></i> 약관/정책 관리
+                </a>
               </div>
             </div>
           </nav>
