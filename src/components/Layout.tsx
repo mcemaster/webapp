@@ -1,10 +1,16 @@
 import { html } from 'hono/html'
 
-export const Layout = (props: { children: any; title?: string; user?: any }) => {
-  const { children, title, user } = props
+export const Layout = (props: { children: any; title?: string; user?: any; page?: string }) => {
+  const { children, title, user, page = 'home' } = props
   
   return (
     <div class="font-sans text-slate-800 antialiased bg-white selection:bg-blue-100 selection:text-blue-900 flex flex-col min-h-screen relative">
+      
+      {/* Dynamic Popup Container */}
+      <div id="popup-container"></div>
+      
+      {/* Dynamic Banner Container */}
+      <div id="banner-container"></div>
       
       {/* ================= TOP NAVIGATION ================= */}
       <nav class="fixed w-full z-50 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-sm transition-all duration-300" id="navbar">
@@ -251,6 +257,128 @@ export const Layout = (props: { children: any; title?: string; user?: any }) => 
       </div>
 
       <script src="/static/js/layout.js"></script>
+      
+      {/* Dynamic Popup, Banner, Tracking, Chat Widget Loader */}
+      <script dangerouslySetInnerHTML={{
+        __html: `
+          // 팝업 로드 및 표시
+          (async function loadPopups() {
+            try {
+              const res = await fetch('/api/popups/active?page=${page}');
+              if (!res.ok) return;
+              const data = await res.json();
+              if (!data.popups || data.popups.length === 0) return;
+              
+              const container = document.getElementById('popup-container');
+              if (!container) return;
+              
+              data.popups.forEach(popup => {
+                // 오늘 하루 안보기 체크
+                const closedKey = 'popup_closed_' + popup.id;
+                const closedDate = localStorage.getItem(closedKey);
+                if (closedDate === new Date().toISOString().split('T')[0]) return;
+                
+                const popupEl = document.createElement('div');
+                popupEl.id = 'popup-' + popup.id;
+                popupEl.className = 'fixed inset-0 bg-black/50 flex items-center justify-center z-[9999]';
+                popupEl.style.cssText = 'animation: fadeIn 0.3s ease-out';
+                
+                let positionClass = 'items-center justify-center';
+                if (popup.position === 'top') positionClass = 'items-start justify-center pt-20';
+                if (popup.position === 'bottom') positionClass = 'items-end justify-center pb-20';
+                popupEl.className = 'fixed inset-0 bg-black/50 flex ' + positionClass + ' z-[9999]';
+                
+                popupEl.innerHTML = 
+                  '<div class="bg-white rounded-xl shadow-2xl overflow-hidden max-w-[90vw] m-4" style="width:' + popup.width + 'px;max-height:' + popup.height + 'px;">' +
+                  '<div class="flex justify-between items-center p-3 border-b bg-slate-50">' +
+                  '<span class="font-semibold text-slate-800">' + (popup.title || '') + '</span>' +
+                  '<button onclick="closePopup(' + popup.id + ', false)" class="w-8 h-8 flex items-center justify-center hover:bg-slate-200 rounded-lg text-slate-500"><i class="fas fa-times"></i></button>' +
+                  '</div>' +
+                  (popup.image_url ? '<img src="' + popup.image_url + '" class="w-full object-cover" style="max-height:' + (popup.height - 100) + 'px" />' : '') +
+                  (popup.content ? '<div class="p-4 text-sm text-slate-600">' + popup.content + '</div>' : '') +
+                  (popup.link_url ? '<div class="p-3 border-t"><a href="' + popup.link_url + '" class="block w-full py-2 bg-blue-600 text-white text-center rounded-lg font-medium hover:bg-blue-700">자세히 보기</a></div>' : '') +
+                  '<div class="flex justify-between items-center p-3 border-t bg-slate-50 text-sm">' +
+                  (popup.show_today_close ? '<label class="flex items-center text-slate-500 cursor-pointer"><input type="checkbox" id="today-close-' + popup.id + '" class="mr-2" /> 오늘 하루 안보기</label>' : '<span></span>') +
+                  '<button onclick="closePopup(' + popup.id + ', document.getElementById(\\'today-close-' + popup.id + '\\')?.checked)" class="px-4 py-1.5 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300">닫기</button>' +
+                  '</div></div>';
+                
+                container.appendChild(popupEl);
+              });
+            } catch(e) { console.log('Popup load error:', e); }
+          })();
+          
+          window.closePopup = function(id, saveToday) {
+            const el = document.getElementById('popup-' + id);
+            if (el) el.remove();
+            if (saveToday) {
+              localStorage.setItem('popup_closed_' + id, new Date().toISOString().split('T')[0]);
+            }
+          };
+          
+          // 배너 로드 및 표시
+          (async function loadBanners() {
+            try {
+              const res = await fetch('/api/banners/active?type=main');
+              if (!res.ok) return;
+              const data = await res.json();
+              if (!data.banners || data.banners.length === 0) return;
+              
+              const container = document.getElementById('banner-container');
+              if (!container) return;
+              
+              data.banners.forEach(banner => {
+                const bannerEl = document.createElement('a');
+                bannerEl.href = banner.link_url || '#';
+                bannerEl.className = 'fixed top-0 left-0 right-0 z-[100] text-center py-2 px-4 text-sm font-medium transition-all';
+                bannerEl.style.cssText = 'background:' + (banner.background_color || '#3B82F6') + ';color:' + (banner.text_color || '#FFFFFF') + ';';
+                bannerEl.innerHTML = '<span>' + banner.title + '</span>' + (banner.subtitle ? ' <span class="opacity-75 ml-2">' + banner.subtitle + '</span>' : '');
+                bannerEl.onclick = function(e) {
+                  if (banner.link_url) {
+                    fetch('/api/banners/' + banner.id + '/click', { method: 'POST' });
+                  }
+                };
+                container.appendChild(bannerEl);
+                
+                // 네비게이션 패딩 조정
+                const nav = document.getElementById('navbar');
+                if (nav) nav.style.top = '36px';
+                const main = document.querySelector('main');
+                if (main) main.style.paddingTop = '116px';
+              });
+            } catch(e) { console.log('Banner load error:', e); }
+          })();
+          
+          // 트래킹 스크립트 로드
+          (async function loadTracking() {
+            try {
+              const res = await fetch('/api/tracking-scripts');
+              if (!res.ok) return;
+              const data = await res.json();
+              if (!data.scripts || data.scripts.length === 0) return;
+              
+              data.scripts.forEach(script => {
+                const div = document.createElement('div');
+                div.innerHTML = script;
+                document.head.appendChild(div);
+              });
+            } catch(e) { console.log('Tracking load error:', e); }
+          })();
+          
+          // 채팅 위젯 로드
+          (async function loadChatWidget() {
+            try {
+              const res = await fetch('/api/chat-widget');
+              if (!res.ok) return;
+              const data = await res.json();
+              if (!data.widget || !data.widget.script) return;
+              
+              const div = document.createElement('div');
+              div.innerHTML = data.widget.script;
+              document.body.appendChild(div);
+            } catch(e) { console.log('Chat widget load error:', e); }
+          })();
+        `
+      }} />
     </div>
   )
 }

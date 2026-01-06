@@ -74,7 +74,12 @@ app.get('/services/spec', (c) => c.render(<SpecEvaluation />))
 app.get('/services/certification', (c) => c.render(<Certification />))
 app.get('/faq', (c) => c.render(<FAQ />))
 app.get('/partnership', (c) => c.render(<PartnershipProposal />))
-app.get('/legal', (c) => c.render(<Legal />))
+app.get('/legal', (c) => {
+  const userSession = getCookie(c, 'user_session')
+  const user = userSession ? JSON.parse(userSession) : undefined
+  const tab = c.req.query('tab') || 'service'
+  return c.render(<Legal user={user} tab={tab} />)
+})
 app.get('/audit/apply', (c) => c.render(<AuditApplication />))
 app.get('/register', (c) => c.render(<Register />))
 

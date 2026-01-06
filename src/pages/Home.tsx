@@ -2,7 +2,7 @@ import { Layout } from '../components/Layout'
 
 export const Home = (props: { user?: any }) => {
   return (
-    <Layout user={props.user}>
+    <Layout user={props.user} page="home">
       {/* ================= HERO SECTION ================= */}
       <section class="relative h-screen flex items-center justify-center overflow-hidden bg-slate-900">
         <div class="absolute inset-0 z-0">
