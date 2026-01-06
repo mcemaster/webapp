@@ -129,26 +129,52 @@ api.get('/admin/stats', async (c) => {
   }
 })
 
-// 5. Admin - Companies List
+// 5. Admin - Companies List (with pagination and search)
 api.get('/admin/companies', async (c) => {
   try {
     const db = c.env.DB
-    const result = await db.prepare(`
+    const page = parseInt(c.req.query('page') || '1')
+    const limit = parseInt(c.req.query('limit') || '20')
+    const search = c.req.query('q') || ''
+    const offset = (page - 1) * limit
+    
+    // Build WHERE clause for search
+    let whereClause = ''
+    let params: any[] = []
+    if (search) {
+      whereClause = 'WHERE c.name LIKE ? OR c.biz_num LIKE ? OR c.ceo_name LIKE ?'
+      params = [`%${search}%`, `%${search}%`, `%${search}%`]
+    }
+    
+    // Get total count
+    const countQuery = `SELECT COUNT(*) as count FROM companies c ${whereClause}`
+    const countResult = search 
+      ? await db.prepare(countQuery).bind(...params).first<{count: number}>()
+      : await db.prepare(countQuery).first<{count: number}>()
+    const total = countResult?.count || 0
+    const totalPages = Math.ceil(total / limit)
+    
+    // Get paginated data
+    const dataQuery = `
       SELECT 
         c.id,
         c.name,
         c.biz_num,
+        c.ceo_name,
         c.industry_code as industry,
         c.employee_count,
         c.financial_json,
         c.certifications,
-        c.analyzed_at as created_at,
-        u.name as ceo
+        c.analyzed_at as created_at
       FROM companies c
-      LEFT JOIN users u ON c.user_id = u.id
+      ${whereClause}
       ORDER BY c.analyzed_at DESC
-      LIMIT 100
-    `).all()
+      LIMIT ? OFFSET ?
+    `
+    
+    const result = search
+      ? await db.prepare(dataQuery).bind(...params, limit, offset).all()
+      : await db.prepare(dataQuery).bind(limit, offset).all()
     
     const companies = (result.results || []).map((c: any) => {
       let revenue = '-'
@@ -162,17 +188,142 @@ api.get('/admin/companies', async (c) => {
       return {
         id: c.id,
         name: c.name || '-',
-        ceo: c.ceo || '-',
+        biz_num: c.biz_num || '-',
+        ceo: c.ceo_name || '-',
         industry: c.industry || '-',
+        employee_count: c.employee_count || '-',
         revenue,
+        certifications: c.certifications || '-',
         created_at: c.created_at ? c.created_at.split('T')[0] : '-'
       }
     })
     
-    return c.json({ companies })
+    return c.json({ companies, total, page, totalPages })
   } catch (e: any) {
     console.error('Admin companies error:', e)
-    return c.json({ companies: [], error: e.message })
+    return c.json({ companies: [], total: 0, page: 1, totalPages: 1, error: e.message })
+  }
+})
+
+// 5-1. Admin - Upload Companies from Excel/CSV
+api.post('/admin/companies/upload', async (c) => {
+  try {
+    const db = c.env.DB
+    const formData = await c.req.formData()
+    const file = formData.get('file') as File
+    
+    if (!file) {
+      return c.json({ success: false, error: '파일이 없습니다.' }, 400)
+    }
+    
+    const text = await file.text()
+    const lines = text.split('\n').filter(line => line.trim())
+    
+    if (lines.length < 2) {
+      return c.json({ success: false, error: '데이터가 없습니다. 헤더와 최소 1행의 데이터가 필요합니다.' }, 400)
+    }
+    
+    // Parse CSV (handle both comma and tab separated)
+    const delimiter = lines[0].includes('\t') ? '\t' : ','
+    const headers = lines[0].split(delimiter).map(h => h.trim().replace(/"/g, ''))
+    
+    // Expected columns mapping (Korean -> DB field)
+    const columnMap: Record<string, string> = {
+      '기업명': 'name',
+      '사업자번호': 'biz_num',
+      '대표자': 'ceo_name',
+      '업종코드': 'industry_code',
+      '설립일': 'founding_date',
+      '직원수': 'employee_count',
+      '매출액': 'revenue',
+      '인증현황': 'certifications'
+    }
+    
+    // Map header indices
+    const headerIndices: Record<string, number> = {}
+    headers.forEach((h, idx) => {
+      if (columnMap[h]) {
+        headerIndices[columnMap[h]] = idx
+      }
+    })
+    
+    if (!headerIndices['name'] || !headerIndices['biz_num']) {
+      return c.json({ 
+        success: false, 
+        error: '필수 컬럼(기업명, 사업자번호)이 없습니다. 템플릿을 확인해주세요.' 
+      }, 400)
+    }
+    
+    let inserted = 0
+    let duplicates = 0
+    let errors = 0
+    
+    // Process each row
+    for (let i = 1; i < lines.length; i++) {
+      const line = lines[i].trim()
+      if (!line) continue
+      
+      const values = line.split(delimiter).map(v => v.trim().replace(/"/g, ''))
+      
+      const getValue = (field: string) => {
+        const idx = headerIndices[field]
+        return idx !== undefined ? values[idx] : null
+      }
+      
+      const name = getValue('name')
+      const bizNum = getValue('biz_num')
+      
+      if (!name || !bizNum) {
+        errors++
+        continue
+      }
+      
+      // Check for duplicate by biz_num
+      const existing = await db.prepare(
+        'SELECT id FROM companies WHERE biz_num = ?'
+      ).bind(bizNum).first()
+      
+      if (existing) {
+        duplicates++
+        continue
+      }
+      
+      // Prepare financial_json
+      const revenue = getValue('revenue')
+      const financialJson = revenue ? JSON.stringify({ revenue: parseInt(revenue) || 0 }) : null
+      
+      // Insert new company
+      try {
+        await db.prepare(`
+          INSERT INTO companies (name, biz_num, ceo_name, industry_code, founding_date, employee_count, financial_json, certifications, analyzed_at)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
+        `).bind(
+          name,
+          bizNum,
+          getValue('ceo_name'),
+          getValue('industry_code'),
+          getValue('founding_date'),
+          getValue('employee_count') ? parseInt(getValue('employee_count') || '0') : null,
+          financialJson,
+          getValue('certifications')
+        ).run()
+        
+        inserted++
+      } catch (e) {
+        errors++
+      }
+    }
+    
+    return c.json({ 
+      success: true, 
+      inserted, 
+      duplicates, 
+      errors,
+      message: `${inserted}건 추가, ${duplicates}건 중복(스킵), ${errors}건 오류`
+    })
+  } catch (e: any) {
+    console.error('Upload error:', e)
+    return c.json({ success: false, error: e.message }, 500)
   }
 })
 

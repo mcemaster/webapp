@@ -206,29 +206,78 @@ export const Admin = (props: { user: any, tab?: string }) => {
               
               ${activeTab === 'companies' ? html`
                 <!-- Companies Table -->
-                <div class="bg-white rounded-xl shadow-sm border border-slate-100">
-                  <div class="p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                    <h3 class="font-semibold text-slate-800">기업 데이터베이스</h3>
-                    <div class="flex items-center space-x-2">
-                      <input type="text" id="company-search" placeholder="기업명 검색..." class="px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
-                      <button onclick="searchCompanies()" class="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition">검색</button>
+                <div class="space-y-4">
+                  <!-- Excel Upload Section -->
+                  <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-5">
+                    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                      <div>
+                        <h3 class="font-semibold text-slate-800 flex items-center">
+                          <i class="fas fa-file-excel text-green-600 mr-2"></i>
+                          엑셀 업로드
+                        </h3>
+                        <p class="text-xs text-slate-500 mt-1">기업명, 사업자번호, 대표자, 업종코드, 설립일, 직원수, 매출액, 인증현황 컬럼 필요</p>
+                      </div>
+                      <div class="flex items-center space-x-2">
+                        <input type="file" id="excel-file" accept=".xlsx,.xls,.csv" class="hidden" onchange="handleExcelUpload(event)" />
+                        <button onclick="document.getElementById('excel-file').click()" class="px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition flex items-center">
+                          <i class="fas fa-upload mr-2"></i> 엑셀 파일 선택
+                        </button>
+                        <button onclick="downloadTemplate()" class="px-4 py-2 bg-slate-100 text-slate-700 text-sm font-medium rounded-lg hover:bg-slate-200 transition flex items-center">
+                          <i class="fas fa-download mr-2"></i> 템플릿 다운로드
+                        </button>
+                      </div>
+                    </div>
+                    <!-- Upload Status -->
+                    <div id="upload-status" class="hidden mt-4 p-4 rounded-lg">
+                      <div id="upload-message" class="text-sm"></div>
+                      <div id="upload-progress" class="hidden mt-2">
+                        <div class="w-full bg-slate-200 rounded-full h-2">
+                          <div id="progress-bar" class="bg-blue-600 h-2 rounded-full transition-all" style="width: 0%"></div>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                  <div class="overflow-x-auto">
-                    <table class="w-full text-sm">
-                      <thead class="bg-slate-50 text-slate-600 text-xs uppercase">
-                        <tr>
-                          <th class="px-5 py-3 text-left font-semibold">기업명</th>
-                          <th class="px-5 py-3 text-left font-semibold">대표자</th>
-                          <th class="px-5 py-3 text-left font-semibold">업종</th>
-                          <th class="px-5 py-3 text-left font-semibold">매출액</th>
-                          <th class="px-5 py-3 text-left font-semibold">수집일</th>
-                        </tr>
-                      </thead>
-                      <tbody id="company-table" class="divide-y divide-slate-100">
-                        <tr><td colspan="5" class="px-5 py-8 text-center text-slate-400">데이터를 불러오는 중...</td></tr>
-                      </tbody>
-                    </table>
+                  
+                  <!-- Data Table -->
+                  <div class="bg-white rounded-xl shadow-sm border border-slate-100">
+                    <div class="p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                      <div class="flex items-center space-x-3">
+                        <h3 class="font-semibold text-slate-800">기업 데이터베이스</h3>
+                        <span id="company-count" class="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded-full">0건</span>
+                      </div>
+                      <div class="flex items-center space-x-2">
+                        <input type="text" id="company-search" placeholder="기업명 검색..." class="px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" onkeyup="if(event.key==='Enter')searchCompanies()" />
+                        <button onclick="searchCompanies()" class="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition">검색</button>
+                      </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                      <table class="w-full text-sm">
+                        <thead class="bg-slate-50 text-slate-600 text-xs uppercase">
+                          <tr>
+                            <th class="px-5 py-3 text-left font-semibold">기업명</th>
+                            <th class="px-5 py-3 text-left font-semibold">사업자번호</th>
+                            <th class="px-5 py-3 text-left font-semibold">대표자</th>
+                            <th class="px-5 py-3 text-left font-semibold">업종</th>
+                            <th class="px-5 py-3 text-left font-semibold">직원수</th>
+                            <th class="px-5 py-3 text-left font-semibold">매출액</th>
+                            <th class="px-5 py-3 text-left font-semibold">인증</th>
+                            <th class="px-5 py-3 text-left font-semibold">등록일</th>
+                          </tr>
+                        </thead>
+                        <tbody id="company-table" class="divide-y divide-slate-100">
+                          <tr><td colspan="8" class="px-5 py-8 text-center text-slate-400">데이터를 불러오는 중...</td></tr>
+                        </tbody>
+                      </table>
+                    </div>
+                    <!-- Pagination -->
+                    <div class="p-4 border-t border-slate-100 flex items-center justify-between">
+                      <p class="text-sm text-slate-500">총 <span id="total-companies">0</span>개 기업</p>
+                      <div class="flex items-center space-x-1">
+                        <button onclick="loadCompanies(currentPage-1)" id="prev-page" class="px-3 py-1 text-sm border border-slate-200 rounded hover:bg-slate-50 disabled:opacity-50" disabled>이전</button>
+                        <span id="page-info" class="px-3 py-1 text-sm text-slate-600">1 / 1</span>
+                        <button onclick="loadCompanies(currentPage+1)" id="next-page" class="px-3 py-1 text-sm border border-slate-200 rounded hover:bg-slate-50 disabled:opacity-50" disabled>다음</button>
+                      </div>
+                    </div>
                   </div>
                 </div>
               ` : ''}
@@ -534,29 +583,131 @@ export const Admin = (props: { user: any, tab?: string }) => {
             if (tab === 'overview') loadRecentActivity();
           }
           
-          async function loadCompanies() {
+          // Pagination state
+          let currentPage = 1;
+          let totalPages = 1;
+          let searchQuery = '';
+          
+          async function loadCompanies(page = 1) {
+            currentPage = page;
+            const query = searchQuery ? '&q=' + encodeURIComponent(searchQuery) : '';
             try {
-              const res = await fetch('/api/admin/companies');
+              const res = await fetch('/api/admin/companies?page=' + page + '&limit=20' + query);
               if (res.ok) {
                 const data = await res.json();
                 const tbody = document.getElementById('company-table');
+                const countEl = document.getElementById('company-count');
+                const totalEl = document.getElementById('total-companies');
+                const pageInfo = document.getElementById('page-info');
+                const prevBtn = document.getElementById('prev-page');
+                const nextBtn = document.getElementById('next-page');
+                
+                totalPages = data.totalPages || 1;
+                const total = data.total || 0;
+                
+                if (countEl) countEl.textContent = total + '건';
+                if (totalEl) totalEl.textContent = total;
+                if (pageInfo) pageInfo.textContent = currentPage + ' / ' + totalPages;
+                if (prevBtn) prevBtn.disabled = currentPage <= 1;
+                if (nextBtn) nextBtn.disabled = currentPage >= totalPages;
+                
                 if (data.companies && data.companies.length > 0) {
                   tbody.innerHTML = data.companies.map(c => 
                     '<tr class="hover:bg-slate-50">' +
-                    '<td class="px-5 py-3 font-medium text-slate-800">' + c.name + '</td>' +
+                    '<td class="px-5 py-3 font-medium text-slate-800">' + (c.name || '-') + '</td>' +
+                    '<td class="px-5 py-3 text-slate-600 font-mono text-xs">' + (c.biz_num || '-') + '</td>' +
                     '<td class="px-5 py-3 text-slate-600">' + (c.ceo || '-') + '</td>' +
                     '<td class="px-5 py-3 text-slate-600">' + (c.industry || '-') + '</td>' +
+                    '<td class="px-5 py-3 text-slate-600">' + (c.employee_count || '-') + '</td>' +
                     '<td class="px-5 py-3 text-slate-600">' + (c.revenue || '-') + '</td>' +
+                    '<td class="px-5 py-3"><span class="px-2 py-0.5 text-xs bg-blue-50 text-blue-700 rounded">' + (c.certifications || '-') + '</span></td>' +
                     '<td class="px-5 py-3 text-slate-500 text-xs">' + (c.created_at || '-') + '</td>' +
                     '</tr>'
                   ).join('');
                 } else {
-                  tbody.innerHTML = '<tr><td colspan="5" class="px-5 py-8 text-center text-slate-400">등록된 기업이 없습니다.</td></tr>';
+                  tbody.innerHTML = '<tr><td colspan="8" class="px-5 py-8 text-center text-slate-400">등록된 기업이 없습니다.</td></tr>';
                 }
               }
             } catch(e) {
               console.log('Companies load error:', e);
             }
+          }
+          
+          // Excel Upload Functions
+          async function handleExcelUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const statusEl = document.getElementById('upload-status');
+            const messageEl = document.getElementById('upload-message');
+            const progressEl = document.getElementById('upload-progress');
+            const progressBar = document.getElementById('progress-bar');
+            
+            statusEl.classList.remove('hidden', 'bg-green-50', 'bg-red-50', 'bg-blue-50');
+            statusEl.classList.add('bg-blue-50');
+            messageEl.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>파일을 읽는 중...';
+            progressEl.classList.remove('hidden');
+            progressBar.style.width = '10%';
+            
+            try {
+              const formData = new FormData();
+              formData.append('file', file);
+              
+              progressBar.style.width = '30%';
+              messageEl.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>서버에 업로드 중...';
+              
+              const res = await fetch('/api/admin/companies/upload', {
+                method: 'POST',
+                body: formData
+              });
+              
+              progressBar.style.width = '80%';
+              
+              const result = await res.json();
+              
+              progressBar.style.width = '100%';
+              
+              if (result.success) {
+                statusEl.classList.remove('bg-blue-50');
+                statusEl.classList.add('bg-green-50');
+                messageEl.innerHTML = '<i class="fas fa-check-circle text-green-600 mr-2"></i>' +
+                  '<span class="text-green-700">업로드 완료! ' + result.inserted + '건 추가, ' + result.duplicates + '건 중복(스킵), ' + result.errors + '건 오류</span>';
+                
+                // Reload the company list
+                loadCompanies(1);
+              } else {
+                statusEl.classList.remove('bg-blue-50');
+                statusEl.classList.add('bg-red-50');
+                messageEl.innerHTML = '<i class="fas fa-exclamation-circle text-red-600 mr-2"></i>' +
+                  '<span class="text-red-700">업로드 실패: ' + (result.error || '알 수 없는 오류') + '</span>';
+              }
+            } catch(e) {
+              statusEl.classList.remove('bg-blue-50');
+              statusEl.classList.add('bg-red-50');
+              messageEl.innerHTML = '<i class="fas fa-exclamation-circle text-red-600 mr-2"></i>' +
+                '<span class="text-red-700">업로드 오류: ' + e.message + '</span>';
+            }
+            
+            // Reset file input
+            event.target.value = '';
+            
+            // Hide progress after 3 seconds
+            setTimeout(() => {
+              progressEl.classList.add('hidden');
+            }, 3000);
+          }
+          
+          function downloadTemplate() {
+            // Create CSV template
+            const headers = ['기업명', '사업자번호', '대표자', '업종코드', '설립일', '직원수', '매출액', '인증현황'];
+            const sample = ['(주)예시기업', '123-45-67890', '홍길동', 'C29', '2020-01-15', '50', '5000000000', 'ISO9001,ISO14001'];
+            
+            const csvContent = headers.join(',') + '\\n' + sample.join(',');
+            const blob = new Blob([new Uint8Array([0xEF, 0xBB, 0xBF]), csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = '기업DB_업로드_템플릿.csv';
+            link.click();
           }
           
           async function loadGrants() {
@@ -843,8 +994,8 @@ export const Admin = (props: { user: any, tab?: string }) => {
           
           // Search functions
           function searchCompanies() {
-            const q = document.getElementById('company-search').value;
-            console.log('Search companies:', q);
+            searchQuery = document.getElementById('company-search').value;
+            loadCompanies(1);
           }
           
           function searchGrants() {

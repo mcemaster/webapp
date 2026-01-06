@@ -17,6 +17,7 @@ CREATE TABLE IF NOT EXISTS companies (
   user_id INTEGER,
   name TEXT NOT NULL,
   biz_num TEXT UNIQUE, -- 사업자번호
+  ceo_name TEXT, -- 대표자명
   industry_code TEXT, -- KSIC
   founding_date DATE,
   employee_count INTEGER,

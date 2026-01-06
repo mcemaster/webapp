@@ -8,10 +8,10 @@ INSERT OR IGNORE INTO users (email, name, company_name, role, created_at) VALUES
 ('test3@test.com', '[TEST] 박지민', '[TEST] 테스트기업C', 'partner', datetime('now', '-1 days'));
 
 -- 2. 테스트 기업 데이터 (3개)
-INSERT OR IGNORE INTO companies (name, biz_num, industry_code, founding_date, employee_count, financial_json, certifications, analyzed_at) VALUES 
-('[TEST] 테스트기업A', '111-11-11111', 'C29', '2020-03-15', 45, '{"revenue": 5000000000, "operating_profit": 300000000}', 'ISO9001,ISO14001', datetime('now', '-5 days')),
-('[TEST] 테스트기업B', '222-22-22222', 'C30', '2018-07-20', 120, '{"revenue": 12000000000, "operating_profit": 800000000}', 'ISO9001,IATF16949', datetime('now', '-3 days')),
-('[TEST] 테스트기업C', '333-33-33333', 'J62', '2022-01-10', 25, '{"revenue": 2000000000, "operating_profit": 150000000}', 'ISO27001', datetime('now', '-1 days'));
+INSERT OR IGNORE INTO companies (name, biz_num, ceo_name, industry_code, founding_date, employee_count, financial_json, certifications, analyzed_at) VALUES 
+('[TEST] 테스트기업A', '111-11-11111', '[TEST] 홍대표', 'C29', '2020-03-15', 45, '{"revenue": 5000000000, "operating_profit": 300000000}', 'ISO9001,ISO14001', datetime('now', '-5 days')),
+('[TEST] 테스트기업B', '222-22-22222', '[TEST] 김대표', 'C30', '2018-07-20', 120, '{"revenue": 12000000000, "operating_profit": 800000000}', 'ISO9001,IATF16949', datetime('now', '-3 days')),
+('[TEST] 테스트기업C', '333-33-33333', '[TEST] 박대표', 'J62', '2022-01-10', 25, '{"revenue": 2000000000, "operating_profit": 150000000}', 'ISO27001', datetime('now', '-1 days'));
 
 -- 3. 테스트 파트너 신청 (3개)
 INSERT OR IGNORE INTO partners (company_name, ceo_name, biz_num, phone, status, applied_at) VALUES 
