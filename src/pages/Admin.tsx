@@ -207,6 +207,83 @@ export const Admin = (props: { user: any, tab?: string }) => {
               ${activeTab === 'companies' ? html`
                 <!-- Companies Table -->
                 <div class="space-y-4">
+                  <!-- Quick Actions Section -->
+                  <div class="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl shadow-sm p-5 text-white">
+                    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                      <div>
+                        <h3 class="font-bold text-lg flex items-center">
+                          <i class="fas fa-magic mr-2"></i>
+                          기업 DB 빠른 설정
+                        </h3>
+                        <p class="text-indigo-100 text-sm mt-1">30개의 기본 기업 데이터로 시작하거나 AI로 더 많은 기업을 생성하세요</p>
+                      </div>
+                      <div class="flex flex-wrap items-center gap-2">
+                        <button onclick="seedCompanies()" class="px-4 py-2 bg-white text-indigo-600 text-sm font-bold rounded-lg hover:bg-indigo-50 transition flex items-center shadow">
+                          <i class="fas fa-seedling mr-2"></i> 기본 데이터 추가 (30개)
+                        </button>
+                        <button onclick="generateCompaniesWithAI()" class="px-4 py-2 bg-indigo-700 text-white text-sm font-bold rounded-lg hover:bg-indigo-800 transition flex items-center border border-indigo-400">
+                          <i class="fas fa-robot mr-2"></i> AI로 기업 생성
+                        </button>
+                        <button onclick="clearAllCompanies()" class="px-3 py-2 bg-red-500/20 text-white text-sm font-medium rounded-lg hover:bg-red-500/40 transition border border-red-400/50">
+                          <i class="fas fa-trash-alt mr-1"></i> 전체 삭제
+                        </button>
+                      </div>
+                    </div>
+                    <!-- Action Status -->
+                    <div id="quick-action-status" class="hidden mt-4 p-3 bg-white/10 rounded-lg backdrop-blur">
+                      <div id="quick-action-message" class="text-sm"></div>
+                    </div>
+                  </div>
+                  
+                  <!-- AI Generation Modal -->
+                  <div id="ai-gen-modal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
+                    <div class="bg-white rounded-xl shadow-2xl max-w-md w-full mx-4 p-6">
+                      <h3 class="font-bold text-lg text-slate-800 mb-4 flex items-center">
+                        <i class="fas fa-robot text-indigo-600 mr-2"></i>
+                        AI 기업 데이터 생성
+                      </h3>
+                      <div class="space-y-4">
+                        <div>
+                          <label class="block text-sm font-medium text-slate-700 mb-1">업종 분야</label>
+                          <select id="ai-industry" class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            <option value="제조업">제조업 (금속/기계/전자)</option>
+                            <option value="IT/소프트웨어">IT/소프트웨어</option>
+                            <option value="바이오/헬스케어">바이오/헬스케어</option>
+                            <option value="물류/유통">물류/유통</option>
+                            <option value="건설/엔지니어링">건설/엔지니어링</option>
+                            <option value="식품/농업">식품/농업</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label class="block text-sm font-medium text-slate-700 mb-1">지역</label>
+                          <select id="ai-region" class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            <option value="전국">전국</option>
+                            <option value="서울/경기">서울/경기</option>
+                            <option value="인천/경기 서부">인천/경기 서부</option>
+                            <option value="부산/경남">부산/경남</option>
+                            <option value="대구/경북">대구/경북</option>
+                            <option value="대전/충청">대전/충청</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label class="block text-sm font-medium text-slate-700 mb-1">생성 개수</label>
+                          <select id="ai-count" class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            <option value="5">5개</option>
+                            <option value="10" selected>10개</option>
+                            <option value="20">20개</option>
+                          </select>
+                        </div>
+                        <div id="ai-gen-status" class="hidden p-3 bg-indigo-50 rounded-lg text-sm text-indigo-800"></div>
+                      </div>
+                      <div class="flex justify-end space-x-2 mt-6">
+                        <button onclick="closeAIModal()" class="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-lg transition">취소</button>
+                        <button onclick="executeAIGeneration()" id="ai-gen-btn" class="px-4 py-2 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition">
+                          <i class="fas fa-sparkles mr-1"></i> 생성하기
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                  
                   <!-- DART API Import Section -->
                   <div class="bg-white rounded-xl shadow-sm border border-blue-100 p-5">
                     <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
@@ -235,8 +312,8 @@ export const Admin = (props: { user: any, tab?: string }) => {
                       </div>
                     </div>
                     <!-- DART Status -->
-                    <div id="dart-status" class="hidden mt-4 p-4 bg-blue-50 rounded-lg border border-blue-100">
-                      <div id="dart-message" class="text-sm text-blue-800"></div>
+                    <div id="dart-fetch-status" class="hidden mt-4 p-4 bg-blue-50 rounded-lg border border-blue-100">
+                      <div id="dart-fetch-message" class="text-sm text-blue-800"></div>
                     </div>
                     <!-- Sample Codes -->
                     <div id="sample-codes" class="hidden mt-4 p-4 bg-slate-50 rounded-lg">
@@ -1403,6 +1480,116 @@ export const Admin = (props: { user: any, tab?: string }) => {
           }
           
           // ==========================================
+          // 기업 DB 빠른 설정 Functions
+          // ==========================================
+          
+          async function seedCompanies() {
+            if (!confirm('30개의 기본 기업 데이터를 추가하시겠습니까?\\n(중복 데이터는 자동으로 스킵됩니다)')) return;
+            
+            const statusEl = document.getElementById('quick-action-status');
+            const messageEl = document.getElementById('quick-action-message');
+            statusEl.classList.remove('hidden');
+            messageEl.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>기본 기업 데이터를 추가하는 중...';
+            
+            try {
+              const res = await fetch('/api/admin/companies/seed', { method: 'POST' });
+              const result = await res.json();
+              
+              if (result.success) {
+                messageEl.innerHTML = '<i class="fas fa-check-circle mr-2"></i>' + result.message;
+                loadCompanies(1);
+              } else {
+                messageEl.innerHTML = '<i class="fas fa-exclamation-circle mr-2"></i>오류: ' + (result.error || '알 수 없는 오류');
+              }
+            } catch(e) {
+              messageEl.innerHTML = '<i class="fas fa-exclamation-circle mr-2"></i>오류: ' + e.message;
+            }
+            
+            setTimeout(() => { statusEl.classList.add('hidden'); }, 5000);
+          }
+          
+          function generateCompaniesWithAI() {
+            document.getElementById('ai-gen-modal').classList.remove('hidden');
+          }
+          
+          function closeAIModal() {
+            document.getElementById('ai-gen-modal').classList.add('hidden');
+            document.getElementById('ai-gen-status').classList.add('hidden');
+          }
+          
+          async function executeAIGeneration() {
+            const industry = document.getElementById('ai-industry').value;
+            const region = document.getElementById('ai-region').value;
+            const count = parseInt(document.getElementById('ai-count').value);
+            
+            const statusEl = document.getElementById('ai-gen-status');
+            const btn = document.getElementById('ai-gen-btn');
+            
+            statusEl.classList.remove('hidden');
+            statusEl.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>AI가 ' + industry + ' 분야의 기업 ' + count + '개를 생성 중... (약 10-30초 소요)';
+            btn.disabled = true;
+            btn.classList.add('opacity-50', 'cursor-not-allowed');
+            
+            try {
+              const res = await fetch('/api/admin/companies/generate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ industry, region, count })
+              });
+              const result = await res.json();
+              
+              if (result.success) {
+                statusEl.innerHTML = '<i class="fas fa-check-circle text-green-600 mr-2"></i>' + result.message;
+                loadCompanies(1);
+                
+                // Close modal after 2 seconds on success
+                setTimeout(() => {
+                  closeAIModal();
+                  // Show message in quick action status
+                  const quickStatus = document.getElementById('quick-action-status');
+                  const quickMsg = document.getElementById('quick-action-message');
+                  quickStatus.classList.remove('hidden');
+                  quickMsg.innerHTML = '<i class="fas fa-check-circle mr-2"></i>' + result.message;
+                  setTimeout(() => { quickStatus.classList.add('hidden'); }, 5000);
+                }, 2000);
+              } else {
+                statusEl.innerHTML = '<i class="fas fa-exclamation-circle text-red-600 mr-2"></i>' + (result.error || '생성 실패');
+              }
+            } catch(e) {
+              statusEl.innerHTML = '<i class="fas fa-exclamation-circle text-red-600 mr-2"></i>오류: ' + e.message;
+            }
+            
+            btn.disabled = false;
+            btn.classList.remove('opacity-50', 'cursor-not-allowed');
+          }
+          
+          async function clearAllCompanies() {
+            if (!confirm('⚠️ 정말로 모든 기업 데이터를 삭제하시겠습니까?\\n\\n이 작업은 되돌릴 수 없습니다.')) return;
+            if (!confirm('마지막 확인: 전체 기업 DB가 삭제됩니다. 계속하시겠습니까?')) return;
+            
+            const statusEl = document.getElementById('quick-action-status');
+            const messageEl = document.getElementById('quick-action-message');
+            statusEl.classList.remove('hidden');
+            messageEl.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>모든 기업 데이터를 삭제하는 중...';
+            
+            try {
+              const res = await fetch('/api/admin/companies/clear', { method: 'POST' });
+              const result = await res.json();
+              
+              if (result.success) {
+                messageEl.innerHTML = '<i class="fas fa-check-circle mr-2"></i>' + result.message;
+                loadCompanies(1);
+              } else {
+                messageEl.innerHTML = '<i class="fas fa-exclamation-circle mr-2"></i>오류: ' + (result.error || '알 수 없는 오류');
+              }
+            } catch(e) {
+              messageEl.innerHTML = '<i class="fas fa-exclamation-circle mr-2"></i>오류: ' + e.message;
+            }
+            
+            setTimeout(() => { statusEl.classList.add('hidden'); }, 5000);
+          }
+          
+          // ==========================================
           // DART API Integration Functions
           // ==========================================
           
@@ -1419,9 +1606,9 @@ export const Admin = (props: { user: any, tab?: string }) => {
               return;
             }
             
-            const statusEl = document.getElementById('dart-status');
+            const statusEl = document.getElementById('dart-fetch-status');
             statusEl.classList.remove('hidden');
-            document.getElementById('dart-message').innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>DART에서 기업 정보를 수집하는 중... (' + codes.length + '개 기업)';
+            document.getElementById('dart-fetch-message').innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>DART에서 기업 정보를 수집하는 중... (' + codes.length + '개 기업)';
             
             try {
               const res = await fetch('/api/admin/dart/fetch-companies', {
@@ -1433,19 +1620,19 @@ export const Admin = (props: { user: any, tab?: string }) => {
               const result = await res.json();
               
               if (result.success) {
-                document.getElementById('dart-message').innerHTML = 
+                document.getElementById('dart-fetch-message').innerHTML = 
                   '<i class="fas fa-check-circle text-green-600 mr-2"></i>' +
                   '<span class="text-green-800">수집 완료! ' + result.inserted + '건 추가, ' + result.updated + '건 업데이트, ' + result.errors + '건 오류</span>';
                 
                 // Reload the company list
                 loadCompanies(1);
               } else {
-                document.getElementById('dart-message').innerHTML = 
+                document.getElementById('dart-fetch-message').innerHTML = 
                   '<i class="fas fa-exclamation-circle text-red-600 mr-2"></i>' +
                   '<span class="text-red-800">수집 실패: ' + (result.error || '알 수 없는 오류') + '</span>';
               }
             } catch(e) {
-              document.getElementById('dart-message').innerHTML = 
+              document.getElementById('dart-fetch-message').innerHTML = 
                 '<i class="fas fa-exclamation-circle text-red-600 mr-2"></i>' +
                 '<span class="text-red-800">오류: ' + e.message + '</span>';
             }

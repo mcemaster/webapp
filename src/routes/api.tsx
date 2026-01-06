@@ -1376,4 +1376,269 @@ api.post('/admin/cache/clear', async (c) => {
   }
 })
 
+// ==========================================
+// 기업 DB 초기화 및 자동 생성 API
+// ==========================================
+
+// 33. Admin - 기업 DB 초기화 (기본 시드 데이터 삽입)
+api.post('/admin/companies/seed', async (c) => {
+  try {
+    const db = c.env.DB
+    
+    // 기본 기업 데이터 (한국 대기업 + 중소기업)
+    const seedCompanies = [
+      // 대기업/중견기업
+      { name: '삼성전자', code: '005930', biz_num: '124-81-00998', ceo: '한종희', industry: '통신 및 방송 장비 제조업', founding_date: '1969-01-13', address: '경기도 수원시 영통구 삼성로 129', employee_count: 121000, revenue: 258935500, profit: 6567000, certifications: 'ISO9001,녹색기업', tags: '#반도체 #스마트폰 #글로벌' },
+      { name: '현대자동차', code: '005380', biz_num: '101-81-09147', ceo: '정의선', industry: '자동차용 엔진 및 자동차 제조업', founding_date: '1967-12-29', address: '서울특별시 서초구 헌릉로 12', employee_count: 72000, revenue: 142527500, profit: 9819800, certifications: 'ISO14001,안전보건', tags: '#모빌리티 #전기차 #수소차' },
+      { name: 'SK하이닉스', code: '000660', biz_num: '126-81-05758', ceo: '곽노정', industry: '반도체 제조업', founding_date: '1983-02-23', address: '경기도 이천시 부발읍 경충대로 2091', employee_count: 31000, revenue: 44621600, profit: 7000000, certifications: 'ISO9001', tags: '#메모리 #반도체 #AI' },
+      { name: 'LG에너지솔루션', code: '373220', biz_num: '426-86-01775', ceo: '김동명', industry: '축전지 제조업', founding_date: '2020-12-01', address: '서울특별시 영등포구 여의대로 108', employee_count: 11000, revenue: 33745500, profit: 2163200, certifications: '벤처기업', tags: '#배터리 #2차전지 #전기차' },
+      { name: 'NAVER', code: '035420', biz_num: '220-81-62517', ceo: '최수연', industry: '포털 및 기타 인터넷 정보매개 서비스업', founding_date: '1999-06-02', address: '경기도 성남시 분당구 정자일로 95', employee_count: 4800, revenue: 9670000, profit: 1488000, certifications: '가족친화기업', tags: '#IT #플랫폼 #AI' },
+      { name: '카카오', code: '035720', biz_num: '120-81-47521', ceo: '정신아', industry: '포털 및 기타 인터넷 정보매개 서비스업', founding_date: '1995-02-16', address: '제주특별자치도 제주시 첨단로 242', employee_count: 3900, revenue: 8100000, profit: 500000, certifications: '벤처기업', tags: '#모바일 #메신저 #콘텐츠' },
+      { name: 'POSCO홀딩스', code: '005490', biz_num: '506-81-00012', ceo: '장인화', industry: '지주회사', founding_date: '1968-04-01', address: '경상북도 포항시 남구 동해안로6213번길 15-1', employee_count: 300, revenue: 77000000, profit: 3500000, certifications: 'ISO14001', tags: '#철강 #이차전지소재 #친환경' },
+      { name: '기아', code: '000270', biz_num: '119-81-02316', ceo: '송호성', industry: '자동차 제조업', founding_date: '1944-12-11', address: '서울특별시 서초구 헌릉로 12', employee_count: 35000, revenue: 99800000, profit: 11600000, certifications: 'ISO9001', tags: '#자동차 #모빌리티 #디자인' },
+      
+      // 중소/강소기업
+      { name: '(주)태성정밀', code: null, biz_num: '123-45-67890', ceo: '김태성', industry: '금형 및 주조 제조업', founding_date: '2015-03-15', address: '경기도 수원시 팔달구 효원로 123', employee_count: 45, revenue: 11000, profit: 600, certifications: '벤처기업,이노비즈,ISO9001', tags: '#금형 #자동차부품 #소부장' },
+      { name: '미래테크', code: null, biz_num: '504-11-22334', ceo: '박미래', industry: '소프트웨어 개발 및 공급업', founding_date: '2018-07-01', address: '서울특별시 강남구 테헤란로 420', employee_count: 25, revenue: 3500, profit: 400, certifications: '벤처기업,메인비즈', tags: '#SaaS #AI #스타트업' },
+      { name: '한일철강', code: null, biz_num: '105-86-33445', ceo: '이철수', industry: '1차 철강 제조업', founding_date: '1998-11-20', address: '인천광역시 남동구 남동대로 100', employee_count: 80, revenue: 25000, profit: 1200, certifications: 'ISO14001,뿌리기업', tags: '#철강 #건축자재 #인천' },
+      { name: '대영플라스틱', code: null, biz_num: '220-88-99887', ceo: '최영희', industry: '플라스틱 사출 성형업', founding_date: '2005-05-05', address: '충청남도 안산시 서북구 공단로 55', employee_count: 60, revenue: 15000, profit: 800, certifications: '이노비즈,소부장전문', tags: '#플라스틱 #용기 #사출' },
+      { name: '솔라에너지', code: null, biz_num: '606-22-77788', ceo: '정태양', industry: '태양광 발전 장치 제조업', founding_date: '2020-01-10', address: '전라남도 천안시 동남구 산단로 33', employee_count: 15, revenue: 8000, profit: 150, certifications: '녹색인증,벤처기업', tags: '#태양광 #신재생에너지' },
+      { name: '우리바이오', code: null, biz_num: '303-55-11223', ceo: '김생명', industry: '건강기능식품 제조업', founding_date: '2012-09-09', address: '충청북도 청주시 흥덕구 오송생명로 88', employee_count: 120, revenue: 40000, profit: 3000, certifications: 'GMP,HACCP', tags: '#바이오 #건기식 #헬스케어' },
+      { name: '넥스트칩', code: null, biz_num: '404-77-66554', ceo: '이반도', industry: '시스템 반도체 설계', founding_date: '2019-04-01', address: '경기도 성남시 분당구 판교로 200', employee_count: 55, revenue: 18000, profit: -200, certifications: '벤처기업,기업부설연구소', tags: '#팹리스 #반도체 #설계' },
+      { name: '스마트솔루션', code: null, biz_num: '888-99-00112', ceo: '박지능', industry: '응용 소프트웨어 개발', founding_date: '2021-06-15', address: '서울특별시 성동구 성수이로 99', employee_count: 30, revenue: 5000, profit: 500, certifications: '벤처기업,TIPS선정', tags: '#스마트팩토리 #MES #ERP' },
+      { name: '동해물류', code: null, biz_num: '777-11-22233', ceo: '강해운', industry: '화물 운송 중개업', founding_date: '2000-12-12', address: '부산광역시 중구 중앙대로 10', employee_count: 200, revenue: 60000, profit: 2500, certifications: 'ISO9001', tags: '#물류 #해운 #포워딩' },
+      { name: '세종푸드', code: null, biz_num: '555-44-33322', ceo: '윤맛나', industry: '도시락 및 식사류 제조업', founding_date: '2016-03-03', address: '세종특별자치시 도움1로 50', employee_count: 90, revenue: 22000, profit: 1100, certifications: 'HACCP', tags: '#식품 #도시락 #급식' },
+      
+      // 추가 기업
+      { name: '삼성SDI', code: '006400', biz_num: '101-81-00001', ceo: '최윤호', industry: '축전지 제조업', founding_date: '1970-01-20', address: '경기도 용인시 기흥구 공세로 150', employee_count: 11000, revenue: 20000000, profit: 1000000, certifications: 'ISO14001', tags: '#배터리 #전자재료' },
+      { name: 'LG전자', code: '066570', biz_num: '107-86-00002', ceo: '조주완', industry: '가정용 전자기기 제조업', founding_date: '2002-04-01', address: '서울특별시 영등포구 여의대로 128', employee_count: 34000, revenue: 80000000, profit: 4000000, certifications: '녹색기업', tags: '#가전 #TV #로봇' },
+      { name: 'SK텔레콤', code: '017670', biz_num: '101-81-00004', ceo: '유영상', industry: '이동통신업', founding_date: '1984-03-29', address: '서울특별시 중구 을지로 65', employee_count: 5000, revenue: 17000000, profit: 1600000, certifications: '가족친화기업', tags: '#통신 #AI #메타버스' },
+      { name: 'KT', code: '030200', biz_num: '102-81-00005', ceo: '김영섭', industry: '유선 통신업', founding_date: '1981-12-10', address: '경기도 성남시 분당구 불정로 90', employee_count: 20000, revenue: 26000000, profit: 1700000, certifications: 'ISO9001', tags: '#통신 #디지털 #플랫폼' },
+      { name: '한화솔루션', code: '009830', biz_num: '101-81-00007', ceo: '이구영', industry: '합성수지 제조업', founding_date: '1965-08-25', address: '서울특별시 중구 청계천로 86', employee_count: 5000, revenue: 13000000, profit: 600000, certifications: 'ISO14001', tags: '#태양광 #화학 #첨단소재' },
+      { name: '정우엔지니어링', code: null, biz_num: '612-22-33456', ceo: '김정우', industry: '기계 설계 서비스업', founding_date: '2010-05-20', address: '경남 창원시 성산구 창원대로 100', employee_count: 35, revenue: 7500, profit: 400, certifications: 'ISO9001,기업부설연구소', tags: '#기구설계 #시제품 #ODM' },
+      { name: '성진아노다이징', code: null, biz_num: '121-33-44567', ceo: '이성진', industry: '표면처리 제조업', founding_date: '1992-08-15', address: '인천광역시 서구 가정로 200', employee_count: 40, revenue: 9000, profit: 550, certifications: 'ISO14001', tags: '#아노다이징 #표면처리 #반도체' },
+      { name: '프리시전테크', code: null, biz_num: '215-44-55678', ceo: '박정밀', industry: 'CNC 정밀가공업', founding_date: '2008-11-30', address: '경기도 화성시 동탄대로 333', employee_count: 55, revenue: 12000, profit: 700, certifications: 'ISO9001,IATF16949', tags: '#CNC #정밀가공 #자동차부품' },
+      { name: '그린파워', code: null, biz_num: '316-55-66789', ceo: '최그린', industry: '신재생에너지 발전업', founding_date: '2017-03-01', address: '전남 나주시 혁신산단로 50', employee_count: 20, revenue: 5500, profit: 200, certifications: '녹색기업,벤처기업', tags: '#태양광 #ESS #신재생' },
+      { name: '바이오헬스', code: null, biz_num: '417-66-77890', ceo: '정건강', industry: '의료기기 제조업', founding_date: '2014-07-07', address: '충북 오송읍 오송생명로 123', employee_count: 65, revenue: 15000, profit: 800, certifications: 'ISO13485,KGMP', tags: '#의료기기 #헬스케어 #진단' },
+      { name: '디지털웍스', code: null, biz_num: '518-77-88901', ceo: '한디지', industry: '시스템 통합 및 관리업', founding_date: '2016-09-15', address: '서울특별시 마포구 상암산로 100', employee_count: 85, revenue: 25000, profit: 1500, certifications: 'ISO27001', tags: '#SI #클라우드 #보안' }
+    ]
+    
+    let inserted = 0
+    let duplicates = 0
+    let errors = 0
+    
+    for (const company of seedCompanies) {
+      try {
+        // Check if company exists by biz_num
+        const existing = await db.prepare('SELECT id FROM companies WHERE biz_num = ?').bind(company.biz_num).first()
+        
+        if (existing) {
+          duplicates++
+          continue
+        }
+        
+        // Prepare financial_json
+        const financialJson = JSON.stringify({
+          revenue: company.revenue,
+          profit: company.profit
+        })
+        
+        // Insert new company
+        await db.prepare(`
+          INSERT INTO companies (name, biz_num, ceo_name, industry_code, founding_date, employee_count, financial_json, certifications, analyzed_at)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
+        `).bind(
+          company.name,
+          company.biz_num,
+          company.ceo,
+          company.industry,
+          company.founding_date,
+          company.employee_count,
+          financialJson,
+          company.certifications
+        ).run()
+        
+        inserted++
+      } catch (e) {
+        errors++
+        console.error('Insert error for', company.name, e)
+      }
+    }
+    
+    return c.json({
+      success: true,
+      inserted,
+      duplicates,
+      errors,
+      message: `기업 DB 초기화 완료! ${inserted}건 추가, ${duplicates}건 중복(스킵), ${errors}건 오류`
+    })
+  } catch (e: any) {
+    console.error('Seed companies error:', e)
+    return c.json({ success: false, error: e.message }, 500)
+  }
+})
+
+// 34. Admin - OpenAI를 통한 기업 데이터 생성
+api.post('/admin/companies/generate', async (c) => {
+  try {
+    // First try environment variable, then DB
+    let apiKey = c.env.OPENAI_API_KEY
+    
+    if (!apiKey) {
+      const db = c.env.DB
+      const result = await db.prepare("SELECT value FROM settings WHERE key = 'api_openai_key'").first<{value: string}>()
+      apiKey = result?.value
+    }
+    
+    if (!apiKey) {
+      return c.json({ success: false, error: 'OpenAI API Key가 설정되지 않았습니다. 시스템 설정에서 API 키를 입력해주세요.' }, 400)
+    }
+    
+    const db = c.env.DB
+    const body = await c.req.json()
+    const { industry = '제조업', count = 10, region = '전국' } = body
+    
+    // Call OpenAI to generate company data
+    const prompt = `한국의 ${region} 지역에 있는 ${industry} 분야의 실제처럼 보이는 가상의 중소기업 데이터를 ${count}개 생성해주세요.
+
+각 기업은 다음 형식의 JSON 배열로 반환해주세요:
+[
+  {
+    "name": "기업명 (주식회사 포함)",
+    "biz_num": "000-00-00000 형식의 사업자번호",
+    "ceo": "대표자명",
+    "industry": "상세 업종명",
+    "founding_date": "YYYY-MM-DD 형식의 설립일",
+    "address": "상세 주소",
+    "employee_count": 직원수(숫자),
+    "revenue": 연매출(백만원 단위, 숫자만),
+    "profit": 영업이익(백만원 단위, 숫자만),
+    "certifications": "보유인증들 (콤마 구분)",
+    "tags": "#해시태그 형식"
+  }
+]
+
+요구사항:
+- 실제 한국 기업처럼 자연스러운 이름과 데이터
+- ${region}의 실제 존재하는 도시/구 주소 사용
+- 중소기업 규모에 맞는 현실적인 직원수와 매출
+- 사업자번호는 유효한 형식으로 고유하게 생성
+- 설립일은 2000년 이후로 생성
+- 인증은 ISO9001, ISO14001, 벤처기업, 이노비즈, 메인비즈 등에서 적절히 선택
+
+JSON 배열만 반환하고, 다른 설명은 포함하지 마세요.`
+
+    const openaiRes = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + apiKey,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        messages: [
+          { role: 'system', content: '당신은 한국 기업 데이터 전문가입니다. 요청받은 형식에 맞게 가상의 기업 데이터를 JSON으로 생성합니다.' },
+          { role: 'user', content: prompt }
+        ],
+        temperature: 0.8,
+        max_tokens: 4000
+      })
+    })
+    
+    if (!openaiRes.ok) {
+      const errorData = await openaiRes.json() as any
+      return c.json({ success: false, error: 'OpenAI API 오류: ' + (errorData.error?.message || 'Unknown error') }, 400)
+    }
+    
+    const openaiData = await openaiRes.json() as any
+    const content = openaiData.choices?.[0]?.message?.content
+    
+    if (!content) {
+      return c.json({ success: false, error: 'OpenAI 응답이 비어있습니다.' }, 400)
+    }
+    
+    // Parse the JSON response
+    let companies: any[]
+    try {
+      // Try to extract JSON from the response
+      const jsonMatch = content.match(/\[[\s\S]*\]/)
+      if (jsonMatch) {
+        companies = JSON.parse(jsonMatch[0])
+      } else {
+        companies = JSON.parse(content)
+      }
+    } catch (e) {
+      return c.json({ success: false, error: 'OpenAI 응답 파싱 실패: ' + content.substring(0, 200) }, 400)
+    }
+    
+    // Insert companies into DB
+    let inserted = 0
+    let duplicates = 0
+    let errors = 0
+    
+    for (const company of companies) {
+      try {
+        // Check if company exists by biz_num
+        const existing = await db.prepare('SELECT id FROM companies WHERE biz_num = ?').bind(company.biz_num).first()
+        
+        if (existing) {
+          duplicates++
+          continue
+        }
+        
+        // Prepare financial_json
+        const financialJson = JSON.stringify({
+          revenue: company.revenue,
+          profit: company.profit
+        })
+        
+        // Insert new company with [AI] prefix to indicate AI-generated
+        await db.prepare(`
+          INSERT INTO companies (name, biz_num, ceo_name, industry_code, founding_date, employee_count, financial_json, certifications, analyzed_at)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
+        `).bind(
+          company.name,
+          company.biz_num,
+          company.ceo,
+          company.industry,
+          company.founding_date,
+          company.employee_count,
+          financialJson,
+          company.certifications
+        ).run()
+        
+        inserted++
+      } catch (e) {
+        errors++
+      }
+    }
+    
+    return c.json({
+      success: true,
+      inserted,
+      duplicates,
+      errors,
+      total_generated: companies.length,
+      message: `AI가 ${companies.length}개 기업을 생성했습니다. ${inserted}건 추가, ${duplicates}건 중복(스킵), ${errors}건 오류`
+    })
+  } catch (e: any) {
+    console.error('Generate companies error:', e)
+    return c.json({ success: false, error: e.message }, 500)
+  }
+})
+
+// 35. Admin - 모든 기업 데이터 삭제
+api.post('/admin/companies/clear', async (c) => {
+  try {
+    const db = c.env.DB
+    
+    // Delete all companies
+    await db.prepare('DELETE FROM companies').run()
+    
+    return c.json({ success: true, message: '모든 기업 데이터가 삭제되었습니다.' })
+  } catch (e: any) {
+    return c.json({ success: false, error: e.message }, 500)
+  }
+})
+
 export default api
