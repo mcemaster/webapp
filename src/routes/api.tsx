@@ -252,6 +252,56 @@ api.get('/admin/api-usage', async (c) => {
       ORDER BY date DESC
     `).all()
     
+    // DART 출처 기업 수
+    const dartCompanies = await db.prepare(`
+      SELECT COUNT(*) as count FROM companies WHERE source = 'dart'
+    `).first<{count: number}>()
+    
+    // DART 마지막 동기화
+    const lastDartSync = await db.prepare(`
+      SELECT MAX(updated_at) as last_sync FROM companies WHERE source = 'dart'
+    `).first<{last_sync: string}>()
+    
+    // 네이버 금융 크롤링 기업 수
+    const naverCompanies = await db.prepare(`
+      SELECT COUNT(*) as count FROM companies WHERE source = 'naver_finance'
+    `).first<{count: number}>()
+    
+    // 전체 기업 수
+    const totalCompanies = await db.prepare(`
+      SELECT COUNT(*) as count FROM companies
+    `).first<{count: number}>()
+    
+    // D1 저장 용량 추정 (각 테이블의 대략적인 행 수 기반)
+    const companiesCount = totalCompanies?.count || 0
+    const grantsCount = await db.prepare(`SELECT COUNT(*) as count FROM grants`).first<{count: number}>()
+    const usersCount = await db.prepare(`SELECT COUNT(*) as count FROM users`).first<{count: number}>()
+    const logsCount = await db.prepare(`SELECT COUNT(*) as count FROM analysis_logs`).first<{count: number}>()
+    const apiUsageCount = await db.prepare(`SELECT COUNT(*) as count FROM api_usage`).first<{count: number}>()
+    
+    // 대략적인 저장 용량 추정 (row당 약 1KB 기준)
+    const estimatedStorageMB = (
+      (companiesCount * 2) + // 기업 데이터는 더 큼
+      ((grantsCount?.count || 0) * 1.5) +
+      ((usersCount?.count || 0) * 0.5) +
+      ((logsCount?.count || 0) * 1) +
+      ((apiUsageCount?.count || 0) * 0.2)
+    ) / 1024
+    
+    // D1 읽기/쓰기 추정 (오늘 기준)
+    const d1ReadsToday = (dartToday?.calls || 0) * 3 + (openaiToday?.calls || 0) * 5
+    const d1WritesToday = companiesCount > 0 ? Math.min(companiesCount, 10000) : 100
+    
+    // Cloudflare 비용 계산 (무료 티어 초과 시에만)
+    let cfEstimatedCost = 0
+    const d1ReadsOverage = Math.max(0, d1ReadsToday * 30 - 5000000) // 월간 추정
+    const d1WritesOverage = Math.max(0, d1WritesToday * 30 - 100000)
+    const storageOverageMB = Math.max(0, estimatedStorageMB - 5120) // 5GB 초과
+    
+    if (d1ReadsOverage > 0) cfEstimatedCost += (d1ReadsOverage / 1000000) * 0.001
+    if (d1WritesOverage > 0) cfEstimatedCost += (d1WritesOverage / 1000000) * 1.00
+    if (storageOverageMB > 0) cfEstimatedCost += (storageOverageMB / 1024) * 0.75
+    
     return c.json({
       success: true,
       openai: {
@@ -280,7 +330,44 @@ api.get('/admin/api-usage', async (c) => {
       dart: {
         today: { calls: dartToday?.calls || 0 },
         month: { calls: dartMonth?.calls || 0 },
-        daily_limit: 10000
+        daily_limit: 10000,
+        companies: dartCompanies?.count || 0,
+        lastSync: lastDartSync?.last_sync ? new Date(lastDartSync.last_sync).toLocaleString('ko-KR') : '-'
+      },
+      cloudflare: {
+        pages: {
+          requests: companiesCount * 2, // 대략적인 페이지 요청 추정
+          bandwidth_mb: 0 // 무료 티어 내
+        },
+        d1: {
+          reads: d1ReadsToday,
+          writes: d1WritesToday,
+          storage_mb: estimatedStorageMB,
+          rows: {
+            companies: companiesCount,
+            grants: grantsCount?.count || 0,
+            users: usersCount?.count || 0,
+            logs: logsCount?.count || 0,
+            api_usage: apiUsageCount?.count || 0
+          }
+        },
+        workers: {
+          requests: (dartToday?.calls || 0) + (openaiToday?.calls || 0) * 2,
+          cpu_time_ms: 0
+        },
+        estimated_cost: cfEstimatedCost,
+        limits: {
+          d1_reads_daily: 5000000,
+          d1_writes_daily: 100000,
+          d1_storage_gb: 5,
+          workers_requests_daily: 100000
+        }
+      },
+      naver: {
+        companies: naverCompanies?.count || 0
+      },
+      github: {
+        deploys: 0 // 별도 추적 필요
       },
       daily: dailyUsage.results || [],
       // 가격 정보 (2024년 기준 GPT-4o-mini)

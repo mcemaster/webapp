@@ -183,91 +183,280 @@ export const Admin = (props: { user: any, tab?: string }) => {
                     </div>
                   </div>
                   
-                  <!-- API Usage & Cost Dashboard -->
-                  <div class="bg-gradient-to-r from-violet-600 to-purple-600 rounded-xl shadow-lg p-6 text-white">
-                    <div class="flex items-center justify-between mb-4">
-                      <h3 class="text-lg font-bold flex items-center">
-                        <i class="fas fa-chart-line mr-2"></i>
-                        API 사용량 & 비용 현황
-                      </h3>
-                      <button onclick="refreshApiUsage()" class="px-3 py-1 bg-white/20 rounded-lg text-sm hover:bg-white/30 transition">
-                        <i class="fas fa-sync-alt mr-1"></i> 새로고침
-                      </button>
-                    </div>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                      <!-- OpenAI Today -->
-                      <div class="bg-white/10 backdrop-blur rounded-xl p-4">
-                        <div class="flex items-center justify-between mb-2">
-                          <span class="text-violet-200 text-sm">OpenAI 오늘</span>
-                          <span class="w-8 h-8 bg-green-400/20 rounded-lg flex items-center justify-center">
-                            <i class="fas fa-brain text-green-300"></i>
-                          </span>
-                        </div>
-                        <p class="text-2xl font-bold" id="openai-today-tokens">0</p>
-                        <p class="text-sm text-violet-200">토큰</p>
-                        <p class="text-lg font-semibold text-green-300 mt-1" id="openai-today-cost">$0.00</p>
+                  <!-- 전체 서비스 사용량 대시보드 -->
+                  <div class="space-y-4">
+                    <!-- 총 비용 요약 -->
+                    <div class="bg-gradient-to-r from-slate-800 to-slate-900 rounded-xl shadow-lg p-6 text-white">
+                      <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-bold flex items-center">
+                          <i class="fas fa-wallet mr-2"></i>
+                          전체 서비스 사용량 & 비용
+                        </h3>
+                        <button onclick="refreshAllUsage()" class="px-3 py-1 bg-white/20 rounded-lg text-sm hover:bg-white/30 transition">
+                          <i class="fas fa-sync-alt mr-1"></i> 새로고침
+                        </button>
                       </div>
                       
-                      <!-- OpenAI Month -->
-                      <div class="bg-white/10 backdrop-blur rounded-xl p-4">
-                        <div class="flex items-center justify-between mb-2">
-                          <span class="text-violet-200 text-sm">OpenAI 이번달</span>
-                          <span class="w-8 h-8 bg-blue-400/20 rounded-lg flex items-center justify-center">
-                            <i class="fas fa-calendar text-blue-300"></i>
-                          </span>
+                      <!-- 총 비용 카드 -->
+                      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                        <div class="bg-gradient-to-br from-emerald-500 to-green-600 rounded-xl p-4">
+                          <p class="text-emerald-100 text-sm">이번달 총 비용</p>
+                          <p class="text-3xl font-bold mt-1" id="total-month-cost">$0.00</p>
+                          <p class="text-emerald-200 text-xs mt-1">예상 월말: <span id="total-estimated">$0.00</span></p>
                         </div>
-                        <p class="text-2xl font-bold" id="openai-month-tokens">0</p>
-                        <p class="text-sm text-violet-200">토큰</p>
-                        <p class="text-lg font-semibold text-blue-300 mt-1" id="openai-month-cost">$0.00</p>
-                      </div>
-                      
-                      <!-- OpenAI Total -->
-                      <div class="bg-white/10 backdrop-blur rounded-xl p-4">
-                        <div class="flex items-center justify-between mb-2">
-                          <span class="text-violet-200 text-sm">OpenAI 누적</span>
-                          <span class="w-8 h-8 bg-amber-400/20 rounded-lg flex items-center justify-center">
-                            <i class="fas fa-coins text-amber-300"></i>
-                          </span>
+                        <div class="bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl p-4">
+                          <p class="text-blue-100 text-sm">누적 총 비용</p>
+                          <p class="text-3xl font-bold mt-1" id="total-all-cost">$0.00</p>
+                          <p class="text-blue-200 text-xs mt-1">서비스 시작일부터</p>
                         </div>
-                        <p class="text-2xl font-bold" id="openai-total-tokens">0</p>
-                        <p class="text-sm text-violet-200">토큰</p>
-                        <p class="text-lg font-semibold text-amber-300 mt-1" id="openai-total-cost">$0.00</p>
-                      </div>
-                      
-                      <!-- DART API -->
-                      <div class="bg-white/10 backdrop-blur rounded-xl p-4">
-                        <div class="flex items-center justify-between mb-2">
-                          <span class="text-violet-200 text-sm">DART API</span>
-                          <span class="w-8 h-8 bg-cyan-400/20 rounded-lg flex items-center justify-center">
-                            <i class="fas fa-building text-cyan-300"></i>
-                          </span>
+                        <div class="bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl p-4">
+                          <p class="text-amber-100 text-sm">오늘 API 호출</p>
+                          <p class="text-3xl font-bold mt-1" id="total-today-calls">0</p>
+                          <p class="text-amber-200 text-xs mt-1">전체 서비스 합계</p>
                         </div>
-                        <p class="text-2xl font-bold"><span id="dart-today-calls">0</span> / 10,000</p>
-                        <p class="text-sm text-violet-200">오늘 호출 (일일 제한)</p>
-                        <p class="text-lg font-semibold text-cyan-300 mt-1"><span id="dart-month-calls">0</span> 이번달</p>
+                        <div class="bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl p-4">
+                          <p class="text-purple-100 text-sm">이번달 API 호출</p>
+                          <p class="text-3xl font-bold mt-1" id="total-month-calls">0</p>
+                          <p class="text-purple-200 text-xs mt-1">전체 서비스 합계</p>
+                        </div>
                       </div>
                     </div>
                     
-                    <!-- Cost Details -->
-                    <div class="mt-4 p-4 bg-white/5 rounded-xl">
-                      <h4 class="text-sm font-medium text-violet-200 mb-2">💡 비용 계산 기준 (GPT-4o-mini)</h4>
-                      <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
-                        <div class="bg-white/10 rounded-lg px-3 py-2">
-                          <span class="text-violet-300">Input</span>
-                          <span class="text-white font-mono ml-2">$0.15 / 1M tokens</span>
+                    <!-- Cloudflare 사용량 -->
+                    <div class="bg-gradient-to-r from-orange-500 to-amber-500 rounded-xl shadow-lg p-6 text-white">
+                      <div class="flex items-center mb-4">
+                        <img src="https://www.cloudflare.com/favicon.ico" class="w-6 h-6 mr-2" alt="CF" onerror="this.style.display='none'">
+                        <h3 class="text-lg font-bold">Cloudflare 사용량</h3>
+                        <span class="ml-auto px-2 py-1 bg-white/20 rounded text-xs">Pages + D1 + Workers</span>
+                      </div>
+                      
+                      <div class="grid grid-cols-2 lg:grid-cols-5 gap-4">
+                        <!-- Pages 요청 -->
+                        <div class="bg-white/10 backdrop-blur rounded-xl p-4">
+                          <div class="flex items-center justify-between mb-2">
+                            <span class="text-orange-100 text-sm">Pages 요청</span>
+                            <i class="fas fa-globe text-orange-200"></i>
+                          </div>
+                          <p class="text-2xl font-bold" id="cf-pages-requests">-</p>
+                          <p class="text-xs text-orange-200">이번달 / 무제한</p>
+                          <p class="text-sm text-green-300 mt-1">무료</p>
                         </div>
-                        <div class="bg-white/10 rounded-lg px-3 py-2">
-                          <span class="text-violet-300">Output</span>
-                          <span class="text-white font-mono ml-2">$0.60 / 1M tokens</span>
+                        
+                        <!-- D1 읽기 -->
+                        <div class="bg-white/10 backdrop-blur rounded-xl p-4">
+                          <div class="flex items-center justify-between mb-2">
+                            <span class="text-orange-100 text-sm">D1 읽기</span>
+                            <i class="fas fa-database text-orange-200"></i>
+                          </div>
+                          <p class="text-2xl font-bold" id="cf-d1-reads">-</p>
+                          <p class="text-xs text-orange-200">/ 5M (무료)</p>
+                          <div class="mt-1 h-1.5 bg-white/20 rounded-full overflow-hidden">
+                            <div id="cf-d1-reads-bar" class="h-full bg-green-400 rounded-full" style="width: 0%"></div>
+                          </div>
                         </div>
-                        <div class="bg-white/10 rounded-lg px-3 py-2">
-                          <span class="text-violet-300">API 호출</span>
-                          <span class="text-white font-mono ml-2" id="openai-total-calls">0</span>회
+                        
+                        <!-- D1 쓰기 -->
+                        <div class="bg-white/10 backdrop-blur rounded-xl p-4">
+                          <div class="flex items-center justify-between mb-2">
+                            <span class="text-orange-100 text-sm">D1 쓰기</span>
+                            <i class="fas fa-pen text-orange-200"></i>
+                          </div>
+                          <p class="text-2xl font-bold" id="cf-d1-writes">-</p>
+                          <p class="text-xs text-orange-200">/ 100K (무료)</p>
+                          <div class="mt-1 h-1.5 bg-white/20 rounded-full overflow-hidden">
+                            <div id="cf-d1-writes-bar" class="h-full bg-green-400 rounded-full" style="width: 0%"></div>
+                          </div>
                         </div>
-                        <div class="bg-white/10 rounded-lg px-3 py-2">
-                          <span class="text-violet-300">예상 월 비용</span>
-                          <span class="text-white font-mono ml-2" id="estimated-monthly">$0.00</span>
+                        
+                        <!-- D1 저장용량 -->
+                        <div class="bg-white/10 backdrop-blur rounded-xl p-4">
+                          <div class="flex items-center justify-between mb-2">
+                            <span class="text-orange-100 text-sm">D1 저장용량</span>
+                            <i class="fas fa-hdd text-orange-200"></i>
+                          </div>
+                          <p class="text-2xl font-bold" id="cf-d1-storage">-</p>
+                          <p class="text-xs text-orange-200">/ 5GB (무료)</p>
+                          <div class="mt-1 h-1.5 bg-white/20 rounded-full overflow-hidden">
+                            <div id="cf-d1-storage-bar" class="h-full bg-green-400 rounded-full" style="width: 0%"></div>
+                          </div>
+                        </div>
+                        
+                        <!-- Workers 요청 -->
+                        <div class="bg-white/10 backdrop-blur rounded-xl p-4">
+                          <div class="flex items-center justify-between mb-2">
+                            <span class="text-orange-100 text-sm">Workers 요청</span>
+                            <i class="fas fa-bolt text-orange-200"></i>
+                          </div>
+                          <p class="text-2xl font-bold" id="cf-workers-requests">-</p>
+                          <p class="text-xs text-orange-200">/ 100K/일 (무료)</p>
+                          <div class="mt-1 h-1.5 bg-white/20 rounded-full overflow-hidden">
+                            <div id="cf-workers-bar" class="h-full bg-green-400 rounded-full" style="width: 0%"></div>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div class="mt-4 p-3 bg-white/10 rounded-lg text-sm">
+                        <span class="text-orange-100">💡 Cloudflare 예상 비용:</span>
+                        <span class="font-bold ml-2" id="cf-estimated-cost">$0.00</span>
+                        <span class="text-orange-200 text-xs ml-2">(무료 티어 초과시에만 과금)</span>
+                      </div>
+                    </div>
+                    
+                    <!-- OpenAI 사용량 -->
+                    <div class="bg-gradient-to-r from-emerald-600 to-teal-600 rounded-xl shadow-lg p-6 text-white">
+                      <div class="flex items-center mb-4">
+                        <i class="fas fa-brain text-2xl mr-2"></i>
+                        <h3 class="text-lg font-bold">OpenAI 사용량</h3>
+                        <span class="ml-auto px-2 py-1 bg-white/20 rounded text-xs">GPT-4o-mini</span>
+                      </div>
+                      
+                      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div class="bg-white/10 backdrop-blur rounded-xl p-4">
+                          <div class="flex items-center justify-between mb-2">
+                            <span class="text-emerald-100 text-sm">오늘 토큰</span>
+                            <i class="fas fa-calendar-day text-emerald-200"></i>
+                          </div>
+                          <p class="text-2xl font-bold" id="openai-today-tokens">0</p>
+                          <p class="text-lg font-semibold text-green-300 mt-1" id="openai-today-cost">$0.00</p>
+                        </div>
+                        
+                        <div class="bg-white/10 backdrop-blur rounded-xl p-4">
+                          <div class="flex items-center justify-between mb-2">
+                            <span class="text-emerald-100 text-sm">이번달 토큰</span>
+                            <i class="fas fa-calendar text-emerald-200"></i>
+                          </div>
+                          <p class="text-2xl font-bold" id="openai-month-tokens">0</p>
+                          <p class="text-lg font-semibold text-blue-300 mt-1" id="openai-month-cost">$0.00</p>
+                        </div>
+                        
+                        <div class="bg-white/10 backdrop-blur rounded-xl p-4">
+                          <div class="flex items-center justify-between mb-2">
+                            <span class="text-emerald-100 text-sm">누적 토큰</span>
+                            <i class="fas fa-coins text-emerald-200"></i>
+                          </div>
+                          <p class="text-2xl font-bold" id="openai-total-tokens">0</p>
+                          <p class="text-lg font-semibold text-amber-300 mt-1" id="openai-total-cost">$0.00</p>
+                        </div>
+                        
+                        <div class="bg-white/10 backdrop-blur rounded-xl p-4">
+                          <div class="flex items-center justify-between mb-2">
+                            <span class="text-emerald-100 text-sm">API 호출</span>
+                            <i class="fas fa-plug text-emerald-200"></i>
+                          </div>
+                          <p class="text-2xl font-bold" id="openai-total-calls">0</p>
+                          <p class="text-sm text-emerald-200">총 호출 횟수</p>
+                        </div>
+                      </div>
+                      
+                      <div class="mt-4 p-3 bg-white/10 rounded-lg grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+                        <div><span class="text-emerald-200">Input:</span> <span class="font-mono">$0.15/1M</span></div>
+                        <div><span class="text-emerald-200">Output:</span> <span class="font-mono">$0.60/1M</span></div>
+                        <div><span class="text-emerald-200">평균 호출당:</span> <span class="font-mono" id="openai-avg-cost">$0.00</span></div>
+                        <div><span class="text-emerald-200">예상 월비용:</span> <span class="font-mono" id="estimated-monthly">$0.00</span></div>
+                      </div>
+                    </div>
+                    
+                    <!-- DART API 사용량 -->
+                    <div class="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl shadow-lg p-6 text-white">
+                      <div class="flex items-center mb-4">
+                        <i class="fas fa-landmark text-2xl mr-2"></i>
+                        <h3 class="text-lg font-bold">DART API 사용량</h3>
+                        <span class="ml-auto px-2 py-1 bg-white/20 rounded text-xs">금융감독원 공시</span>
+                        <span class="ml-2 px-2 py-1 bg-green-400/30 rounded text-xs text-green-200">무료</span>
+                      </div>
+                      
+                      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div class="bg-white/10 backdrop-blur rounded-xl p-4">
+                          <div class="flex items-center justify-between mb-2">
+                            <span class="text-blue-100 text-sm">오늘 호출</span>
+                            <i class="fas fa-clock text-blue-200"></i>
+                          </div>
+                          <p class="text-2xl font-bold"><span id="dart-today-calls">0</span></p>
+                          <p class="text-xs text-blue-200">/ 10,000 (일일 제한)</p>
+                          <div class="mt-1 h-1.5 bg-white/20 rounded-full overflow-hidden">
+                            <div id="dart-today-bar" class="h-full bg-cyan-400 rounded-full" style="width: 0%"></div>
+                          </div>
+                        </div>
+                        
+                        <div class="bg-white/10 backdrop-blur rounded-xl p-4">
+                          <div class="flex items-center justify-between mb-2">
+                            <span class="text-blue-100 text-sm">이번달 호출</span>
+                            <i class="fas fa-calendar text-blue-200"></i>
+                          </div>
+                          <p class="text-2xl font-bold" id="dart-month-calls">0</p>
+                          <p class="text-xs text-blue-200">월간 누적</p>
+                        </div>
+                        
+                        <div class="bg-white/10 backdrop-blur rounded-xl p-4">
+                          <div class="flex items-center justify-between mb-2">
+                            <span class="text-blue-100 text-sm">수집 기업수</span>
+                            <i class="fas fa-building text-blue-200"></i>
+                          </div>
+                          <p class="text-2xl font-bold" id="dart-companies">-</p>
+                          <p class="text-xs text-blue-200">DART 출처</p>
+                        </div>
+                        
+                        <div class="bg-white/10 backdrop-blur rounded-xl p-4">
+                          <div class="flex items-center justify-between mb-2">
+                            <span class="text-blue-100 text-sm">마지막 수집</span>
+                            <i class="fas fa-sync text-blue-200"></i>
+                          </div>
+                          <p class="text-lg font-bold" id="dart-last-sync">-</p>
+                          <p class="text-xs text-blue-200">최근 업데이트</p>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <!-- 기타 API 사용량 -->
+                    <div class="bg-gradient-to-r from-slate-600 to-slate-700 rounded-xl shadow-lg p-6 text-white">
+                      <div class="flex items-center mb-4">
+                        <i class="fas fa-plug text-2xl mr-2"></i>
+                        <h3 class="text-lg font-bold">기타 API / 서비스</h3>
+                      </div>
+                      
+                      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                        <!-- 공공데이터포털 -->
+                        <div class="bg-white/10 backdrop-blur rounded-xl p-4">
+                          <div class="flex items-center justify-between mb-2">
+                            <span class="text-slate-200 text-sm">공공데이터포털</span>
+                            <i class="fas fa-database text-slate-300"></i>
+                          </div>
+                          <p class="text-lg font-bold" id="public-data-calls">대기중</p>
+                          <p class="text-xs text-slate-300">승인 후 사용 가능</p>
+                          <span class="inline-block mt-2 px-2 py-0.5 bg-yellow-500/30 rounded text-xs text-yellow-200">승인 대기</span>
+                        </div>
+                        
+                        <!-- 네이버 금융 -->
+                        <div class="bg-white/10 backdrop-blur rounded-xl p-4">
+                          <div class="flex items-center justify-between mb-2">
+                            <span class="text-slate-200 text-sm">네이버 금융</span>
+                            <i class="fas fa-chart-line text-green-300"></i>
+                          </div>
+                          <p class="text-lg font-bold" id="naver-crawl-count">-</p>
+                          <p class="text-xs text-slate-300">크롤링 기업 수</p>
+                          <span class="inline-block mt-2 px-2 py-0.5 bg-green-500/30 rounded text-xs text-green-200">무료</span>
+                        </div>
+                        
+                        <!-- GitHub -->
+                        <div class="bg-white/10 backdrop-blur rounded-xl p-4">
+                          <div class="flex items-center justify-between mb-2">
+                            <span class="text-slate-200 text-sm">GitHub</span>
+                            <i class="fab fa-github text-slate-300"></i>
+                          </div>
+                          <p class="text-lg font-bold" id="github-deploys">-</p>
+                          <p class="text-xs text-slate-300">이번달 배포 횟수</p>
+                          <span class="inline-block mt-2 px-2 py-0.5 bg-green-500/30 rounded text-xs text-green-200">무료</span>
+                        </div>
+                        
+                        <!-- 도메인 -->
+                        <div class="bg-white/10 backdrop-blur rounded-xl p-4">
+                          <div class="flex items-center justify-between mb-2">
+                            <span class="text-slate-200 text-sm">커스텀 도메인</span>
+                            <i class="fas fa-globe text-slate-300"></i>
+                          </div>
+                          <p class="text-lg font-bold">mce.ai.kr</p>
+                          <p class="text-xs text-slate-300">연간 도메인 비용</p>
+                          <span class="inline-block mt-2 px-2 py-0.5 bg-blue-500/30 rounded text-xs text-blue-200">~₩20,000/년</span>
                         </div>
                       </div>
                     </div>
@@ -1638,24 +1827,26 @@ export const Admin = (props: { user: any, tab?: string }) => {
           
           // ========== API Usage Functions ==========
           async function refreshApiUsage() {
+            await refreshAllUsage();
+          }
+          
+          async function refreshAllUsage() {
             try {
               const res = await fetch('/api/admin/api-usage');
               const data = await res.json();
               
               if (data.success) {
-                // OpenAI Today
+                // ========== OpenAI 사용량 ==========
                 const todayEl = document.getElementById('openai-today-tokens');
                 const todayCostEl = document.getElementById('openai-today-cost');
                 if (todayEl) todayEl.textContent = (data.openai?.today?.total_tokens || 0).toLocaleString();
                 if (todayCostEl) todayCostEl.textContent = '$' + (data.openai?.today?.cost_usd || 0).toFixed(4);
                 
-                // OpenAI Month
                 const monthEl = document.getElementById('openai-month-tokens');
                 const monthCostEl = document.getElementById('openai-month-cost');
                 if (monthEl) monthEl.textContent = (data.openai?.month?.total_tokens || 0).toLocaleString();
                 if (monthCostEl) monthCostEl.textContent = '$' + (data.openai?.month?.cost_usd || 0).toFixed(4);
                 
-                // OpenAI Total
                 const totalEl = document.getElementById('openai-total-tokens');
                 const totalCostEl = document.getElementById('openai-total-cost');
                 const totalCallsEl = document.getElementById('openai-total-calls');
@@ -1663,23 +1854,146 @@ export const Admin = (props: { user: any, tab?: string }) => {
                 if (totalCostEl) totalCostEl.textContent = '$' + (data.openai?.total?.cost_usd || 0).toFixed(4);
                 if (totalCallsEl) totalCallsEl.textContent = (data.openai?.total?.calls || 0).toLocaleString();
                 
-                // DART
+                // 평균 호출당 비용
+                const avgCostEl = document.getElementById('openai-avg-cost');
+                if (avgCostEl && data.openai?.total?.calls > 0) {
+                  const avgCost = (data.openai.total.cost_usd / data.openai.total.calls);
+                  avgCostEl.textContent = '$' + avgCost.toFixed(6);
+                }
+                
+                // ========== DART 사용량 ==========
                 const dartTodayEl = document.getElementById('dart-today-calls');
                 const dartMonthEl = document.getElementById('dart-month-calls');
+                const dartCompaniesEl = document.getElementById('dart-companies');
+                const dartLastSyncEl = document.getElementById('dart-last-sync');
+                
                 if (dartTodayEl) dartTodayEl.textContent = (data.dart?.today?.calls || 0).toLocaleString();
                 if (dartMonthEl) dartMonthEl.textContent = (data.dart?.month?.calls || 0).toLocaleString();
+                if (dartCompaniesEl) dartCompaniesEl.textContent = (data.dart?.companies || 0).toLocaleString();
+                if (dartLastSyncEl) dartLastSyncEl.textContent = data.dart?.lastSync || '-';
                 
-                // Estimated monthly (based on current month usage)
+                // DART 일일 진행바
+                const dartBarEl = document.getElementById('dart-today-bar');
+                if (dartBarEl) {
+                  const dartPercent = Math.min(100, ((data.dart?.today?.calls || 0) / 10000) * 100);
+                  dartBarEl.style.width = dartPercent + '%';
+                  dartBarEl.classList.toggle('bg-red-400', dartPercent > 80);
+                  dartBarEl.classList.toggle('bg-yellow-400', dartPercent > 50 && dartPercent <= 80);
+                }
+                
+                // ========== Cloudflare 사용량 ==========
+                const cf = data.cloudflare || {};
+                
+                // Pages 요청
+                const cfPagesEl = document.getElementById('cf-pages-requests');
+                if (cfPagesEl) cfPagesEl.textContent = (cf.pages?.requests || 0).toLocaleString();
+                
+                // D1 읽기
+                const cfD1ReadsEl = document.getElementById('cf-d1-reads');
+                const cfD1ReadsBarEl = document.getElementById('cf-d1-reads-bar');
+                const d1Reads = cf.d1?.reads || 0;
+                const d1ReadsLimit = 5000000;
+                if (cfD1ReadsEl) cfD1ReadsEl.textContent = formatLargeNumber(d1Reads);
+                if (cfD1ReadsBarEl) {
+                  const readsPercent = Math.min(100, (d1Reads / d1ReadsLimit) * 100);
+                  cfD1ReadsBarEl.style.width = readsPercent + '%';
+                  cfD1ReadsBarEl.classList.toggle('bg-red-400', readsPercent > 80);
+                  cfD1ReadsBarEl.classList.toggle('bg-yellow-400', readsPercent > 50 && readsPercent <= 80);
+                }
+                
+                // D1 쓰기
+                const cfD1WritesEl = document.getElementById('cf-d1-writes');
+                const cfD1WritesBarEl = document.getElementById('cf-d1-writes-bar');
+                const d1Writes = cf.d1?.writes || 0;
+                const d1WritesLimit = 100000;
+                if (cfD1WritesEl) cfD1WritesEl.textContent = formatLargeNumber(d1Writes);
+                if (cfD1WritesBarEl) {
+                  const writesPercent = Math.min(100, (d1Writes / d1WritesLimit) * 100);
+                  cfD1WritesBarEl.style.width = writesPercent + '%';
+                  cfD1WritesBarEl.classList.toggle('bg-red-400', writesPercent > 80);
+                  cfD1WritesBarEl.classList.toggle('bg-yellow-400', writesPercent > 50 && writesPercent <= 80);
+                }
+                
+                // D1 저장용량
+                const cfD1StorageEl = document.getElementById('cf-d1-storage');
+                const cfD1StorageBarEl = document.getElementById('cf-d1-storage-bar');
+                const d1Storage = cf.d1?.storage_mb || 0;
+                const d1StorageLimit = 5120; // 5GB in MB
+                if (cfD1StorageEl) cfD1StorageEl.textContent = d1Storage >= 1024 ? (d1Storage / 1024).toFixed(2) + ' GB' : d1Storage.toFixed(2) + ' MB';
+                if (cfD1StorageBarEl) {
+                  const storagePercent = Math.min(100, (d1Storage / d1StorageLimit) * 100);
+                  cfD1StorageBarEl.style.width = storagePercent + '%';
+                  cfD1StorageBarEl.classList.toggle('bg-red-400', storagePercent > 80);
+                  cfD1StorageBarEl.classList.toggle('bg-yellow-400', storagePercent > 50 && storagePercent <= 80);
+                }
+                
+                // Workers 요청
+                const cfWorkersEl = document.getElementById('cf-workers-requests');
+                const cfWorkersBarEl = document.getElementById('cf-workers-bar');
+                const workersRequests = cf.workers?.requests || 0;
+                const workersLimit = 100000;
+                if (cfWorkersEl) cfWorkersEl.textContent = formatLargeNumber(workersRequests);
+                if (cfWorkersBarEl) {
+                  const workersPercent = Math.min(100, (workersRequests / workersLimit) * 100);
+                  cfWorkersBarEl.style.width = workersPercent + '%';
+                  cfWorkersBarEl.classList.toggle('bg-red-400', workersPercent > 80);
+                  cfWorkersBarEl.classList.toggle('bg-yellow-400', workersPercent > 50 && workersPercent <= 80);
+                }
+                
+                // Cloudflare 예상 비용
+                const cfCostEl = document.getElementById('cf-estimated-cost');
+                if (cfCostEl) cfCostEl.textContent = '$' + (cf.estimated_cost || 0).toFixed(2);
+                
+                // ========== 총 비용 계산 ==========
+                const openaiMonthCost = data.openai?.month?.cost_usd || 0;
+                const openaiTotalCost = data.openai?.total?.cost_usd || 0;
+                const cfTotalCost = cf.estimated_cost || 0;
+                
+                const totalMonthCost = openaiMonthCost + cfTotalCost;
+                const totalAllCost = openaiTotalCost + cfTotalCost;
+                
+                // 총 API 호출
+                const totalTodayCalls = (data.openai?.today?.calls || 0) + (data.dart?.today?.calls || 0);
+                const totalMonthCalls = (data.openai?.month?.calls || 0) + (data.dart?.month?.calls || 0);
+                
+                const totalMonthCostEl = document.getElementById('total-month-cost');
+                const totalAllCostEl = document.getElementById('total-all-cost');
+                const totalTodayCallsEl = document.getElementById('total-today-calls');
+                const totalMonthCallsEl = document.getElementById('total-month-calls');
+                
+                if (totalMonthCostEl) totalMonthCostEl.textContent = '$' + totalMonthCost.toFixed(2);
+                if (totalAllCostEl) totalAllCostEl.textContent = '$' + totalAllCost.toFixed(2);
+                if (totalTodayCallsEl) totalTodayCallsEl.textContent = totalTodayCalls.toLocaleString();
+                if (totalMonthCallsEl) totalMonthCallsEl.textContent = totalMonthCalls.toLocaleString();
+                
+                // 예상 월말 비용
                 const daysInMonth = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate();
                 const currentDay = new Date().getDate();
-                const monthCost = data.openai?.month?.cost_usd || 0;
-                const estimatedMonthly = (monthCost / currentDay) * daysInMonth;
+                const estimatedMonthly = (totalMonthCost / currentDay) * daysInMonth;
+                const totalEstimatedEl = document.getElementById('total-estimated');
                 const estimatedEl = document.getElementById('estimated-monthly');
+                if (totalEstimatedEl) totalEstimatedEl.textContent = '$' + estimatedMonthly.toFixed(2);
                 if (estimatedEl) estimatedEl.textContent = '$' + estimatedMonthly.toFixed(2);
+                
+                // ========== 기타 서비스 ==========
+                // 네이버 크롤링 기업 수
+                const naverEl = document.getElementById('naver-crawl-count');
+                if (naverEl) naverEl.textContent = (data.naver?.companies || 0).toLocaleString();
+                
+                // GitHub 배포 횟수
+                const githubEl = document.getElementById('github-deploys');
+                if (githubEl) githubEl.textContent = (data.github?.deploys || 0).toLocaleString();
               }
             } catch (e) {
               console.error('API usage load error:', e);
             }
+          }
+          
+          // 큰 숫자 포맷팅 헬퍼
+          function formatLargeNumber(num) {
+            if (num >= 1000000) return (num / 1000000).toFixed(2) + 'M';
+            if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+            return num.toLocaleString();
           }
           
           // ========== Data Collector Functions ==========
