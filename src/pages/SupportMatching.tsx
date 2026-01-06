@@ -1,4 +1,5 @@
 import { Layout } from '../components/Layout'
+import { LandingPage } from '../components/support/LandingPage'
 import { InputForm } from '../components/support/InputForm'
 import { LoadingScreen } from '../components/support/LoadingScreen'
 import { ResultReport } from '../components/support/ResultReport'
@@ -7,11 +8,29 @@ import { html } from 'hono/html'
 export const SupportMatching = (props: { user: any }) => {
   return (
     <Layout user={props.user}>
-      <InputForm />
-      <LoadingScreen />
-      <ResultReport />
+      <!-- Landing Page (Initially Visible) -->
+      <div id="view-landing">
+        <LandingPage />
+      </div>
+
+      <!-- Application Wizard (Initially Hidden) -->
+      <div id="view-app" class="hidden">
+        <InputForm />
+        <LoadingScreen />
+        <ResultReport />
+      </div>
 
       <script>{`
+        // --- View Switching Logic ---
+        document.getElementById('btn-start-landing').onclick = startApp;
+        document.getElementById('btn-start-landing-2').onclick = startApp;
+
+        function startApp() {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+          document.getElementById('view-landing').classList.add('hidden');
+          document.getElementById('view-app').classList.remove('hidden');
+        }
+
         // --- Wizard Logic ---
         let currentStep = 1;
         const totalSteps = 5;
