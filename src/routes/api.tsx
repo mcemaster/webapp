@@ -110,13 +110,33 @@ api.get('/search/company', async (c) => {
     // Try from DB first
     const db = c.env.DB
     if (db) {
+      // ETF/ETN 제외하고 실제 기업 우선 검색
+      // 이름이 정확히 일치하는 것 우선, 그 다음 포함하는 것
       const result = await db.prepare(
-        `SELECT name, COALESCE(corp_code, biz_num) as code, ceo_name as ceo
-         FROM companies WHERE name LIKE ? ORDER BY name LIMIT 15`
-      ).bind(`%${q}%`).all()
+        `SELECT name, COALESCE(corp_code, biz_num) as code, ceo_name as ceo,
+                CASE 
+                  WHEN name = ? THEN 1
+                  WHEN name LIKE ? THEN 2
+                  ELSE 3
+                END as priority
+         FROM companies 
+         WHERE name LIKE ? 
+           AND name NOT LIKE '%ETF%'
+           AND name NOT LIKE '%ETN%'
+           AND name NOT LIKE '%KODEX%'
+           AND name NOT LIKE '%TIGER%'
+           AND name NOT LIKE '%ACE %'
+           AND name NOT LIKE '%RISE %'
+         ORDER BY priority, LENGTH(name), name 
+         LIMIT 15`
+      ).bind(q, q + '%', '%' + q + '%').all()
       
       if (result.results && result.results.length > 0) {
-        return c.json(result.results)
+        return c.json(result.results.map((r: any) => ({ 
+          name: r.name, 
+          code: r.code, 
+          ceo: r.ceo 
+        })))
       }
     }
   } catch (e) {
@@ -125,11 +145,14 @@ api.get('/search/company', async (c) => {
   
   // Fallback to mock (if DB search returns nothing)
   const mockDB = [
-    { name: '삼성전자', code: '00126380', ceo: '한종희' },
-    { name: '삼성에스디아이', code: '00126362', ceo: '최윤호' },
-    { name: '태성정밀', code: '00123456', ceo: '김철수' },
-    { name: '현대자동차', code: '00164779', ceo: '정의선' },
-    { name: 'LG에너지솔루션', code: '01515337', ceo: '권영수' }
+    { name: '삼성전자', code: '005930', ceo: '이재용' },
+    { name: '삼성SDI', code: '006400', ceo: '최윤호' },
+    { name: '삼성물산', code: '028260', ceo: '오세철' },
+    { name: '현대자동차', code: '005380', ceo: '장재훈' },
+    { name: 'LG에너지솔루션', code: '373220', ceo: '권영수' },
+    { name: 'SK하이닉스', code: '000660', ceo: '곽노정' },
+    { name: '네이버', code: '035420', ceo: '최수연' },
+    { name: '카카오', code: '035720', ceo: '홍은택' }
   ]
   
   return c.json(mockDB.filter(x => x.name.includes(q)))
