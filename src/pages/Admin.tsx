@@ -2433,22 +2433,47 @@ export const Admin = (props: { user: any, tab?: string }) => {
               
               if (data.success && data.matches) {
                 resultDiv.classList.remove('hidden');
-                contentDiv.innerHTML = data.matches.map((m, i) => 
-                  '<div class="p-4 bg-white rounded-lg border border-indigo-100 hover:border-indigo-300 transition">' +
+                
+                // AI 분석 여부 표시
+                let headerHtml = '';
+                if (data.aiPowered) {
+                  headerHtml = '<div class="mb-4 p-3 bg-gradient-to-r from-green-100 to-emerald-100 rounded-lg border border-green-200">' +
+                    '<div class="flex items-center justify-between">' +
+                    '<span class="text-green-700 font-medium"><i class="fas fa-brain mr-2"></i>GPT-4o-mini AI 분석 완료</span>' +
+                    '<span class="text-xs text-green-600">' + (data.tokensUsed || 0) + ' 토큰 사용</span>' +
+                    '</div>' +
+                    (data.analysis ? '<p class="text-sm text-green-800 mt-2">' + data.analysis + '</p>' : '') +
+                    '</div>';
+                } else {
+                  headerHtml = '<div class="mb-4 p-3 bg-amber-50 rounded-lg border border-amber-200">' +
+                    '<span class="text-amber-700 text-sm"><i class="fas fa-info-circle mr-2"></i>기본 매칭 알고리즘 사용 중. 관리자 설정에서 OpenAI API 키를 추가하면 더 정교한 AI 분석이 가능합니다.</span>' +
+                    '</div>';
+                }
+                
+                contentDiv.innerHTML = headerHtml + data.matches.map((m, i) => 
+                  '<div class="p-4 bg-white rounded-lg border border-indigo-100 hover:border-indigo-300 hover:shadow-md transition">' +
                   '<div class="flex items-start justify-between">' +
                   '<div class="flex-1">' +
                   '<h5 class="font-semibold text-slate-800">' + (i+1) + '. ' + m.title + '</h5>' +
-                  '<p class="text-sm text-slate-600 mt-1">' + (m.agency || '-') + '</p>' +
-                  '<p class="text-sm text-slate-500 mt-2">' + (m.description || '').substring(0, 100) + '...</p>' +
+                  '<p class="text-sm text-slate-600 mt-1"><i class="fas fa-building text-slate-400 mr-1"></i>' + (m.agency || '-') + '</p>' +
+                  (m.description ? '<p class="text-sm text-slate-500 mt-2">' + (m.description || '').substring(0, 150) + '...</p>' : '') +
                   '</div>' +
                   '<div class="ml-4 text-right">' +
-                  '<span class="px-3 py-1 bg-indigo-100 text-indigo-700 font-bold rounded-full">' + m.score + '%</span>' +
-                  '<p class="text-xs text-slate-500 mt-2">매칭 점수</p>' +
+                  '<div class="w-16 h-16 rounded-full bg-gradient-to-br ' + (m.score >= 80 ? 'from-green-400 to-emerald-500' : m.score >= 60 ? 'from-blue-400 to-indigo-500' : 'from-amber-400 to-orange-500') + ' flex items-center justify-center">' +
+                  '<span class="text-white font-bold text-lg">' + m.score + '</span>' +
+                  '</div>' +
+                  '<p class="text-xs text-slate-500 mt-1">매칭 점수</p>' +
                   '</div>' +
                   '</div>' +
-                  '<p class="text-sm text-indigo-600 mt-3"><i class="fas fa-lightbulb mr-1"></i> ' + (m.reason || 'AI 추천 이유') + '</p>' +
+                  '<div class="mt-3 p-2 bg-indigo-50 rounded-lg">' +
+                  '<p class="text-sm text-indigo-700"><i class="fas fa-lightbulb text-amber-500 mr-2"></i>' + (m.reason || 'AI 추천') + '</p>' +
+                  '</div>' +
                   '</div>'
                 ).join('');
+                
+                if (data.message) {
+                  contentDiv.innerHTML += '<p class="text-center text-slate-500 text-sm mt-4">' + data.message + '</p>';
+                }
               } else {
                 resultDiv.classList.remove('hidden');
                 contentDiv.innerHTML = '<p class="text-slate-500 text-center py-4">매칭 결과가 없습니다. 지원사업 데이터를 추가해주세요.</p>';

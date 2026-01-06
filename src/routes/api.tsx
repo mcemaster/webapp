@@ -2264,7 +2264,7 @@ api.get('/admin/companies/:id/detail', async (c) => {
 })
 
 // ==========================================
-// AI 기업-지원사업 매칭 API
+// AI 기업-지원사업 매칭 API (OpenAI GPT-4o-mini)
 // ==========================================
 
 // AI 기반 기업 맞춤 지원사업 매칭
@@ -2278,19 +2278,224 @@ api.post('/support/ai-match', async (c) => {
       return c.json({ success: false, error: '기업 정보가 필요합니다.' }, 400)
     }
     
+    // OpenAI API 키 가져오기
+    let openaiKey = c.env.OPENAI_API_KEY
+    if (!openaiKey) {
+      const keyResult = await db.prepare("SELECT value FROM settings WHERE key = 'api_openai_key'").first<{value: string}>()
+      openaiKey = keyResult?.value
+    }
+    
     // 지원사업 목록 가져오기
     const grants = await db.prepare(`
       SELECT id, title, agency, type, max_amount, target_age_min, target_age_max, description, deadline
       FROM grants
       WHERE deadline >= date('now') OR deadline IS NULL
       ORDER BY deadline ASC
-      LIMIT 50
+      LIMIT 30
     `).all()
     
     const grantList = grants.results || []
     
+    // 기업 정보 요약
+    const companyProfile = `
+기업명: ${companyInfo.name || '-'}
+업종: ${companyInfo.industry || '-'}
+직원수: ${companyInfo.employeeCount || '-'}명
+매출액: ${companyInfo.revenue ? Math.round(parseInt(companyInfo.revenue) / 100000000) + '억원' : '-'}
+설립일: ${companyInfo.foundingDate || '-'}
+보유인증: ${companyInfo.certifications || '-'}
+`.trim()
+    
+    // OpenAI API가 있고 지원사업 데이터가 있으면 AI 분석
+    if (openaiKey && grantList.length > 0) {
+      try {
+        const grantsSummary = grantList.slice(0, 15).map((g: any, i: number) => 
+          `${i+1}. [ID:${g.id}] ${g.title} (${g.agency}) - ${g.description?.substring(0, 100) || '설명없음'}...`
+        ).join('\n')
+        
+        const prompt = `당신은 정부지원사업 전문 컨설턴트입니다. 기업 정보를 분석하고 가장 적합한 지원사업을 추천해주세요.
+
+## 기업 정보
+${companyProfile}
+
+## 지원사업 목록
+${grantsSummary}
+
+## 요청사항
+위 기업에 가장 적합한 지원사업 5개를 선정하고, 각각에 대해 다음 형식의 JSON으로 응답해주세요:
+
+{
+  "matches": [
+    {
+      "id": 지원사업ID(숫자),
+      "score": 매칭점수(0-100),
+      "reason": "이 기업에 추천하는 구체적인 이유 (50자 내외)"
+    }
+  ],
+  "analysis": "기업 분석 요약 (100자 내외)"
+}
+
+JSON만 응답하세요.`
+
+        const openaiRes = await fetch('https://api.openai.com/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${openaiKey}`
+          },
+          body: JSON.stringify({
+            model: 'gpt-4o-mini',
+            messages: [{ role: 'user', content: prompt }],
+            temperature: 0.7,
+            max_tokens: 1000
+          })
+        })
+        
+        if (openaiRes.ok) {
+          const aiData: any = await openaiRes.json()
+          const content = aiData.choices?.[0]?.message?.content || ''
+          
+          // JSON 파싱 시도
+          try {
+            // JSON 부분만 추출
+            const jsonMatch = content.match(/\{[\s\S]*\}/)
+            if (jsonMatch) {
+              const aiResult = JSON.parse(jsonMatch[0])
+              
+              // AI 결과와 지원사업 데이터 병합
+              const enrichedMatches = (aiResult.matches || []).map((m: any) => {
+                const grant = grantList.find((g: any) => g.id === m.id) as any
+                return {
+                  id: m.id,
+                  title: grant?.title || '지원사업',
+                  agency: grant?.agency || '-',
+                  description: grant?.description || '',
+                  deadline: grant?.deadline,
+                  maxAmount: grant?.max_amount,
+                  score: m.score,
+                  reason: m.reason
+                }
+              })
+              
+              // API 사용량 기록
+              const tokensUsed = aiData.usage?.total_tokens || 0
+              try {
+                await db.prepare(`
+                  INSERT INTO api_usage (api_type, endpoint, tokens_input, tokens_output, cost_usd, created_at)
+                  VALUES ('openai', 'ai-match', ?, ?, ?, datetime('now'))
+                `).bind(
+                  aiData.usage?.prompt_tokens || 0,
+                  aiData.usage?.completion_tokens || 0,
+                  (aiData.usage?.prompt_tokens || 0) * 0.00000015 + (aiData.usage?.completion_tokens || 0) * 0.0000006
+                ).run()
+              } catch (e) {}
+              
+              // 분석 로그 저장
+              try {
+                await db.prepare(`
+                  INSERT INTO analysis_logs (company_id, result_json, created_at)
+                  VALUES (?, ?, datetime('now'))
+                `).bind(
+                  companyId || null,
+                  JSON.stringify({ matches: enrichedMatches, analysis: aiResult.analysis })
+                ).run()
+              } catch (e) {}
+              
+              return c.json({
+                success: true,
+                matches: enrichedMatches,
+                analysis: aiResult.analysis,
+                aiPowered: true,
+                tokensUsed
+              })
+            }
+          } catch (parseError) {
+            console.error('AI response parse error:', parseError)
+          }
+        }
+      } catch (aiError) {
+        console.error('OpenAI API error:', aiError)
+      }
+    }
+    
+    // AI 실패시 또는 지원사업 없을 때 기본 로직
     if (grantList.length === 0) {
-      // 지원사업이 없으면 샘플 데이터로 테스트
+      // 샘플 데이터로 AI 분석 시뮬레이션
+      if (openaiKey) {
+        try {
+          const prompt = `당신은 정부지원사업 전문 컨설턴트입니다. 다음 기업에 적합한 정부지원사업 5개를 추천해주세요.
+
+## 기업 정보
+${companyProfile}
+
+## 요청사항
+이 기업에 적합할 것으로 예상되는 실제 정부지원사업을 5개 추천하고, 다음 형식의 JSON으로 응답해주세요:
+
+{
+  "matches": [
+    {
+      "title": "지원사업명",
+      "agency": "담당기관",
+      "score": 매칭점수(0-100),
+      "reason": "추천 이유 (50자 내외)",
+      "description": "지원사업 설명 (100자 내외)"
+    }
+  ],
+  "analysis": "기업 분석 및 전략적 조언 (150자 내외)"
+}
+
+JSON만 응답하세요.`
+
+          const openaiRes = await fetch('https://api.openai.com/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${openaiKey}`
+            },
+            body: JSON.stringify({
+              model: 'gpt-4o-mini',
+              messages: [{ role: 'user', content: prompt }],
+              temperature: 0.7,
+              max_tokens: 1500
+            })
+          })
+          
+          if (openaiRes.ok) {
+            const aiData: any = await openaiRes.json()
+            const content = aiData.choices?.[0]?.message?.content || ''
+            
+            const jsonMatch = content.match(/\{[\s\S]*\}/)
+            if (jsonMatch) {
+              const aiResult = JSON.parse(jsonMatch[0])
+              
+              // API 사용량 기록
+              try {
+                await db.prepare(`
+                  INSERT INTO api_usage (api_type, endpoint, tokens_input, tokens_output, cost_usd, created_at)
+                  VALUES ('openai', 'ai-match-suggest', ?, ?, ?, datetime('now'))
+                `).bind(
+                  aiData.usage?.prompt_tokens || 0,
+                  aiData.usage?.completion_tokens || 0,
+                  (aiData.usage?.prompt_tokens || 0) * 0.00000015 + (aiData.usage?.completion_tokens || 0) * 0.0000006
+                ).run()
+              } catch (e) {}
+              
+              return c.json({
+                success: true,
+                matches: aiResult.matches || [],
+                analysis: aiResult.analysis,
+                aiPowered: true,
+                tokensUsed: aiData.usage?.total_tokens || 0,
+                message: 'AI가 추천하는 지원사업입니다. (실제 지원사업 DB 연동 시 더 정확해집니다)'
+              })
+            }
+          }
+        } catch (e) {
+          console.error('AI suggestion error:', e)
+        }
+      }
+      
+      // AI도 실패하면 기본 샘플
       return c.json({
         success: true,
         matches: [
@@ -2312,20 +2517,20 @@ api.post('/support/ai-match', async (c) => {
             title: '일자리 안정자금',
             agency: '고용노동부',
             score: 78,
-            reason: companyInfo.employeeCount + '명 규모의 기업에 적용 가능한 지원금입니다.',
+            reason: (companyInfo.employeeCount || '중소') + '명 규모의 기업에 적용 가능한 지원금입니다.',
             description: '최저임금 인상에 따른 중소기업 지원'
           }
         ],
-        message: '샘플 매칭 결과 (실제 지원사업 데이터 추가 필요)'
+        aiPowered: false,
+        message: 'OpenAI API 키를 설정하면 더 정교한 AI 분석이 가능합니다.'
       })
     }
     
-    // 간단한 매칭 로직 (실제로는 AI/ML 사용 가능)
+    // 기본 매칭 로직 (AI 없이)
     const matches = grantList.map((g: any) => {
-      let score = 50 // 기본 점수
+      let score = 50
       const reasons: string[] = []
       
-      // 업종 매칭
       if (g.description && companyInfo.industry) {
         if (g.description.includes(companyInfo.industry) || 
             g.description.includes('제조') || 
@@ -2335,35 +2540,21 @@ api.post('/support/ai-match', async (c) => {
         }
       }
       
-      // 직원수 매칭
       if (companyInfo.employeeCount) {
         const emp = parseInt(companyInfo.employeeCount)
-        if (emp < 50) {
-          score += 15
-          reasons.push('소기업 우대')
-        } else if (emp < 300) {
-          score += 10
-          reasons.push('중기업 대상')
-        }
+        if (emp < 50) { score += 15; reasons.push('소기업 우대') }
+        else if (emp < 300) { score += 10; reasons.push('중기업 대상') }
       }
       
-      // 매출액 매칭
       if (companyInfo.revenue) {
         const rev = parseInt(companyInfo.revenue)
-        if (rev < 10000000000) { // 100억 미만
-          score += 10
-          reasons.push('매출 규모 적합')
-        }
+        if (rev < 10000000000) { score += 10; reasons.push('매출 규모 적합') }
       }
       
-      // 업력 매칭 (창업지원)
       if (companyInfo.foundingDate) {
         const founding = new Date(companyInfo.foundingDate)
         const years = (Date.now() - founding.getTime()) / (365 * 24 * 60 * 60 * 1000)
-        if (years < 7 && g.title && g.title.includes('창업')) {
-          score += 15
-          reasons.push('창업 7년 이내')
-        }
+        if (years < 7 && g.title?.includes('창업')) { score += 15; reasons.push('창업 7년 이내') }
       }
       
       return {
@@ -2378,7 +2569,6 @@ api.post('/support/ai-match', async (c) => {
       }
     })
     
-    // 점수순 정렬
     matches.sort((a: any, b: any) => b.score - a.score)
     
     // 분석 로그 저장
@@ -2390,9 +2580,7 @@ api.post('/support/ai-match', async (c) => {
         companyId || null,
         JSON.stringify({ matches: matches.slice(0, 5) })
       ).run()
-    } catch (e) {
-      // 로그 저장 실패해도 계속
-    }
+    } catch (e) {}
     
     return c.json({
       success: true,
