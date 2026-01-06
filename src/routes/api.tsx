@@ -1044,7 +1044,22 @@ api.get('/sitemap.xml', async (c) => {
 api.get('/seo/meta', async (c) => {
   try {
     const db = c.env.DB
-    const result = await db.prepare('SELECT key, value FROM settings WHERE key LIKE ?').bind('seo_%').all()
+    
+    // First try site_settings table
+    let result = await db.prepare('SELECT setting_key, setting_value FROM site_settings WHERE setting_group = ?').bind('seo').all()
+    
+    if (result.results && result.results.length > 0) {
+      const meta: Record<string, string> = {}
+      result.results.forEach((r: any) => {
+        // Remove 'seo_' prefix if present
+        const key = r.setting_key.replace('seo_', '')
+        meta[key] = r.setting_value
+      })
+      return c.json(meta)
+    }
+    
+    // Fallback to settings table
+    result = await db.prepare('SELECT key, value FROM settings WHERE key LIKE ?').bind('seo_%').all()
     
     const meta: Record<string, string> = {}
     if (result.results) {
@@ -1056,6 +1071,7 @@ api.get('/seo/meta', async (c) => {
     
     return c.json(meta)
   } catch (e: any) {
+    console.log('SEO meta error:', e)
     return c.json({})
   }
 })
@@ -2954,7 +2970,7 @@ api.get('/banners/active', async (c) => {
     const now = new Date().toISOString().split('T')[0]
     
     const result = await db.prepare(`
-      SELECT id, title, subtitle, image_url, link_url, position, background_color, text_color
+      SELECT id, title, image_url, link_url, position, background_color, text_color
       FROM banners 
       WHERE is_active = 1 AND banner_type = ?
         AND (start_date IS NULL OR start_date <= ?)
