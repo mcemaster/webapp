@@ -1,9 +1,8 @@
 import { Layout } from '../components/Layout'
 
-export const Partners = (props: { user?: any, lang?: string }) => {
-  const currentLang = props.lang || 'ko';
+export const Partners = (props: { user?: any }) => {
   return (
-    <Layout user={props.user} lang={currentLang}>
+    <Layout user={props.user}>
       <div class="bg-slate-50 min-h-screen">
         {/* Header Filter Section */}
         <div class="bg-white border-b border-slate-200 sticky top-20 z-40">

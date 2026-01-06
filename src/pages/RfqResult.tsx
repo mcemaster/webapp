@@ -1,9 +1,8 @@
 import { Layout } from '../components/Layout'
 
-export const RfqResult = (props: { user?: any, lang?: string }) => {
-  const currentLang = props.lang || 'ko';
+export const RfqResult = (props: { user?: any }) => {
   return (
-    <Layout user={props.user} lang={currentLang}>
+    <Layout user={props.user}>
       <div class="bg-slate-50 min-h-screen py-12" id="result-container">
         
         {/* 1. Loading State (Initially Visible) */}

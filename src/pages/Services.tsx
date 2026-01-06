@@ -1,10 +1,8 @@
 import { Layout } from '../components/Layout'
 
-export const Services = (props: { user?: any, lang?: string }) => {
-  const currentLang = props.lang || 'ko';
-  
+export const Services = (props: { user?: any }) => {
   return (
-    <Layout user={props.user} lang={currentLang}>
+    <Layout user={props.user}>
       {/* Hero Section */}
       <section class="relative py-20 bg-slate-900 overflow-hidden">
         <div class="absolute inset-0 opacity-20 bg-[url('https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80')] bg-cover bg-center"></div>

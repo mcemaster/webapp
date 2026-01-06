@@ -231,8 +231,8 @@ export const Layout = (props: { children: any; title?: string; user?: any }) => 
              <p>상호명: 경영인증평가원(주) | 대표자: 신솔푸름 (기관장) | 사업자등록번호: 123-45-67890</p>
              <p>주소: 부산광역시 동래구 중앙대로 1367번길 44-15 | 통신판매업신고: 2024-부산동래-0249호 | 개인정보관리책임자: 관리자</p>
              <p>고객센터: 051-714-0798 | 팩스: 051-000-0000 | 이메일: mce@mce.re.kr</p>
-             <p className="mt-2 text-slate-600">경영인증평가원은 통신판매중개자로서 거래 당사자가 아니며, 입점 파트너사가 등록한 상품 및 거래에 대해 책임을 지지 않습니다.</p>
-             <p className="mt-4 font-bold">Copyright © 경영인증평가원. All Rights Reserved.</p>
+             <p class="mt-2 text-slate-600">경영인증평가원은 통신판매중개자로서 거래 당사자가 아니며, 입점 파트너사가 등록한 상품 및 거래에 대해 책임을 지지 않습니다.</p>
+             <p class="mt-4 font-bold">Copyright © 경영인증평가원. All Rights Reserved.</p>
           </div>
         </div>
       </footer>
