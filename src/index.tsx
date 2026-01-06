@@ -22,7 +22,7 @@ import { AuditApplication } from './pages/AuditApplication'
 import { Certification } from './pages/Certification'
 import puppeteer from '@cloudflare/puppeteer'
 
-// --- 2. Admin Final Component ---
+// --- 2. Admin Final Component (With DART Search) ---
 const AdminFinal = (props: { user: any, tab?: string }) => {
   const activeTab = props.tab || 'overview';
   
@@ -262,23 +262,102 @@ app.get('/partnership', (c) => c.render(<PartnershipProposal />))
 app.get('/legal', (c) => c.render(<Legal />))
 app.get('/audit/apply', (c) => c.render(<AuditApplication />))
 
-// --- 5. Auth & Admin Routes ---
+// --- 5. Auth & Admin Routes (RESTORED RICH LOGIN) ---
 app.get('/login', (c) => {
+  const userSession = getCookie(c, 'user_session')
+  if (userSession) return c.redirect('/')
+  
   return c.html(
     <html lang="ko">
       <head>
         <meta charset="UTF-8" />
-        <title>로그인</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>로그인 - 경영인증평가원</title>
         <script src="https://cdn.tailwindcss.com"></script>
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
       </head>
       <body class="bg-gray-50 flex items-center justify-center min-h-screen">
-        <div class="bg-white p-8 rounded-lg shadow-lg w-96">
-          <h1 class="text-2xl font-bold mb-6 text-center">로그인</h1>
-          <form action="/auth/login" method="post" class="space-y-4">
-            <input type="email" name="email" placeholder="이메일" class="w-full p-2 border rounded" required />
-            <input type="password" name="password" placeholder="비밀번호" class="w-full p-2 border rounded" required />
-            <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded font-bold">로그인</button>
-          </form>
+        <div class="bg-white p-8 rounded-lg shadow-lg max-w-md w-full">
+          <div class="text-center mb-8">
+            <img src="/static/logo-horizontal.png" alt="경영인증평가원 Logo" class="h-12 mx-auto mb-4" />
+            <h1 class="text-2xl font-bold text-gray-800">로그인</h1>
+            <p class="text-gray-600 mt-2">서비스 이용을 위해 로그인해주세요</p>
+          </div>
+
+          <div class="mb-6">
+            <div class="flex border-b border-gray-200 mb-4">
+              <button id="tab-enterprise" class="flex-1 py-2 text-blue-600 border-b-2 border-blue-600 font-semibold">기업 회원</button>
+              <button id="tab-institution" class="flex-1 py-2 text-gray-500">기관/심사원</button>
+            </div>
+            
+            <form action="/auth/login" method="post" class="space-y-4">
+              <div>
+                <label class="block text-gray-700 text-sm font-bold mb-2">아이디 (이메일)</label>
+                <input type="email" name="email" id="email" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-blue-500 transition-colors" placeholder="example@company.com" required />
+              </div>
+              <div>
+                <label class="block text-gray-700 text-sm font-bold mb-2">비밀번호</label>
+                <input type="password" name="password" id="password" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-blue-500 transition-colors" placeholder="••••••••" required />
+              </div>
+              
+              <div class="flex items-center justify-between text-sm">
+                <label class="flex items-center">
+                  <input type="checkbox" class="mr-2" />
+                  <span class="text-gray-600">로그인 유지</span>
+                </label>
+                <a href="#" class="text-blue-600 hover:underline">비밀번호 찾기</a>
+              </div>
+              <button type="submit" id="login-btn" class="w-full bg-blue-600 text-white py-3 rounded-lg font-bold hover:bg-blue-700 transition duration-200">
+                로그인
+              </button>
+            </form>
+            
+            <div class="mt-6">
+              <div class="relative">
+                <div class="absolute inset-0 flex items-center">
+                  <div class="w-full border-t border-gray-300"></div>
+                </div>
+                <div class="relative flex justify-center text-sm">
+                  <span class="px-2 bg-white text-gray-500">간편 로그인</span>
+                </div>
+              </div>
+
+              <div class="mt-6 grid grid-cols-3 gap-3">
+                <a href="#" class="w-full flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-[#FEE500] hover:bg-[#FDD835]">
+                  <i class="fas fa-comment text-brown-600"></i>
+                </a>
+                <a href="#" class="w-full flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-white bg-[#03C75A] hover:bg-[#02B150]">
+                  <span class="font-bold">N</span>
+                </a>
+                <a href="#" class="w-full flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                  <i class="fab fa-google text-red-500"></i>
+                </a>
+              </div>
+            </div>
+            
+            <div class="mt-8 pt-6 border-t border-gray-200">
+              <div class="text-center mb-4">
+                <span class="text-gray-600 text-sm">아직 회원이 아니신가요?</span>
+              </div>
+              <div class="grid grid-cols-2 gap-4">
+                <a href="/register?type=buyer" class="flex flex-col items-center justify-center p-4 border border-gray-200 rounded-xl hover:border-blue-500 hover:bg-blue-50 transition group cursor-pointer">
+                  <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 mb-2 group-hover:bg-blue-600 group-hover:text-white transition">
+                    <i class="fas fa-user"></i>
+                  </div>
+                  <span class="text-sm font-bold text-gray-800">일반 회원가입</span>
+                  <span class="text-xs text-gray-500 mt-1">공급사 찾기 / 기업 검색</span>
+                </a>
+                <a href="/register?type=partner" class="flex flex-col items-center justify-center p-4 border border-gray-200 rounded-xl hover:border-blue-500 hover:bg-blue-50 transition group cursor-pointer">
+                  <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center text-green-600 mb-2 group-hover:bg-green-600 group-hover:text-white transition">
+                    <i class="fas fa-handshake"></i>
+                  </div>
+                  <span class="text-sm font-bold text-gray-800">파트너사 가입</span>
+                  <span class="text-xs text-gray-500 mt-1">공급사 / 인증 기업</span>
+                </a>
+              </div>
+            </div>
+
+          </div>
         </div>
       </body>
     </html>
