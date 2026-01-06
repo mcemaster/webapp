@@ -20,6 +20,7 @@ import { FAQ } from './pages/FAQ'
 import { Legal } from './pages/Legal'
 import { AuditApplication } from './pages/AuditApplication'
 import { Certification } from './pages/Certification'
+import puppeteer from '@cloudflare/puppeteer'
 
 // --- 2. Admin Final Component (Standalone Mode - NO LAYOUT) ---
 const AdminFinal = (props: { user: any, tab?: string }) => {
@@ -44,16 +45,16 @@ const AdminFinal = (props: { user: any, tab?: string }) => {
                <img src="/static/logo-horizontal.png" alt="Logo" class="h-8" />
             </div>
             <div class="p-4 space-y-1">
-              <a href="/admin?tab=overview" class={`flex items-center px-4 py-3 text-sm font-bold rounded-xl transition-colors ${activeTab === 'overview' ? 'bg-red-50 text-red-600' : 'text-slate-600 hover:bg-slate-50'}`}>
+              <a href="/admin?tab=overview" class={`flex items-center px-4 py-3 text-sm font-bold rounded-xl transition-colors ${activeTab === 'overview' ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50'}`}>
                 <i class="fas fa-chart-pie w-6"></i> 대시보드
               </a>
-              <a href="/admin?tab=companies" class={`flex items-center px-4 py-3 text-sm font-bold rounded-xl transition-colors ${activeTab === 'companies' ? 'bg-red-50 text-red-600' : 'text-slate-600 hover:bg-slate-50'}`}>
+              <a href="/admin?tab=companies" class={`flex items-center px-4 py-3 text-sm font-bold rounded-xl transition-colors ${activeTab === 'companies' ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50'}`}>
                 <i class="fas fa-building w-6"></i> 기업 DB 관리
               </a>
-              <a href="/admin?tab=grants" class={`flex items-center px-4 py-3 text-sm font-bold rounded-xl transition-colors ${activeTab === 'grants' ? 'bg-red-50 text-red-600' : 'text-slate-600 hover:bg-slate-50'}`}>
+              <a href="/admin?tab=grants" class={`flex items-center px-4 py-3 text-sm font-bold rounded-xl transition-colors ${activeTab === 'grants' ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50'}`}>
                 <i class="fas fa-bullhorn w-6"></i> 지원사업 공고
               </a>
-              <a href="/admin?tab=logs" class={`flex items-center px-4 py-3 text-sm font-bold rounded-xl transition-colors ${activeTab === 'logs' ? 'bg-red-50 text-red-600' : 'text-slate-600 hover:bg-slate-50'}`}>
+              <a href="/admin?tab=logs" class={`flex items-center px-4 py-3 text-sm font-bold rounded-xl transition-colors ${activeTab === 'logs' ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50'}`}>
                 <i class="fas fa-history w-6"></i> AI 분석 내역
               </a>
               <div class="border-t border-slate-100 my-4"></div>
@@ -65,14 +66,14 @@ const AdminFinal = (props: { user: any, tab?: string }) => {
 
           {/* Standalone Main Content */}
           <main class="flex-1 md:ml-64 p-8">
-            {/* Header */}
-            <header class="flex justify-between items-center mb-8 bg-white p-6 rounded-2xl shadow-sm border-l-4 border-red-500">
+            {/* Header - Professional Blue Style */}
+            <header class="flex justify-between items-center mb-8 bg-white p-6 rounded-2xl shadow-sm border-l-4 border-blue-600">
               <div>
                 <h1 class="text-2xl font-extrabold text-slate-900 flex items-center">
-                  <span class="bg-red-100 text-red-600 px-3 py-1 rounded-lg text-xs mr-3">ADMIN V3.0</span>
-                  통합 관리 시스템
+                  <span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-lg text-xs mr-3">ADMIN V3.0</span>
+                  통합 관리자 시스템
                 </h1>
-                <p class="text-slate-500 text-sm mt-1 ml-14">모든 데이터와 현황을 한눈에 파악하세요.</p>
+                <p class="text-slate-500 text-sm mt-1 ml-14">기업 데이터, 공고 매칭, AI 분석 현황을 실시간으로 관리합니다.</p>
               </div>
               <div class="flex items-center space-x-4">
                  <div class="text-right mr-4 hidden sm:block">
@@ -86,7 +87,7 @@ const AdminFinal = (props: { user: any, tab?: string }) => {
             </header>
 
             {/* Action Center */}
-            <div id="action-center" class="bg-indigo-600 rounded-2xl shadow-lg p-6 text-white mb-8 hidden">
+            <div id="action-center" class="bg-indigo-600 rounded-2xl shadow-lg p-6 text-white mb-8 hidden animate-fade-in-up">
               <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-4">
                   <div class="p-3 bg-white/20 rounded-xl backdrop-blur-sm animate-pulse">
@@ -110,7 +111,7 @@ const AdminFinal = (props: { user: any, tab?: string }) => {
 
             {/* Dashboard Charts */}
             {activeTab === 'overview' && (
-              <div class="space-y-6">
+              <div class="space-y-6 animate-fade-in-up">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
                       <p class="text-xs font-bold text-slate-400 uppercase">총 회원 수</p>
@@ -141,19 +142,19 @@ const AdminFinal = (props: { user: any, tab?: string }) => {
 
             {/* Tables Container */}
             {activeTab === 'companies' && (
-              <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
+              <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 animate-fade-in-up">
                 <h3 class="font-bold text-lg mb-4">기업 DB 목록</h3>
                 <div class="overflow-x-auto"><table class="w-full text-sm text-left"><tbody id="company-list"><tr><td class="p-4 text-center">로딩중...</td></tr></tbody></table></div>
               </div>
             )}
             {activeTab === 'grants' && (
-              <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
+              <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 animate-fade-in-up">
                 <h3 class="font-bold text-lg mb-4">지원사업 공고 목록</h3>
                 <div class="overflow-x-auto"><table class="w-full text-sm text-left"><tbody id="grant-list"><tr><td class="p-4 text-center">로딩중...</td></tr></tbody></table></div>
               </div>
             )}
             {activeTab === 'logs' && (
-              <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
+              <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 animate-fade-in-up">
                 <h3 class="font-bold text-lg mb-4">AI 분석 이력</h3>
                 <div class="overflow-x-auto"><table class="w-full text-sm text-left"><tbody id="log-list"><tr><td class="p-4 text-center">로딩중...</td></tr></tbody></table></div>
               </div>
