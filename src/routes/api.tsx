@@ -687,4 +687,222 @@ api.post('/analysis/log', async (c) => {
   }
 })
 
+// ==========================================
+// SEO Management APIs
+// ==========================================
+
+// 14. Get SEO Settings
+api.get('/admin/seo', async (c) => {
+  try {
+    const db = c.env.DB
+    const result = await db.prepare('SELECT key, value FROM settings WHERE key LIKE ?').bind('seo_%').all()
+    
+    const settings: Record<string, string> = {}
+    if (result.results) {
+      result.results.forEach((r: any) => {
+        const key = r.key.replace('seo_', '')
+        settings[key] = r.value
+      })
+    }
+    
+    return c.json({ settings })
+  } catch (e: any) {
+    return c.json({ settings: {}, error: e.message })
+  }
+})
+
+// 15. Save SEO Settings
+api.post('/admin/seo', async (c) => {
+  try {
+    const db = c.env.DB
+    const body = await c.req.json()
+    
+    const seoFields = [
+      'title', 'url', 'description', 'keywords',
+      'og_title', 'og_image', 'og_description',
+      'company_name', 'phone', 'email', 'address'
+    ]
+    
+    for (const field of seoFields) {
+      if (body[field] !== undefined) {
+        await db.prepare(`
+          INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)
+        `).bind('seo_' + field, body[field]).run()
+      }
+    }
+    
+    return c.json({ success: true })
+  } catch (e: any) {
+    return c.json({ success: false, error: e.message })
+  }
+})
+
+// ==========================================
+// API Key Management
+// ==========================================
+
+// 16. Get API Keys (masked)
+api.get('/admin/api-keys', async (c) => {
+  try {
+    const db = c.env.DB
+    const dartKey = await db.prepare("SELECT value FROM settings WHERE key = 'api_dart_key'").first<{value: string}>()
+    const openaiKey = await db.prepare("SELECT value FROM settings WHERE key = 'api_openai_key'").first<{value: string}>()
+    
+    // Return masked keys
+    const maskKey = (key: string | undefined) => {
+      if (!key) return ''
+      if (key.length <= 8) return '****'
+      return key.substring(0, 4) + '****' + key.substring(key.length - 4)
+    }
+    
+    return c.json({
+      dart_key: maskKey(dartKey?.value),
+      openai_key: maskKey(openaiKey?.value),
+      dart_configured: !!dartKey?.value,
+      openai_configured: !!openaiKey?.value
+    })
+  } catch (e: any) {
+    return c.json({ dart_key: '', openai_key: '', error: e.message })
+  }
+})
+
+// 17. Save API Keys
+api.post('/admin/api-keys', async (c) => {
+  try {
+    const db = c.env.DB
+    const body = await c.req.json()
+    
+    // Only save if the key doesn't contain **** (meaning it was edited)
+    if (body.dart_key && !body.dart_key.includes('****')) {
+      await db.prepare(`
+        INSERT OR REPLACE INTO settings (key, value) VALUES ('api_dart_key', ?)
+      `).bind(body.dart_key).run()
+    }
+    
+    if (body.openai_key && !body.openai_key.includes('****')) {
+      await db.prepare(`
+        INSERT OR REPLACE INTO settings (key, value) VALUES ('api_openai_key', ?)
+      `).bind(body.openai_key).run()
+    }
+    
+    return c.json({ success: true })
+  } catch (e: any) {
+    return c.json({ success: false, error: e.message })
+  }
+})
+
+// 18. Test OpenAI Connection
+api.get('/admin/openai/test', async (c) => {
+  try {
+    // First try environment variable, then DB
+    let apiKey = c.env.OPENAI_API_KEY
+    
+    if (!apiKey) {
+      const db = c.env.DB
+      const result = await db.prepare("SELECT value FROM settings WHERE key = 'api_openai_key'").first<{value: string}>()
+      apiKey = result?.value
+    }
+    
+    if (!apiKey) {
+      return c.json({ success: false, message: 'API Key not configured' })
+    }
+    
+    const res = await fetch('https://api.openai.com/v1/models', {
+      headers: { 'Authorization': 'Bearer ' + apiKey }
+    })
+    
+    if (res.ok) {
+      return c.json({ success: true, model: 'GPT-4o Available' })
+    } else {
+      const error = await res.json() as any
+      return c.json({ success: false, message: error.error?.message || 'API Error' })
+    }
+  } catch (e: any) {
+    return c.json({ success: false, message: e.message })
+  }
+})
+
+// 19. Generate Sitemap
+api.post('/admin/sitemap', async (c) => {
+  try {
+    const db = c.env.DB
+    const urlResult = await db.prepare("SELECT value FROM settings WHERE key = 'seo_url'").first<{value: string}>()
+    const baseUrl = urlResult?.value || 'https://www.mce.or.kr'
+    
+    const pages = [
+      { loc: '/', priority: '1.0', changefreq: 'daily' },
+      { loc: '/support-matching', priority: '0.9', changefreq: 'daily' },
+      { loc: '/rfq', priority: '0.9', changefreq: 'daily' },
+      { loc: '/services/certification', priority: '0.8', changefreq: 'weekly' },
+      { loc: '/services/spec', priority: '0.8', changefreq: 'weekly' },
+      { loc: '/services/scm', priority: '0.8', changefreq: 'weekly' },
+      { loc: '/faq', priority: '0.6', changefreq: 'monthly' },
+      { loc: '/partnership', priority: '0.6', changefreq: 'monthly' },
+      { loc: '/register', priority: '0.7', changefreq: 'monthly' },
+    ]
+    
+    const now = new Date().toISOString().split('T')[0]
+    
+    let sitemap = '<?xml version="1.0" encoding="UTF-8"?>\n'
+    sitemap += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+    
+    for (const page of pages) {
+      sitemap += '  <url>\n'
+      sitemap += '    <loc>' + baseUrl + page.loc + '</loc>\n'
+      sitemap += '    <lastmod>' + now + '</lastmod>\n'
+      sitemap += '    <changefreq>' + page.changefreq + '</changefreq>\n'
+      sitemap += '    <priority>' + page.priority + '</priority>\n'
+      sitemap += '  </url>\n'
+    }
+    
+    sitemap += '</urlset>'
+    
+    // Store sitemap in settings
+    await db.prepare(`
+      INSERT OR REPLACE INTO settings (key, value) VALUES ('sitemap_xml', ?)
+    `).bind(sitemap).run()
+    
+    return c.json({ success: true, url: baseUrl + '/sitemap.xml' })
+  } catch (e: any) {
+    return c.json({ success: false, error: e.message })
+  }
+})
+
+// 20. Get Sitemap
+api.get('/sitemap.xml', async (c) => {
+  try {
+    const db = c.env.DB
+    const result = await db.prepare("SELECT value FROM settings WHERE key = 'sitemap_xml'").first<{value: string}>()
+    
+    if (result?.value) {
+      return c.text(result.value, 200, { 'Content-Type': 'application/xml' })
+    }
+    
+    // Return default sitemap
+    return c.text('<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"></urlset>', 200, { 'Content-Type': 'application/xml' })
+  } catch (e) {
+    return c.text('<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"></urlset>', 200, { 'Content-Type': 'application/xml' })
+  }
+})
+
+// 21. Get SEO Meta for pages (used by Layout)
+api.get('/seo/meta', async (c) => {
+  try {
+    const db = c.env.DB
+    const result = await db.prepare('SELECT key, value FROM settings WHERE key LIKE ?').bind('seo_%').all()
+    
+    const meta: Record<string, string> = {}
+    if (result.results) {
+      result.results.forEach((r: any) => {
+        const key = r.key.replace('seo_', '')
+        meta[key] = r.value
+      })
+    }
+    
+    return c.json(meta)
+  } catch (e: any) {
+    return c.json({})
+  }
+})
+
 export default api

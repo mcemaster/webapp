@@ -78,4 +78,44 @@ app.get('/legal', (c) => c.render(<Legal />))
 app.get('/audit/apply', (c) => c.render(<AuditApplication />))
 app.get('/register', (c) => c.render(<Register />))
 
+// ==========================================
+// 3. SEO - Sitemap & Robots
+// ==========================================
+app.get('/sitemap.xml', async (c) => {
+  try {
+    const db = c.env.DB
+    const result = await db.prepare("SELECT value FROM settings WHERE key = 'sitemap_xml'").first<{value: string}>()
+    
+    if (result?.value) {
+      return c.text(result.value, 200, { 'Content-Type': 'application/xml' })
+    }
+    
+    // Default sitemap
+    const baseUrl = 'https://www.mce.or.kr'
+    const pages = ['/', '/support-matching', '/rfq', '/services/certification', '/services/spec', '/services/scm', '/faq', '/partnership', '/register']
+    const now = new Date().toISOString().split('T')[0]
+    
+    let xml = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+    pages.forEach(p => {
+      xml += `  <url><loc>${baseUrl}${p}</loc><lastmod>${now}</lastmod></url>\n`
+    })
+    xml += '</urlset>'
+    
+    return c.text(xml, 200, { 'Content-Type': 'application/xml' })
+  } catch (e) {
+    return c.text('<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"></urlset>', 200, { 'Content-Type': 'application/xml' })
+  }
+})
+
+app.get('/robots.txt', (c) => {
+  const robots = `User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /api
+Disallow: /auth
+
+Sitemap: https://www.mce.or.kr/sitemap.xml`
+  return c.text(robots, 200, { 'Content-Type': 'text/plain' })
+})
+
 export default app

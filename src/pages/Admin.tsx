@@ -394,44 +394,189 @@ export const Admin = (props: { user: any, tab?: string }) => {
               ${activeTab === 'settings' ? html`
                 <!-- Settings -->
                 <div class="space-y-6">
-                  <!-- API Settings -->
+                  
+                  <!-- SEO Settings -->
                   <div class="bg-white rounded-xl shadow-sm border border-slate-100">
-                    <div class="p-5 border-b border-slate-100">
-                      <h3 class="font-semibold text-slate-800">API 연동 설정</h3>
+                    <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+                      <div class="flex items-center">
+                        <i class="fas fa-search text-blue-600 mr-3"></i>
+                        <h3 class="font-semibold text-slate-800">SEO 설정 (검색엔진 최적화)</h3>
+                      </div>
+                      <button onclick="saveSeoSettings()" class="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition">
+                        <i class="fas fa-save mr-2"></i>저장
+                      </button>
+                    </div>
+                    <div class="p-5 space-y-5">
+                      <!-- Basic SEO -->
+                      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                        <div>
+                          <label class="block text-sm font-medium text-slate-700 mb-1">사이트 제목</label>
+                          <input type="text" id="seo-title" placeholder="MCE 경영인증평가원 | 기업 맞춤 정부지원사업 매칭" class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                          <p class="text-xs text-slate-400 mt-1">권장: 50-60자 이내</p>
+                        </div>
+                        <div>
+                          <label class="block text-sm font-medium text-slate-700 mb-1">사이트 URL</label>
+                          <input type="text" id="seo-url" placeholder="https://www.mce.or.kr" class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">메타 설명 (Description)</label>
+                        <textarea id="seo-description" rows="3" placeholder="AI 기반 기업 맞춤형 정부지원사업 매칭, ISO 인증, 공급사 찾기 서비스를 제공합니다. 30,000건 이상의 지원사업 데이터베이스에서 최적의 지원사업을 찾아드립니다." class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                        <p class="text-xs text-slate-400 mt-1">권장: 150-160자 이내 (Google 검색결과에 표시됨)</p>
+                      </div>
+                      
+                      <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">키워드 (Keywords)</label>
+                        <input type="text" id="seo-keywords" placeholder="정부지원사업, ISO인증, 기업평가, AI매칭, 경영컨설팅, 스마트공장, R&D지원" class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                        <p class="text-xs text-slate-400 mt-1">쉼표로 구분 (예: 키워드1, 키워드2, 키워드3)</p>
+                      </div>
+                      
+                      <!-- Open Graph Tags -->
+                      <div class="pt-4 border-t border-slate-100">
+                        <h4 class="font-medium text-slate-800 mb-3 flex items-center">
+                          <i class="fab fa-facebook text-blue-500 mr-2"></i>
+                          소셜 미디어 공유 설정 (Open Graph)
+                        </h4>
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                          <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">OG 제목</label>
+                            <input type="text" id="seo-og-title" placeholder="MCE 경영인증평가원" class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                          </div>
+                          <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">OG 이미지 URL</label>
+                            <input type="text" id="seo-og-image" placeholder="https://www.mce.or.kr/static/og-image.png" class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                          </div>
+                        </div>
+                        <div class="mt-4">
+                          <label class="block text-sm font-medium text-slate-700 mb-1">OG 설명</label>
+                          <textarea id="seo-og-description" rows="2" placeholder="AI 기반 기업 맞춤형 정부지원사업 매칭 서비스" class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                        </div>
+                      </div>
+                      
+                      <!-- Structured Data -->
+                      <div class="pt-4 border-t border-slate-100">
+                        <h4 class="font-medium text-slate-800 mb-3 flex items-center">
+                          <i class="fas fa-code text-purple-500 mr-2"></i>
+                          구조화된 데이터 (Schema.org)
+                        </h4>
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                          <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">회사명</label>
+                            <input type="text" id="seo-company-name" placeholder="경영인증평가원" class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                          </div>
+                          <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">전화번호</label>
+                            <input type="text" id="seo-phone" placeholder="051-714-0798" class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                          </div>
+                          <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">이메일</label>
+                            <input type="text" id="seo-email" placeholder="mce@mce.re.kr" class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                          </div>
+                          <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">주소</label>
+                            <input type="text" id="seo-address" placeholder="부산광역시 동래구 중앙대로 1367번길 44-15" class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <!-- SEO Preview -->
+                      <div class="pt-4 border-t border-slate-100">
+                        <h4 class="font-medium text-slate-800 mb-3 flex items-center">
+                          <i class="fab fa-google text-red-500 mr-2"></i>
+                          Google 검색 결과 미리보기
+                        </h4>
+                        <div class="p-4 bg-slate-50 rounded-lg">
+                          <p id="preview-title" class="text-blue-700 text-lg font-medium hover:underline cursor-pointer">MCE 경영인증평가원 | 기업 맞춤 정부지원사업 매칭</p>
+                          <p id="preview-url" class="text-green-700 text-sm">https://www.mce.or.kr</p>
+                          <p id="preview-desc" class="text-slate-600 text-sm mt-1">AI 기반 기업 맞춤형 정부지원사업 매칭, ISO 인증, 공급사 찾기 서비스를 제공합니다...</p>
+                        </div>
+                      </div>
+                      
+                      <div id="seo-status" class="hidden p-4 rounded-lg"></div>
+                    </div>
+                  </div>
+                  
+                  <!-- API Key Management -->
+                  <div class="bg-white rounded-xl shadow-sm border border-slate-100">
+                    <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+                      <div class="flex items-center">
+                        <i class="fas fa-key text-amber-600 mr-3"></i>
+                        <h3 class="font-semibold text-slate-800">API 키 관리</h3>
+                      </div>
+                      <button onclick="saveApiKeys()" class="px-4 py-2 bg-amber-600 text-white text-sm font-medium rounded-lg hover:bg-amber-700 transition">
+                        <i class="fas fa-save mr-2"></i>저장
+                      </button>
                     </div>
                     <div class="p-5 space-y-4">
-                      <div class="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
-                        <div class="flex items-center">
-                          <div class="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center mr-4">
-                            <span class="font-bold text-yellow-700">D</span>
+                      <!-- DART API -->
+                      <div class="p-4 bg-slate-50 rounded-lg">
+                        <div class="flex items-center justify-between mb-3">
+                          <div class="flex items-center">
+                            <div class="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center mr-3">
+                              <span class="font-bold text-yellow-700">D</span>
+                            </div>
+                            <div>
+                              <p class="font-medium text-slate-800">DART API</p>
+                              <p class="text-xs text-slate-500">금융감독원 기업공시 데이터</p>
+                            </div>
                           </div>
-                          <div>
-                            <p class="font-medium text-slate-800">DART API</p>
-                            <p class="text-xs text-slate-500">금융감독원 기업공시 데이터</p>
-                          </div>
+                          <button onclick="testDartConnection()" class="px-3 py-1.5 bg-slate-800 text-white text-xs font-medium rounded-lg hover:bg-slate-900 transition">
+                            <i class="fas fa-plug mr-1"></i>연결 테스트
+                          </button>
                         </div>
-                        <button onclick="testDartConnection()" class="px-4 py-2 bg-slate-800 text-white text-sm font-medium rounded-lg hover:bg-slate-900 transition">연동 테스트</button>
+                        <div class="flex items-center space-x-2">
+                          <input type="password" id="api-dart-key" placeholder="DART API 키 입력..." class="flex-1 px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 font-mono text-sm" />
+                          <button onclick="togglePassword('api-dart-key')" class="px-3 py-2 border border-slate-200 rounded-lg hover:bg-slate-100">
+                            <i class="fas fa-eye text-slate-500"></i>
+                          </button>
+                        </div>
+                        <div id="dart-status" class="mt-2 px-3 py-2 bg-slate-100 rounded text-xs text-slate-600 font-mono">Status: Ready</div>
+                        <p class="text-xs text-slate-400 mt-2">
+                          <a href="https://opendart.fss.or.kr" target="_blank" class="text-blue-500 hover:underline">
+                            <i class="fas fa-external-link-alt mr-1"></i>DART API 키 발급받기
+                          </a>
+                        </p>
                       </div>
-                      <div id="dart-status" class="px-4 py-3 bg-slate-100 rounded-lg text-sm text-slate-600 font-mono">Status: Ready</div>
                       
-                      <div class="flex items-center justify-between p-4 bg-slate-50 rounded-lg mt-4">
-                        <div class="flex items-center">
-                          <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mr-4">
-                            <i class="fas fa-brain text-green-600"></i>
+                      <!-- OpenAI API -->
+                      <div class="p-4 bg-slate-50 rounded-lg">
+                        <div class="flex items-center justify-between mb-3">
+                          <div class="flex items-center">
+                            <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mr-3">
+                              <i class="fas fa-brain text-green-600"></i>
+                            </div>
+                            <div>
+                              <p class="font-medium text-slate-800">OpenAI API</p>
+                              <p class="text-xs text-slate-500">GPT-4o 기반 AI 분석</p>
+                            </div>
                           </div>
-                          <div>
-                            <p class="font-medium text-slate-800">OpenAI API</p>
-                            <p class="text-xs text-slate-500">GPT-4o 기반 AI 분석</p>
-                          </div>
+                          <button onclick="testOpenAIConnection()" class="px-3 py-1.5 bg-green-600 text-white text-xs font-medium rounded-lg hover:bg-green-700 transition">
+                            <i class="fas fa-plug mr-1"></i>연결 테스트
+                          </button>
                         </div>
-                        <span class="px-3 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full">Connected</span>
+                        <div class="flex items-center space-x-2">
+                          <input type="password" id="api-openai-key" placeholder="sk-..." class="flex-1 px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 font-mono text-sm" />
+                          <button onclick="togglePassword('api-openai-key')" class="px-3 py-2 border border-slate-200 rounded-lg hover:bg-slate-100">
+                            <i class="fas fa-eye text-slate-500"></i>
+                          </button>
+                        </div>
+                        <div id="openai-status" class="mt-2 px-3 py-2 bg-slate-100 rounded text-xs text-slate-600 font-mono">Status: Ready</div>
+                        <p class="text-xs text-slate-400 mt-2">
+                          <a href="https://platform.openai.com/api-keys" target="_blank" class="text-blue-500 hover:underline">
+                            <i class="fas fa-external-link-alt mr-1"></i>OpenAI API 키 발급받기
+                          </a>
+                        </p>
                       </div>
+                      
+                      <div id="api-status" class="hidden p-4 rounded-lg"></div>
                     </div>
                   </div>
                   
                   <!-- System Actions -->
                   <div class="bg-white rounded-xl shadow-sm border border-slate-100">
-                    <div class="p-5 border-b border-slate-100">
+                    <div class="p-5 border-b border-slate-100 flex items-center">
+                      <i class="fas fa-cogs text-slate-600 mr-3"></i>
                       <h3 class="font-semibold text-slate-800">시스템 관리</h3>
                     </div>
                     <div class="p-5 space-y-4">
@@ -459,6 +604,19 @@ export const Admin = (props: { user: any, tab?: string }) => {
                           </div>
                         </div>
                         <button onclick="clearCache()" class="px-4 py-2 bg-slate-600 text-white text-sm font-medium rounded-lg hover:bg-slate-700 transition">초기화</button>
+                      </div>
+                      
+                      <div class="flex items-center justify-between p-4 bg-red-50 rounded-lg">
+                        <div class="flex items-center">
+                          <div class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center mr-4">
+                            <i class="fas fa-sitemap text-red-600"></i>
+                          </div>
+                          <div>
+                            <p class="font-medium text-slate-800">Sitemap 생성</p>
+                            <p class="text-xs text-slate-500">검색엔진용 사이트맵 갱신</p>
+                          </div>
+                        </div>
+                        <button onclick="generateSitemap()" class="px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 transition">생성</button>
                       </div>
                     </div>
                   </div>
@@ -1006,6 +1164,202 @@ export const Admin = (props: { user: any, tab?: string }) => {
           function searchUsers() {
             const q = document.getElementById('user-search').value;
             console.log('Search users:', q);
+          }
+          
+          // ==========================================
+          // SEO Management Functions
+          // ==========================================
+          
+          async function loadSeoSettings() {
+            try {
+              const res = await fetch('/api/admin/seo');
+              if (res.ok) {
+                const data = await res.json();
+                if (data.settings) {
+                  const s = data.settings;
+                  document.getElementById('seo-title').value = s.title || '';
+                  document.getElementById('seo-url').value = s.url || '';
+                  document.getElementById('seo-description').value = s.description || '';
+                  document.getElementById('seo-keywords').value = s.keywords || '';
+                  document.getElementById('seo-og-title').value = s.og_title || '';
+                  document.getElementById('seo-og-image').value = s.og_image || '';
+                  document.getElementById('seo-og-description').value = s.og_description || '';
+                  document.getElementById('seo-company-name').value = s.company_name || '';
+                  document.getElementById('seo-phone').value = s.phone || '';
+                  document.getElementById('seo-email').value = s.email || '';
+                  document.getElementById('seo-address').value = s.address || '';
+                  updateSeoPreview();
+                }
+              }
+            } catch(e) {
+              console.log('SEO settings load error:', e);
+            }
+          }
+          
+          function updateSeoPreview() {
+            const title = document.getElementById('seo-title').value || 'MCE 경영인증평가원';
+            const url = document.getElementById('seo-url').value || 'https://www.mce.or.kr';
+            const desc = document.getElementById('seo-description').value || '사이트 설명...';
+            
+            document.getElementById('preview-title').textContent = title;
+            document.getElementById('preview-url').textContent = url;
+            document.getElementById('preview-desc').textContent = desc.length > 160 ? desc.substring(0, 157) + '...' : desc;
+          }
+          
+          async function saveSeoSettings() {
+            const statusEl = document.getElementById('seo-status');
+            statusEl.classList.remove('hidden', 'bg-green-50', 'bg-red-50');
+            statusEl.classList.add('bg-blue-50');
+            statusEl.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>저장 중...';
+            
+            const settings = {
+              title: document.getElementById('seo-title').value,
+              url: document.getElementById('seo-url').value,
+              description: document.getElementById('seo-description').value,
+              keywords: document.getElementById('seo-keywords').value,
+              og_title: document.getElementById('seo-og-title').value,
+              og_image: document.getElementById('seo-og-image').value,
+              og_description: document.getElementById('seo-og-description').value,
+              company_name: document.getElementById('seo-company-name').value,
+              phone: document.getElementById('seo-phone').value,
+              email: document.getElementById('seo-email').value,
+              address: document.getElementById('seo-address').value
+            };
+            
+            try {
+              const res = await fetch('/api/admin/seo', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(settings)
+              });
+              
+              if (res.ok) {
+                statusEl.classList.remove('bg-blue-50');
+                statusEl.classList.add('bg-green-50');
+                statusEl.innerHTML = '<i class="fas fa-check-circle text-green-600 mr-2"></i><span class="text-green-700">SEO 설정이 저장되었습니다.</span>';
+              } else {
+                throw new Error('저장 실패');
+              }
+            } catch(e) {
+              statusEl.classList.remove('bg-blue-50');
+              statusEl.classList.add('bg-red-50');
+              statusEl.innerHTML = '<i class="fas fa-exclamation-circle text-red-600 mr-2"></i><span class="text-red-700">저장 실패: ' + e.message + '</span>';
+            }
+            
+            setTimeout(() => { statusEl.classList.add('hidden'); }, 3000);
+          }
+          
+          // Add event listeners for real-time preview
+          if (document.getElementById('seo-title')) {
+            ['seo-title', 'seo-url', 'seo-description'].forEach(id => {
+              const el = document.getElementById(id);
+              if (el) el.addEventListener('input', updateSeoPreview);
+            });
+          }
+          
+          // ==========================================
+          // API Key Management Functions
+          // ==========================================
+          
+          function togglePassword(inputId) {
+            const input = document.getElementById(inputId);
+            const icon = input.nextElementSibling.querySelector('i');
+            if (input.type === 'password') {
+              input.type = 'text';
+              icon.classList.remove('fa-eye');
+              icon.classList.add('fa-eye-slash');
+            } else {
+              input.type = 'password';
+              icon.classList.remove('fa-eye-slash');
+              icon.classList.add('fa-eye');
+            }
+          }
+          
+          async function loadApiKeys() {
+            try {
+              const res = await fetch('/api/admin/api-keys');
+              if (res.ok) {
+                const data = await res.json();
+                if (data.dart_key) {
+                  document.getElementById('api-dart-key').value = data.dart_key;
+                }
+                if (data.openai_key) {
+                  document.getElementById('api-openai-key').value = data.openai_key;
+                }
+              }
+            } catch(e) {
+              console.log('API keys load error:', e);
+            }
+          }
+          
+          async function saveApiKeys() {
+            const statusEl = document.getElementById('api-status');
+            statusEl.classList.remove('hidden', 'bg-green-50', 'bg-red-50');
+            statusEl.classList.add('bg-blue-50');
+            statusEl.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>저장 중...';
+            
+            const keys = {
+              dart_key: document.getElementById('api-dart-key').value,
+              openai_key: document.getElementById('api-openai-key').value
+            };
+            
+            try {
+              const res = await fetch('/api/admin/api-keys', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(keys)
+              });
+              
+              if (res.ok) {
+                statusEl.classList.remove('bg-blue-50');
+                statusEl.classList.add('bg-green-50');
+                statusEl.innerHTML = '<i class="fas fa-check-circle text-green-600 mr-2"></i><span class="text-green-700">API 키가 저장되었습니다.</span>';
+              } else {
+                throw new Error('저장 실패');
+              }
+            } catch(e) {
+              statusEl.classList.remove('bg-blue-50');
+              statusEl.classList.add('bg-red-50');
+              statusEl.innerHTML = '<i class="fas fa-exclamation-circle text-red-600 mr-2"></i><span class="text-red-700">저장 실패: ' + e.message + '</span>';
+            }
+            
+            setTimeout(() => { statusEl.classList.add('hidden'); }, 3000);
+          }
+          
+          async function testOpenAIConnection() {
+            const el = document.getElementById('openai-status');
+            el.innerHTML = '<span class="text-blue-600">연결 테스트 중...</span>';
+            try {
+              const res = await fetch('/api/admin/openai/test');
+              const json = await res.json();
+              el.innerHTML = json.success 
+                ? '<span class="text-green-600">✅ 연결 성공: ' + (json.model || 'GPT-4o') + '</span>' 
+                : '<span class="text-red-600">❌ 연결 실패: ' + (json.message || 'Error') + '</span>';
+            } catch(e) { 
+              el.innerHTML = '<span class="text-red-600">❌ 연결 오류</span>'; 
+            }
+          }
+          
+          async function generateSitemap() {
+            if(confirm('사이트맵을 생성하시겠습니까?')) {
+              try {
+                const res = await fetch('/api/admin/sitemap', { method: 'POST' });
+                const json = await res.json();
+                if (json.success) {
+                  alert('사이트맵이 생성되었습니다.\\n' + json.url);
+                } else {
+                  alert('사이트맵 생성 실패: ' + (json.error || '알 수 없는 오류'));
+                }
+              } catch(e) {
+                alert('사이트맵 생성 오류');
+              }
+            }
+          }
+          
+          // Load settings if on settings tab
+          if ('${activeTab}' === 'settings') {
+            loadSeoSettings();
+            loadApiKeys();
           }
           
           // Initialize on page load
