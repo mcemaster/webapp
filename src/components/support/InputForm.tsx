@@ -3,7 +3,6 @@ import { html } from 'hono/html'
 export const InputForm = () => html`
   <div id="wizard-container" class="min-h-screen bg-slate-50 pb-24">
     
-    {/* Progress Header */}
     <div class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
       <div class="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
         <h1 class="font-bold text-slate-800 flex items-center text-lg">
@@ -22,7 +21,6 @@ export const InputForm = () => html`
     <div class="max-w-5xl mx-auto px-6 py-8">
       <form id="diagnosis-form" onsubmit="return false;" class="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
         
-        {/* ================= STEP 1: 기업 개요 (Identity) ================= */}
         <div id="step-1" class="step-content p-8 md:p-10">
           <div class="mb-8 pb-6 border-b border-slate-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
@@ -91,7 +89,6 @@ export const InputForm = () => html`
           </div>
         </div>
 
-        {/* ================= STEP 2: 재무 현황 (Financials) ================= */}
         <div id="step-2" class="step-content hidden p-8 md:p-10">
           <div class="mb-8">
             <h2 class="text-2xl font-extrabold text-slate-900">Step 2. 재무 성장성 분석 (3개년)</h2>
@@ -137,7 +134,6 @@ export const InputForm = () => html`
           </div>
         </div>
 
-        {/* ================= STEP 3: 기술 및 인력 (Tech & HR) ================= */}
         <div id="step-3" class="step-content hidden p-8 md:p-10">
           <div class="mb-8">
             <h2 class="text-2xl font-extrabold text-slate-900">Step 3. 기술력 및 인력 구조</h2>
@@ -145,7 +141,6 @@ export const InputForm = () => html`
           </div>
 
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
-            {/* HR Section */}
             <div class="space-y-6">
               <h3 class="font-bold text-slate-700 flex items-center border-b pb-2"><i class="fas fa-users text-indigo-500 mr-2"></i> 인력 상세 현황 (명)</h3>
               <div class="grid grid-cols-2 gap-4">
@@ -160,7 +155,6 @@ export const InputForm = () => html`
               </div>
             </div>
 
-            {/* Certs Section */}
             <div class="space-y-6">
               <h3 class="font-bold text-slate-700 flex items-center border-b pb-2"><i class="fas fa-certificate text-orange-500 mr-2"></i> 인증 및 지재권</h3>
               
@@ -193,7 +187,6 @@ export const InputForm = () => html`
           </div>
         </div>
 
-        {/* ================= STEP 4: 시장 및 전략 (Market & Strategy) ================= */}
         <div id="step-4" class="step-content hidden p-8 md:p-10">
           <div class="mb-8">
             <h2 class="text-2xl font-extrabold text-slate-900">Step 4. 시장 진출 및 사업 전략</h2>
@@ -237,7 +230,6 @@ export const InputForm = () => html`
           </div>
         </div>
 
-        {/* ================= STEP 5: 파일 첨부 (Files) ================= */}
         <div id="step-5" class="step-content hidden p-8 md:p-10">
           <div class="text-center mb-10">
             <div class="w-20 h-20 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
@@ -268,7 +260,6 @@ export const InputForm = () => html`
           </div>
         </div>
 
-        {/* Footer Navigation */}
         <div class="px-8 py-6 bg-slate-50 border-t border-slate-200 flex justify-between items-center">
           <button type="button" id="btn-prev" class="px-6 py-3 rounded-xl font-bold text-slate-500 hover:bg-white hover:shadow-sm border border-transparent hover:border-slate-200 transition hidden">
             <i class="fas fa-arrow-left mr-2"></i> 이전 단계
