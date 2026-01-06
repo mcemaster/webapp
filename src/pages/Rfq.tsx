@@ -1,9 +1,8 @@
 import { Layout } from '../components/Layout'
 
-export const Rfq = (props: { user?: any, lang?: string }) => {
-  const currentLang = props.lang || 'ko';
+export const Rfq = (props: { user?: any }) => {
   return (
-    <Layout user={props.user} lang={currentLang}>
+    <Layout user={props.user}>
       <div class="bg-slate-50 min-h-screen py-12">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           

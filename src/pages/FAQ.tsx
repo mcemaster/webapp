@@ -56,6 +56,7 @@ export const FAQ = (props: { user?: any }) => {
           <div class="flex flex-wrap justify-center gap-2 mb-12" id="faq-categories">
             {faqCategories.map((cat, index) => (
               <button 
+                key={index}
                 class={`px-6 py-2 rounded-full border transition font-medium ${index === 0 ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-600 border-gray-200 hover:border-blue-400 hover:text-blue-600'}`}
                 data-category={cat}
               >
@@ -67,7 +68,7 @@ export const FAQ = (props: { user?: any }) => {
           {/* FAQ List */}
           <div class="space-y-4" id="faq-list">
             {faqData.map((item) => (
-              <div class="border border-gray-200 rounded-xl overflow-hidden faq-item transition-all duration-300 hover:shadow-md bg-white" data-category={item.category} data-question={item.question} data-answer={item.answer}>
+              <div key={item.id} class="border border-gray-200 rounded-xl overflow-hidden faq-item transition-all duration-300 hover:shadow-md bg-white" data-category={item.category} data-question={item.question} data-answer={item.answer}>
                 <button class="w-full flex items-center justify-between p-6 text-left focus:outline-none faq-toggle">
                   <div class="flex items-center gap-4">
                     <span class="text-blue-600 font-bold text-xl">Q</span>

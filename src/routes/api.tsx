@@ -92,4 +92,16 @@ api.get('/admin/companies', (c) => c.json([{name:'(주)테스트기업', ceo:'�
 api.get('/admin/grants', (c) => c.json([{title:'2026 AI 바우처 지원사업', agency:'NIPA', deadline:'2026-05-01'}]))
 api.get('/admin/logs', (c) => c.json([{created_at: new Date(), user_id:'user1', match_score:95, ai_reasoning:'적합함'}]))
 
+// 6. User Registration
+api.post('/register', async (c) => {
+  try {
+    const body = await c.req.json()
+    // TODO: Save to DB
+    // await c.env.DB.prepare('INSERT INTO users ...').run()
+    return c.json({ success: true, message: '회원가입이 완료되었습니다.' })
+  } catch (e: any) {
+    return c.json({ success: false, error: e.message }, 400)
+  }
+})
+
 export default api
