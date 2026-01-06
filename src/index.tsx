@@ -20,7 +20,6 @@ import { FAQ } from './pages/FAQ'
 import { Legal } from './pages/Legal'
 import { AuditApplication } from './pages/AuditApplication'
 import { Certification } from './pages/Certification'
-import puppeteer from '@cloudflare/puppeteer'
 
 // --- 2. Admin Final Component (Standalone Mode - NO LAYOUT) ---
 const AdminFinal = (props: { user: any, tab?: string }) => {
