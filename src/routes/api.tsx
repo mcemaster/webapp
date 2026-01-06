@@ -122,10 +122,165 @@ api.get('/admin/stats', async (c) => {
     const pendingResult = await db.prepare("SELECT COUNT(*) as count FROM partners WHERE status = 'pending'").first<{count: number}>()
     const pending = pendingResult?.count || 0
     
-    return c.json({ users, aiUsage, grants, pending })
+    // Get companies count
+    const companiesResult = await db.prepare('SELECT COUNT(*) as count FROM companies').first<{count: number}>()
+    const companies = companiesResult?.count || 0
+    
+    return c.json({ users, aiUsage, grants, pending, companies })
   } catch (e: any) {
     console.error('Admin stats error:', e)
-    return c.json({ users: 0, aiUsage: 0, grants: 0, pending: 0, error: e.message })
+    return c.json({ users: 0, aiUsage: 0, grants: 0, pending: 0, companies: 0, error: e.message })
+  }
+})
+
+// 4-1. Admin API Usage Stats - OpenAI, DART 사용량 및 비용
+api.get('/admin/api-usage', async (c) => {
+  try {
+    const db = c.env.DB
+    
+    // api_usage 테이블 생성 (없으면)
+    await db.prepare(`
+      CREATE TABLE IF NOT EXISTS api_usage (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        api_type TEXT NOT NULL,
+        endpoint TEXT,
+        tokens_input INTEGER DEFAULT 0,
+        tokens_output INTEGER DEFAULT 0,
+        cost_usd REAL DEFAULT 0,
+        created_at TEXT DEFAULT (datetime('now'))
+      )
+    `).run()
+    
+    // 오늘 날짜
+    const today = new Date().toISOString().split('T')[0]
+    const thisMonth = today.substring(0, 7)
+    
+    // OpenAI 사용량 (오늘)
+    const openaiToday = await db.prepare(`
+      SELECT 
+        COALESCE(SUM(tokens_input), 0) as input_tokens,
+        COALESCE(SUM(tokens_output), 0) as output_tokens,
+        COALESCE(SUM(cost_usd), 0) as cost,
+        COUNT(*) as calls
+      FROM api_usage 
+      WHERE api_type = 'openai' AND date(created_at) = date('now')
+    `).first<{input_tokens: number, output_tokens: number, cost: number, calls: number}>()
+    
+    // OpenAI 사용량 (이번 달)
+    const openaiMonth = await db.prepare(`
+      SELECT 
+        COALESCE(SUM(tokens_input), 0) as input_tokens,
+        COALESCE(SUM(tokens_output), 0) as output_tokens,
+        COALESCE(SUM(cost_usd), 0) as cost,
+        COUNT(*) as calls
+      FROM api_usage 
+      WHERE api_type = 'openai' AND strftime('%Y-%m', created_at) = ?
+    `).bind(thisMonth).first<{input_tokens: number, output_tokens: number, cost: number, calls: number}>()
+    
+    // OpenAI 사용량 (전체)
+    const openaiTotal = await db.prepare(`
+      SELECT 
+        COALESCE(SUM(tokens_input), 0) as input_tokens,
+        COALESCE(SUM(tokens_output), 0) as output_tokens,
+        COALESCE(SUM(cost_usd), 0) as cost,
+        COUNT(*) as calls
+      FROM api_usage 
+      WHERE api_type = 'openai'
+    `).first<{input_tokens: number, output_tokens: number, cost: number, calls: number}>()
+    
+    // DART API 사용량 (오늘)
+    const dartToday = await db.prepare(`
+      SELECT COUNT(*) as calls
+      FROM api_usage 
+      WHERE api_type = 'dart' AND date(created_at) = date('now')
+    `).first<{calls: number}>()
+    
+    // DART API 사용량 (이번 달)
+    const dartMonth = await db.prepare(`
+      SELECT COUNT(*) as calls
+      FROM api_usage 
+      WHERE api_type = 'dart' AND strftime('%Y-%m', created_at) = ?
+    `).bind(thisMonth).first<{calls: number}>()
+    
+    // 일별 사용량 (최근 7일)
+    const dailyUsage = await db.prepare(`
+      SELECT 
+        date(created_at) as date,
+        api_type,
+        COALESCE(SUM(tokens_input + tokens_output), 0) as tokens,
+        COALESCE(SUM(cost_usd), 0) as cost,
+        COUNT(*) as calls
+      FROM api_usage 
+      WHERE created_at >= datetime('now', '-7 days')
+      GROUP BY date(created_at), api_type
+      ORDER BY date DESC
+    `).all()
+    
+    return c.json({
+      success: true,
+      openai: {
+        today: {
+          input_tokens: openaiToday?.input_tokens || 0,
+          output_tokens: openaiToday?.output_tokens || 0,
+          total_tokens: (openaiToday?.input_tokens || 0) + (openaiToday?.output_tokens || 0),
+          cost_usd: openaiToday?.cost || 0,
+          calls: openaiToday?.calls || 0
+        },
+        month: {
+          input_tokens: openaiMonth?.input_tokens || 0,
+          output_tokens: openaiMonth?.output_tokens || 0,
+          total_tokens: (openaiMonth?.input_tokens || 0) + (openaiMonth?.output_tokens || 0),
+          cost_usd: openaiMonth?.cost || 0,
+          calls: openaiMonth?.calls || 0
+        },
+        total: {
+          input_tokens: openaiTotal?.input_tokens || 0,
+          output_tokens: openaiTotal?.output_tokens || 0,
+          total_tokens: (openaiTotal?.input_tokens || 0) + (openaiTotal?.output_tokens || 0),
+          cost_usd: openaiTotal?.cost || 0,
+          calls: openaiTotal?.calls || 0
+        }
+      },
+      dart: {
+        today: { calls: dartToday?.calls || 0 },
+        month: { calls: dartMonth?.calls || 0 },
+        daily_limit: 10000
+      },
+      daily: dailyUsage.results || [],
+      // 가격 정보 (2024년 기준 GPT-4o-mini)
+      pricing: {
+        'gpt-4o-mini': { input: 0.00015, output: 0.0006 }, // per 1K tokens
+        'gpt-4o': { input: 0.005, output: 0.015 },
+        'gpt-4-turbo': { input: 0.01, output: 0.03 }
+      }
+    })
+  } catch (e: any) {
+    console.error('API usage error:', e)
+    return c.json({ success: false, error: e.message })
+  }
+})
+
+// 4-2. API 사용량 기록 (내부 호출용)
+api.post('/admin/api-usage/log', async (c) => {
+  try {
+    const db = c.env.DB
+    const body = await c.req.json()
+    const { api_type, endpoint, tokens_input, tokens_output, cost_usd } = body
+    
+    await db.prepare(`
+      INSERT INTO api_usage (api_type, endpoint, tokens_input, tokens_output, cost_usd)
+      VALUES (?, ?, ?, ?, ?)
+    `).bind(
+      api_type || 'unknown',
+      endpoint || '',
+      tokens_input || 0,
+      tokens_output || 0,
+      cost_usd || 0
+    ).run()
+    
+    return c.json({ success: true })
+  } catch (e: any) {
+    return c.json({ success: false, error: e.message })
   }
 })
 
@@ -1552,6 +1707,24 @@ JSON 배열만 반환하고, 다른 설명은 포함하지 마세요.`
     
     const openaiData = await openaiRes.json() as any
     const content = openaiData.choices?.[0]?.message?.content
+    
+    // API 사용량 기록
+    const usage = openaiData.usage
+    if (usage) {
+      const inputTokens = usage.prompt_tokens || 0
+      const outputTokens = usage.completion_tokens || 0
+      // GPT-4o-mini 가격: input $0.15/1M, output $0.60/1M
+      const costUsd = (inputTokens * 0.00000015) + (outputTokens * 0.0000006)
+      
+      try {
+        await db.prepare(`
+          INSERT INTO api_usage (api_type, endpoint, tokens_input, tokens_output, cost_usd)
+          VALUES ('openai', 'companies/generate', ?, ?, ?)
+        `).bind(inputTokens, outputTokens, costUsd).run()
+      } catch (e) {
+        // 사용량 기록 실패 무시
+      }
+    }
     
     if (!content) {
       return c.json({ success: false, error: 'OpenAI 응답이 비어있습니다.' }, 400)

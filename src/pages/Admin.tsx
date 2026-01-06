@@ -183,6 +183,96 @@ export const Admin = (props: { user: any, tab?: string }) => {
                     </div>
                   </div>
                   
+                  <!-- API Usage & Cost Dashboard -->
+                  <div class="bg-gradient-to-r from-violet-600 to-purple-600 rounded-xl shadow-lg p-6 text-white">
+                    <div class="flex items-center justify-between mb-4">
+                      <h3 class="text-lg font-bold flex items-center">
+                        <i class="fas fa-chart-line mr-2"></i>
+                        API 사용량 & 비용 현황
+                      </h3>
+                      <button onclick="refreshApiUsage()" class="px-3 py-1 bg-white/20 rounded-lg text-sm hover:bg-white/30 transition">
+                        <i class="fas fa-sync-alt mr-1"></i> 새로고침
+                      </button>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                      <!-- OpenAI Today -->
+                      <div class="bg-white/10 backdrop-blur rounded-xl p-4">
+                        <div class="flex items-center justify-between mb-2">
+                          <span class="text-violet-200 text-sm">OpenAI 오늘</span>
+                          <span class="w-8 h-8 bg-green-400/20 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-brain text-green-300"></i>
+                          </span>
+                        </div>
+                        <p class="text-2xl font-bold" id="openai-today-tokens">0</p>
+                        <p class="text-sm text-violet-200">토큰</p>
+                        <p class="text-lg font-semibold text-green-300 mt-1" id="openai-today-cost">$0.00</p>
+                      </div>
+                      
+                      <!-- OpenAI Month -->
+                      <div class="bg-white/10 backdrop-blur rounded-xl p-4">
+                        <div class="flex items-center justify-between mb-2">
+                          <span class="text-violet-200 text-sm">OpenAI 이번달</span>
+                          <span class="w-8 h-8 bg-blue-400/20 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-calendar text-blue-300"></i>
+                          </span>
+                        </div>
+                        <p class="text-2xl font-bold" id="openai-month-tokens">0</p>
+                        <p class="text-sm text-violet-200">토큰</p>
+                        <p class="text-lg font-semibold text-blue-300 mt-1" id="openai-month-cost">$0.00</p>
+                      </div>
+                      
+                      <!-- OpenAI Total -->
+                      <div class="bg-white/10 backdrop-blur rounded-xl p-4">
+                        <div class="flex items-center justify-between mb-2">
+                          <span class="text-violet-200 text-sm">OpenAI 누적</span>
+                          <span class="w-8 h-8 bg-amber-400/20 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-coins text-amber-300"></i>
+                          </span>
+                        </div>
+                        <p class="text-2xl font-bold" id="openai-total-tokens">0</p>
+                        <p class="text-sm text-violet-200">토큰</p>
+                        <p class="text-lg font-semibold text-amber-300 mt-1" id="openai-total-cost">$0.00</p>
+                      </div>
+                      
+                      <!-- DART API -->
+                      <div class="bg-white/10 backdrop-blur rounded-xl p-4">
+                        <div class="flex items-center justify-between mb-2">
+                          <span class="text-violet-200 text-sm">DART API</span>
+                          <span class="w-8 h-8 bg-cyan-400/20 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-building text-cyan-300"></i>
+                          </span>
+                        </div>
+                        <p class="text-2xl font-bold"><span id="dart-today-calls">0</span> / 10,000</p>
+                        <p class="text-sm text-violet-200">오늘 호출 (일일 제한)</p>
+                        <p class="text-lg font-semibold text-cyan-300 mt-1"><span id="dart-month-calls">0</span> 이번달</p>
+                      </div>
+                    </div>
+                    
+                    <!-- Cost Details -->
+                    <div class="mt-4 p-4 bg-white/5 rounded-xl">
+                      <h4 class="text-sm font-medium text-violet-200 mb-2">💡 비용 계산 기준 (GPT-4o-mini)</h4>
+                      <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+                        <div class="bg-white/10 rounded-lg px-3 py-2">
+                          <span class="text-violet-300">Input</span>
+                          <span class="text-white font-mono ml-2">$0.15 / 1M tokens</span>
+                        </div>
+                        <div class="bg-white/10 rounded-lg px-3 py-2">
+                          <span class="text-violet-300">Output</span>
+                          <span class="text-white font-mono ml-2">$0.60 / 1M tokens</span>
+                        </div>
+                        <div class="bg-white/10 rounded-lg px-3 py-2">
+                          <span class="text-violet-300">API 호출</span>
+                          <span class="text-white font-mono ml-2" id="openai-total-calls">0</span>회
+                        </div>
+                        <div class="bg-white/10 rounded-lg px-3 py-2">
+                          <span class="text-violet-300">예상 월 비용</span>
+                          <span class="text-white font-mono ml-2" id="estimated-monthly">$0.00</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
                   <!-- Charts -->
                   <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-100">
@@ -1040,6 +1130,9 @@ export const Admin = (props: { user: any, tab?: string }) => {
               
               // Initialize charts
               initCharts();
+              
+              // Load API usage stats
+              refreshApiUsage();
             }
             
             // Load table data
@@ -1052,6 +1145,52 @@ export const Admin = (props: { user: any, tab?: string }) => {
             
             // Load recent activity for overview
             if (tab === 'overview') loadRecentActivity();
+          }
+          
+          // ========== API Usage Functions ==========
+          async function refreshApiUsage() {
+            try {
+              const res = await fetch('/api/admin/api-usage');
+              const data = await res.json();
+              
+              if (data.success) {
+                // OpenAI Today
+                const todayEl = document.getElementById('openai-today-tokens');
+                const todayCostEl = document.getElementById('openai-today-cost');
+                if (todayEl) todayEl.textContent = (data.openai?.today?.total_tokens || 0).toLocaleString();
+                if (todayCostEl) todayCostEl.textContent = '$' + (data.openai?.today?.cost_usd || 0).toFixed(4);
+                
+                // OpenAI Month
+                const monthEl = document.getElementById('openai-month-tokens');
+                const monthCostEl = document.getElementById('openai-month-cost');
+                if (monthEl) monthEl.textContent = (data.openai?.month?.total_tokens || 0).toLocaleString();
+                if (monthCostEl) monthCostEl.textContent = '$' + (data.openai?.month?.cost_usd || 0).toFixed(4);
+                
+                // OpenAI Total
+                const totalEl = document.getElementById('openai-total-tokens');
+                const totalCostEl = document.getElementById('openai-total-cost');
+                const totalCallsEl = document.getElementById('openai-total-calls');
+                if (totalEl) totalEl.textContent = (data.openai?.total?.total_tokens || 0).toLocaleString();
+                if (totalCostEl) totalCostEl.textContent = '$' + (data.openai?.total?.cost_usd || 0).toFixed(4);
+                if (totalCallsEl) totalCallsEl.textContent = (data.openai?.total?.calls || 0).toLocaleString();
+                
+                // DART
+                const dartTodayEl = document.getElementById('dart-today-calls');
+                const dartMonthEl = document.getElementById('dart-month-calls');
+                if (dartTodayEl) dartTodayEl.textContent = (data.dart?.today?.calls || 0).toLocaleString();
+                if (dartMonthEl) dartMonthEl.textContent = (data.dart?.month?.calls || 0).toLocaleString();
+                
+                // Estimated monthly (based on current month usage)
+                const daysInMonth = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate();
+                const currentDay = new Date().getDate();
+                const monthCost = data.openai?.month?.cost_usd || 0;
+                const estimatedMonthly = (monthCost / currentDay) * daysInMonth;
+                const estimatedEl = document.getElementById('estimated-monthly');
+                if (estimatedEl) estimatedEl.textContent = '$' + estimatedMonthly.toFixed(2);
+              }
+            } catch (e) {
+              console.error('API usage load error:', e);
+            }
           }
           
           // ========== Data Collector Functions ==========
