@@ -9,67 +9,111 @@ type Bindings = {
 
 const support = new Hono<{ Bindings: Bindings }>()
 
-// 1. UI Route (Input Page)
+// 1. UI Route
 support.get('/', (c) => {
   const userSession = getCookie(c, 'user_session')
   const user = userSession ? JSON.parse(userSession) : undefined
   return c.render(<SupportMatching user={user} />)
 })
 
-// 2. API: Advanced AI Analysis (Top 20 Matching)
+// 2. API: Real AI Analysis (OpenAI GPT-4o)
 support.post('/analyze', async (c) => {
   try {
     const { companyData } = await c.req.json();
     const apiKey = c.env.OPENAI_API_KEY;
 
-    // --- Mock Data Generator (For Stability & Speed) ---
-    // 실제로는 DB나 OpenAI를 쓰지만, 20개의 상세 데이터를 보여주기 위해 정교한 모의 데이터를 생성합니다.
-    
-    const categories = ['R&D', '사업화', '수출/글로벌', '인력/고용', 'ESG/기타'];
-    const agencies = ['중소벤처기업부', '과학기술정보통신부', '산업통상자원부', 'KOTRA', '창업진흥원', '기술보증기금'];
-    
-    const results = Array.from({ length: 20 }).map((_, i) => {
-      const category = categories[i % categories.length];
-      const agency = agencies[i % agencies.length];
-      const score = 98 - (i * 2) + Math.floor(Math.random() * 3); // 98점부터 내림차순
+    // API 키 확인
+    if (!apiKey) {
+      throw new Error("OpenAI API Key가 설정되지 않았습니다. 클라우드플레어 설정을 확인해주세요.");
+    }
+
+    // 프롬프트 구성 (Strict JSON Output)
+    const systemPrompt = `
+      당신은 대한민국 최고의 정부지원사업 매칭 전문가 AI입니다.
+      현재 시점은 2026년입니다.
       
-      let title = '';
-      let reason = '';
-
-      if (category === 'R&D') {
-        title = `2026년 ${companyData.ksic} 분야 핵심기술개발사업 (${i+1}차)`;
-        reason = `귀사는 <strong>기업부설연구소</strong>를 보유하고 있으며, <strong>${companyData.ksic}</strong> 관련 특허 출원 가능성이 높습니다. 특히 매출액 대비 R&D 투자 비율을 강조하면 선정 확률이 매우 높습니다.`;
-      } else if (category === '사업화') {
-        title = `중소기업 혁신바우처 사업 (제조혁신)`;
-        reason = `현재 매출액 <strong>${companyData.rev_2024}백만원</strong> 구간에서 가장 필요한 마케팅 및 시제품 제작을 지원합니다. 기존 제품의 고도화 전략으로 접근 시 가점을 받을 수 있습니다.`;
-      } else if (category === '수출/글로벌') {
-        title = `글로벌 강소기업 1000+ 프로젝트`;
-        reason = `해외 시장 진출 의지가 확인되며, 수출바우처와 연계하여 <strong>해외 규격 인증</strong> 획득 비용을 지원받을 수 있는 최적의 사업입니다.`;
-      } else if (category === '인력/고용') {
-        title = `청년 일자리 도약 장려금`;
-        reason = `최근 고용 인원 중 <strong>청년 채용</strong> 비중을 늘릴 계획이 있다면, 1인당 최대 1,200만원의 인건비를 절감할 수 있어 재무 구조 개선에 기여합니다.`;
-      } else {
-        title = `스마트공장 보급확산 사업 (고도화)`;
-        reason = `제조 데이터 수집 및 분석 시스템(MES) 도입을 통해 생산성을 30% 이상 향상시킬 수 있으며, 귀사의 <strong>스마트팩토리 수준 확인</strong> 점수가 양호할 것으로 예상됩니다.`;
+      입력된 기업 데이터를 정밀 분석하여, 합격 가능성이 높은 '2026년 정부지원사업' 20개를 추천해야 합니다.
+      반드시 다음 JSON 스키마를 준수하여 응답하세요.
+      
+      Output JSON Format:
+      {
+        "data": [
+          {
+            "rank": 1,
+            "title": "공고명 (예: 2026년 초기창업패키지)",
+            "agency": "주관기관 (예: 중소벤처기업부)",
+            "category": "분야 (R&D, 사업화, 인력, 수출, 자금 중 택1)",
+            "matchScore": 98,
+            "amount": "지원금액 (예: 최대 1억원)",
+            "deadline": "마감일 (예: 2026-03-15)",
+            "aiReason": "기업의 상황(매출, 업종 등)과 공고의 특성을 연결한 구체적인 추천 사유 (2문장 이상)"
+          }
+          // ... 총 20개 항목
+        ]
       }
+    `;
 
-      return {
-        id: i + 1,
-        rank: i + 1,
-        title: title,
-        agency: agency,
-        category: category,
-        matchScore: score,
-        amount: Math.floor(Math.random() * 500) * 100 + 5000 + '만원', // 5000 ~ 55000만원
-        deadline: `2026-0${(i % 5) + 3}-1${i % 9}`,
-        aiReason: reason
-      };
+    const userPrompt = `
+      [분석 대상 기업 정보]
+      - 기업명: ${companyData.name}
+      - 대표자: ${companyData.ceo || '미입력'}
+      - 업종(KSIC): ${companyData.ksic}
+      - 주요사업: ${companyData.desc || '정보 없음'}
+      - 매출액: ${companyData.rev_2024} 백만원
+      - 직원수: ${companyData.employees} 명
+      - 보유인증: ${companyData.certs ? companyData.certs.join(', ') : '없음'}
+      
+      위 기업에게 가장 적합한 2026년도 정부지원사업 20개를 선정하고, 각 사업별로 선정이유를 논리적으로 작성해주세요.
+      매출액 규모와 업력을 고려하여 '창업기', '도약기', '성장기'에 맞는 사업을 매칭해야 합니다.
+      특히 '보유인증'이 가점이 되는 사업을 우선순위에 두세요.
+    `;
+
+    // OpenAI API 호출
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`
+      },
+      body: JSON.stringify({
+        model: "gpt-4o", // 속도와 성능 균형
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt }
+        ],
+        temperature: 0.7,
+        response_format: { type: "json_object" }
+      })
     });
+
+    if (!response.ok) {
+      const err = await response.json() as any;
+      throw new Error(`OpenAI API Error: ${err.error?.message || response.statusText}`);
+    }
+
+    const aiData: any = await response.json();
+    const content = aiData.choices[0].message.content;
+    const parsedData = JSON.parse(content);
+
+    // 데이터 검증 및 가공 (ID 부여)
+    const results = parsedData.data.map((item: any, index: number) => ({
+      ...item,
+      id: index + 1,
+      rank: index + 1
+    }));
 
     return c.json({ success: true, data: results });
 
   } catch (e: any) {
-    return c.json({ success: false, error: e.message });
+    console.error("AI Analysis Failed:", e);
+    
+    // 실패 시 Fallback (사용자 경험을 위해 정적 데이터 반환하되, 에러 메시지 포함 가능)
+    // 여기서는 명시적으로 에러를 리턴하여 클라이언트가 알게 함
+    return c.json({ 
+      success: false, 
+      error: e.message,
+      message: "AI 분석 중 오류가 발생했습니다. API Key를 확인하거나 잠시 후 다시 시도해주세요."
+    });
   }
 })
 
