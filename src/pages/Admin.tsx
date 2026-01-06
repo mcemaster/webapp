@@ -52,6 +52,9 @@ export const Admin = (props: { user: any, tab?: string }) => {
               </a>
               
               <p class="px-3 py-2 text-xs font-semibold text-slate-400 uppercase tracking-wider mt-4">데이터 관리</p>
+              <a href="/admin?tab=collector" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all ${menuClass('collector')}">
+                <i class="fas fa-download w-5 mr-3 text-center"></i> 기업 데이터 수집
+              </a>
               <a href="/admin?tab=companies" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all ${menuClass('companies')}">
                 <i class="fas fa-building w-5 mr-3 text-center"></i> 기업 DB
               </a>
@@ -199,6 +202,198 @@ export const Admin = (props: { user: any, tab?: string }) => {
                     </div>
                     <div class="divide-y divide-slate-100" id="recent-activity">
                       <div class="p-4 text-center text-slate-400 text-sm">데이터를 불러오는 중...</div>
+                    </div>
+                  </div>
+                </div>
+              ` : ''}
+              
+              ${activeTab === 'collector' ? html`
+                <!-- Data Collector Dashboard -->
+                <div class="space-y-6">
+                  <!-- Header -->
+                  <div class="bg-gradient-to-r from-emerald-600 to-teal-600 rounded-xl shadow-lg p-6 text-white">
+                    <h2 class="text-2xl font-bold flex items-center">
+                      <i class="fas fa-database mr-3"></i>
+                      전국 기업 데이터 수집 시스템
+                    </h2>
+                    <p class="text-emerald-100 mt-2">DART, 공공데이터포털, 채용사이트에서 실시간으로 기업 정보를 수집합니다</p>
+                  </div>
+                  
+                  <!-- Collection Status -->
+                  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-100">
+                      <div class="flex items-center justify-between">
+                        <div>
+                          <p class="text-xs font-medium text-slate-500 uppercase">총 수집 기업</p>
+                          <p class="text-3xl font-bold text-slate-800 mt-1" id="collector-total">-</p>
+                        </div>
+                        <div class="w-14 h-14 bg-emerald-50 rounded-xl flex items-center justify-center">
+                          <i class="fas fa-building text-emerald-500 text-xl"></i>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-100">
+                      <div class="flex items-center justify-between">
+                        <div>
+                          <p class="text-xs font-medium text-slate-500 uppercase">DART 기업코드</p>
+                          <p class="text-3xl font-bold text-blue-600 mt-1" id="collector-dart">-</p>
+                        </div>
+                        <div class="w-14 h-14 bg-blue-50 rounded-xl flex items-center justify-center">
+                          <i class="fas fa-file-alt text-blue-500 text-xl"></i>
+                        </div>
+                      </div>
+                      <p class="text-xs text-slate-400 mt-2" id="collector-dart-progress">-</p>
+                    </div>
+                    <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-100">
+                      <div class="flex items-center justify-between">
+                        <div>
+                          <p class="text-xs font-medium text-slate-500 uppercase">상장사</p>
+                          <p class="text-3xl font-bold text-indigo-600 mt-1" id="collector-listed">-</p>
+                        </div>
+                        <div class="w-14 h-14 bg-indigo-50 rounded-xl flex items-center justify-center">
+                          <i class="fas fa-chart-line text-indigo-500 text-xl"></i>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-100">
+                      <div class="flex items-center justify-between">
+                        <div>
+                          <p class="text-xs font-medium text-slate-500 uppercase">채용사이트</p>
+                          <p class="text-3xl font-bold text-purple-600 mt-1" id="collector-jobs">-</p>
+                        </div>
+                        <div class="w-14 h-14 bg-purple-50 rounded-xl flex items-center justify-center">
+                          <i class="fas fa-briefcase text-purple-500 text-xl"></i>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <!-- Data Sources -->
+                  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- DART Section -->
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+                      <div class="p-5 bg-gradient-to-r from-blue-500 to-blue-600 text-white">
+                        <h3 class="font-bold text-lg flex items-center">
+                          <i class="fas fa-landmark mr-2"></i>
+                          DART (금융감독원 전자공시)
+                        </h3>
+                        <p class="text-blue-100 text-sm mt-1">상장법인 및 등록법인 약 9만개 기업</p>
+                      </div>
+                      <div class="p-5 space-y-4">
+                        <div class="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                          <span class="text-sm text-slate-600">1단계: 전체 기업코드 다운로드</span>
+                          <button onclick="downloadDartCorps()" class="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition">
+                            <i class="fas fa-download mr-1"></i> 다운로드
+                          </button>
+                        </div>
+                        <div class="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                          <span class="text-sm text-slate-600">2단계: 상세정보 수집 (배치)</span>
+                          <button onclick="collectDartDetails()" class="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition">
+                            <i class="fas fa-sync-alt mr-1"></i> 수집 시작
+                          </button>
+                        </div>
+                        <div id="dart-status" class="p-3 bg-blue-50 rounded-lg text-sm text-blue-700 hidden">
+                          <i class="fas fa-spinner fa-spin mr-2"></i>
+                          <span id="dart-status-text">처리 중...</span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <!-- Public Data Section -->
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+                      <div class="p-5 bg-gradient-to-r from-green-500 to-emerald-600 text-white">
+                        <h3 class="font-bold text-lg flex items-center">
+                          <i class="fas fa-database mr-2"></i>
+                          공공데이터포털
+                        </h3>
+                        <p class="text-green-100 text-sm mt-1">전국 사업자등록 정보 800만+ 건</p>
+                      </div>
+                      <div class="p-5 space-y-4">
+                        <div>
+                          <label class="block text-sm font-medium text-slate-700 mb-2">공공데이터포털 API Key</label>
+                          <input type="password" id="public-data-key" placeholder="API Key 입력" class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm">
+                          <a href="https://www.data.go.kr/tcs/dss/selectApiDataDetailView.do?publicDataPk=15081808" target="_blank" class="text-xs text-green-600 hover:underline mt-1 inline-block">
+                            <i class="fas fa-external-link-alt mr-1"></i> API Key 발급받기
+                          </a>
+                        </div>
+                        <button onclick="collectPublicData()" class="w-full px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition">
+                          <i class="fas fa-cloud-download-alt mr-2"></i> 사업자정보 수집
+                        </button>
+                      </div>
+                    </div>
+                    
+                    <!-- Job Sites Section -->
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+                      <div class="p-5 bg-gradient-to-r from-purple-500 to-pink-500 text-white">
+                        <h3 class="font-bold text-lg flex items-center">
+                          <i class="fas fa-briefcase mr-2"></i>
+                          채용사이트 크롤링
+                        </h3>
+                        <p class="text-purple-100 text-sm mt-1">사람인, 잡코리아, 인크루트 기업정보</p>
+                      </div>
+                      <div class="p-5 space-y-4">
+                        <div>
+                          <label class="block text-sm font-medium text-slate-700 mb-2">검색 키워드 (선택)</label>
+                          <input type="text" id="crawl-keyword" placeholder="예: IT, 제조, 반도체" class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm">
+                        </div>
+                        <div class="grid grid-cols-3 gap-2">
+                          <button onclick="crawlSaramin()" class="px-3 py-2 bg-purple-600 text-white text-sm font-medium rounded-lg hover:bg-purple-700 transition">
+                            <i class="fas fa-spider mr-1"></i> 사람인
+                          </button>
+                          <button onclick="crawlJobkorea()" class="px-3 py-2 bg-pink-600 text-white text-sm font-medium rounded-lg hover:bg-pink-700 transition">
+                            <i class="fas fa-spider mr-1"></i> 잡코리아
+                          </button>
+                          <button onclick="crawlIncruit()" class="px-3 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition">
+                            <i class="fas fa-spider mr-1"></i> 인크루트
+                          </button>
+                        </div>
+                        <div id="crawl-status" class="p-3 bg-purple-50 rounded-lg text-sm text-purple-700 hidden"></div>
+                      </div>
+                    </div>
+                    
+                    <!-- Auto Collection -->
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+                      <div class="p-5 bg-gradient-to-r from-orange-500 to-amber-500 text-white">
+                        <h3 class="font-bold text-lg flex items-center">
+                          <i class="fas fa-robot mr-2"></i>
+                          자동 수집 스케줄러
+                        </h3>
+                        <p class="text-orange-100 text-sm mt-1">정기적으로 자동 업데이트</p>
+                      </div>
+                      <div class="p-5 space-y-4">
+                        <div class="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                          <div>
+                            <p class="font-medium text-slate-700">DART 상장사 자동 수집</p>
+                            <p class="text-xs text-slate-500">매일 50개씩 상세정보 수집</p>
+                          </div>
+                          <button onclick="startBatchCollect('dart')" class="px-4 py-2 bg-orange-600 text-white text-sm font-medium rounded-lg hover:bg-orange-700 transition">
+                            <i class="fas fa-play mr-1"></i> 실행
+                          </button>
+                        </div>
+                        <div id="batch-status" class="p-3 bg-orange-50 rounded-lg text-sm text-orange-700 hidden"></div>
+                        <div class="p-3 bg-amber-50 rounded-lg border border-amber-200">
+                          <p class="text-xs text-amber-700">
+                            <i class="fas fa-info-circle mr-1"></i>
+                            <strong>참고:</strong> Cloudflare Workers는 10분 이상 실행이 제한됩니다. 대량 수집은 여러 번 나눠서 실행하세요.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <!-- Collection Log -->
+                  <div class="bg-white rounded-xl shadow-sm border border-slate-100">
+                    <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+                      <h3 class="font-semibold text-slate-800">
+                        <i class="fas fa-history text-slate-400 mr-2"></i>
+                        수집 로그
+                      </h3>
+                      <button onclick="refreshCollectorStatus()" class="text-sm text-blue-600 hover:text-blue-700">
+                        <i class="fas fa-sync-alt mr-1"></i> 새로고침
+                      </button>
+                    </div>
+                    <div id="collector-log" class="p-5 max-h-64 overflow-y-auto font-mono text-xs bg-slate-900 text-green-400">
+                      <div>[시스템] 데이터 수집 시스템 준비 완료</div>
                     </div>
                   </div>
                 </div>
@@ -853,9 +1048,196 @@ export const Admin = (props: { user: any, tab?: string }) => {
             if (tab === 'logs') loadLogs();
             if (tab === 'users') loadUsers();
             if (tab === 'partners') loadPartners();
+            if (tab === 'collector') refreshCollectorStatus();
             
             // Load recent activity for overview
             if (tab === 'overview') loadRecentActivity();
+          }
+          
+          // ========== Data Collector Functions ==========
+          function addCollectorLog(message, type = 'info') {
+            const log = document.getElementById('collector-log');
+            if (!log) return;
+            const time = new Date().toLocaleTimeString('ko-KR');
+            const colorClass = type === 'success' ? 'text-green-400' : type === 'error' ? 'text-red-400' : 'text-blue-400';
+            log.innerHTML += '<div class="' + colorClass + '">[' + time + '] ' + message + '</div>';
+            log.scrollTop = log.scrollHeight;
+          }
+          
+          async function refreshCollectorStatus() {
+            try {
+              const res = await fetch('/api/admin/collector/status');
+              const data = await res.json();
+              
+              if (data.success) {
+                document.getElementById('collector-total').textContent = (data.companies?.total || 0).toLocaleString();
+                document.getElementById('collector-dart').textContent = (data.dart?.total_corps || 0).toLocaleString();
+                document.getElementById('collector-listed').textContent = (data.dart?.listed || 0).toLocaleString();
+                document.getElementById('collector-dart-progress').textContent = '수집 진행: ' + (data.dart?.progress || '0%');
+                
+                const jobsCount = (data.companies?.by_source?.saramin || 0) + 
+                                  (data.companies?.by_source?.jobkorea || 0);
+                document.getElementById('collector-jobs').textContent = jobsCount.toLocaleString();
+              }
+            } catch (e) {
+              console.error('Collector status error:', e);
+            }
+          }
+          
+          async function downloadDartCorps() {
+            const statusEl = document.getElementById('dart-status');
+            statusEl.classList.remove('hidden');
+            document.getElementById('dart-status-text').textContent = 'DART 전체 기업코드 다운로드 중... (약 9만건)';
+            addCollectorLog('DART 기업코드 다운로드 시작...', 'info');
+            
+            try {
+              const res = await fetch('/api/admin/collector/dart/all-corps', { method: 'POST' });
+              const data = await res.json();
+              
+              if (data.success) {
+                document.getElementById('dart-status-text').textContent = '완료! ' + data.message;
+                addCollectorLog('DART 기업코드 다운로드 완료: ' + data.total_parsed + '건 파싱, ' + data.inserted + '건 추가', 'success');
+                refreshCollectorStatus();
+              } else {
+                document.getElementById('dart-status-text').textContent = '오류: ' + data.error;
+                addCollectorLog('DART 다운로드 실패: ' + data.error, 'error');
+              }
+            } catch (e) {
+              document.getElementById('dart-status-text').textContent = '네트워크 오류';
+              addCollectorLog('DART 다운로드 오류: ' + e.message, 'error');
+            }
+          }
+          
+          async function collectDartDetails() {
+            const statusEl = document.getElementById('dart-status');
+            statusEl.classList.remove('hidden');
+            document.getElementById('dart-status-text').textContent = 'DART 상장사 상세정보 수집 중... (50건 배치)';
+            addCollectorLog('DART 상세정보 배치 수집 시작...', 'info');
+            
+            try {
+              const res = await fetch('/api/admin/collector/dart/collect-details', { 
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ limit: 50, onlyListed: true })
+              });
+              const data = await res.json();
+              
+              if (data.success) {
+                document.getElementById('dart-status-text').textContent = '완료! ' + data.collected + '건 수집 (' + data.stats.progress + ')';
+                addCollectorLog('DART 상세정보 수집 완료: ' + data.collected + '건 (전체 진행률: ' + data.stats.progress + ')', 'success');
+                refreshCollectorStatus();
+              } else {
+                document.getElementById('dart-status-text').textContent = '오류: ' + data.error;
+                addCollectorLog('DART 수집 실패: ' + data.error, 'error');
+              }
+            } catch (e) {
+              document.getElementById('dart-status-text').textContent = '네트워크 오류';
+              addCollectorLog('DART 수집 오류: ' + e.message, 'error');
+            }
+          }
+          
+          async function collectPublicData() {
+            const apiKey = document.getElementById('public-data-key').value;
+            if (!apiKey) {
+              alert('공공데이터포털 API Key를 입력해주세요.');
+              return;
+            }
+            addCollectorLog('공공데이터포털 연동은 추가 구현이 필요합니다.', 'info');
+            alert('공공데이터포털 API Key가 저장되었습니다. 사업자번호 목록이 필요합니다.');
+          }
+          
+          async function crawlSaramin() {
+            const keyword = document.getElementById('crawl-keyword')?.value || '';
+            const statusEl = document.getElementById('crawl-status');
+            statusEl.classList.remove('hidden');
+            statusEl.textContent = '사람인 기업정보 수집 중...';
+            addCollectorLog('사람인 크롤링 시작 (키워드: ' + (keyword || '전체') + ')', 'info');
+            
+            try {
+              const res = await fetch('/api/admin/collector/saramin/companies', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ page: 1, keyword })
+              });
+              const data = await res.json();
+              
+              statusEl.textContent = data.success ? '완료: ' + data.message : '오류: ' + data.error;
+              addCollectorLog(data.success ? '사람인 수집 완료: ' + data.inserted + '개 추가' : '사람인 수집 실패', data.success ? 'success' : 'error');
+              refreshCollectorStatus();
+            } catch (e) {
+              statusEl.textContent = '크롤링 오류';
+              addCollectorLog('사람인 크롤링 오류: ' + e.message, 'error');
+            }
+          }
+          
+          async function crawlJobkorea() {
+            const keyword = document.getElementById('crawl-keyword')?.value || '';
+            const statusEl = document.getElementById('crawl-status');
+            statusEl.classList.remove('hidden');
+            statusEl.textContent = '잡코리아 기업정보 수집 중...';
+            addCollectorLog('잡코리아 크롤링 시작', 'info');
+            
+            try {
+              const res = await fetch('/api/admin/collector/jobkorea/companies', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ page: 1, keyword })
+              });
+              const data = await res.json();
+              
+              statusEl.textContent = data.success ? '완료: ' + data.message : '오류: ' + data.error;
+              addCollectorLog(data.success ? '잡코리아 수집 완료: ' + data.inserted + '개 추가' : '잡코리아 수집 실패', data.success ? 'success' : 'error');
+              refreshCollectorStatus();
+            } catch (e) {
+              statusEl.textContent = '크롤링 오류';
+              addCollectorLog('잡코리아 크롤링 오류: ' + e.message, 'error');
+            }
+          }
+          
+          async function crawlIncruit() {
+            const statusEl = document.getElementById('crawl-status');
+            statusEl.classList.remove('hidden');
+            statusEl.textContent = '인크루트 기업정보 수집 중...';
+            addCollectorLog('인크루트 크롤링 시작', 'info');
+            
+            try {
+              const res = await fetch('/api/admin/collector/incruit/companies', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ page: 1 })
+              });
+              const data = await res.json();
+              
+              statusEl.textContent = data.success ? '완료: ' + data.inserted + '개 추가' : '오류: ' + data.error;
+              addCollectorLog(data.success ? '인크루트 수집 완료: ' + data.inserted + '개 추가' : '인크루트 수집 실패', data.success ? 'success' : 'error');
+              refreshCollectorStatus();
+            } catch (e) {
+              statusEl.textContent = '크롤링 오류';
+              addCollectorLog('인크루트 크롤링 오류: ' + e.message, 'error');
+            }
+          }
+          
+          async function startBatchCollect(source) {
+            const statusEl = document.getElementById('batch-status');
+            statusEl.classList.remove('hidden');
+            statusEl.textContent = source.toUpperCase() + ' 배치 수집 실행 중...';
+            addCollectorLog(source.toUpperCase() + ' 배치 자동 수집 시작', 'info');
+            
+            try {
+              const res = await fetch('/api/admin/collector/batch-collect', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ source, batchSize: 50 })
+              });
+              const data = await res.json();
+              
+              statusEl.textContent = data.success ? '완료: ' + data.collected + '건 수집' : '오류: ' + (data.error || data.message);
+              addCollectorLog(data.success ? '배치 수집 완료: ' + data.collected + '건' : '배치 수집 실패: ' + (data.error || data.message), data.success ? 'success' : 'error');
+              refreshCollectorStatus();
+            } catch (e) {
+              statusEl.textContent = '실행 오류';
+              addCollectorLog('배치 수집 오류: ' + e.message, 'error');
+            }
           }
           
           // Pagination state

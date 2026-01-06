@@ -1641,4 +1641,709 @@ api.post('/admin/companies/clear', async (c) => {
   }
 })
 
+// ==========================================
+// 대규모 기업 데이터 수집 시스템
+// ==========================================
+
+// 36. DART 전체 기업 코드 목록 다운로드 및 저장
+api.post('/admin/collector/dart/all-corps', async (c) => {
+  try {
+    const db = c.env.DB
+    let apiKey = c.env.DART_API_KEY
+    
+    if (!apiKey) {
+      const result = await db.prepare("SELECT value FROM settings WHERE key = 'api_dart_key'").first<{value: string}>()
+      apiKey = result?.value
+    }
+    
+    if (!apiKey) {
+      return c.json({ success: false, error: 'DART API Key가 설정되지 않았습니다.' }, 400)
+    }
+    
+    // DART 전체 기업 코드 목록 다운로드 (ZIP 파일)
+    const url = `https://opendart.fss.or.kr/api/corpCode.xml?crtfc_key=${apiKey}`
+    const res = await fetch(url)
+    
+    if (!res.ok) {
+      return c.json({ success: false, error: 'DART API 호출 실패' }, 400)
+    }
+    
+    // ZIP 파일을 ArrayBuffer로 받음
+    const zipBuffer = await res.arrayBuffer()
+    
+    // JSZip으로 압축 해제 (Cloudflare Workers에서는 직접 파싱 필요)
+    // ZIP 파일 내 CORPCODE.xml 파싱
+    const zipData = new Uint8Array(zipBuffer)
+    
+    // ZIP 파일 구조 파싱 (간단한 구현)
+    // Local file header signature = 0x04034b50
+    let xmlContent = ''
+    
+    // ZIP에서 XML 추출 시도
+    try {
+      // ZIP 파일에서 XML 데이터 위치 찾기
+      const decoder = new TextDecoder('utf-8')
+      const fullText = decoder.decode(zipData)
+      
+      // XML 시작과 끝 찾기
+      const xmlStart = fullText.indexOf('<?xml')
+      const xmlEnd = fullText.lastIndexOf('</result>') + '</result>'.length
+      
+      if (xmlStart >= 0 && xmlEnd > xmlStart) {
+        xmlContent = fullText.substring(xmlStart, xmlEnd)
+      }
+    } catch (e) {
+      // ZIP 파싱 실패 시 직접 XML로 시도
+      const decoder = new TextDecoder('utf-8')
+      xmlContent = decoder.decode(zipData)
+    }
+    
+    if (!xmlContent || !xmlContent.includes('<list>')) {
+      return c.json({ 
+        success: false, 
+        error: 'DART 응답 파싱 실패. ZIP/XML 형식 확인 필요.',
+        hint: 'DART API에서 반환된 데이터 형식이 예상과 다릅니다.'
+      }, 400)
+    }
+    
+    // XML에서 기업 정보 추출
+    const corpRegex = /<list>([\s\S]*?)<\/list>/g
+    const companies: any[] = []
+    let match
+    
+    while ((match = corpRegex.exec(xmlContent)) !== null) {
+      const item = match[1]
+      const corpCode = item.match(/<corp_code>([^<]+)<\/corp_code>/)?.[1]
+      const corpName = item.match(/<corp_name>([^<]+)<\/corp_name>/)?.[1]
+      const stockCode = item.match(/<stock_code>([^<]*)<\/stock_code>/)?.[1]
+      const modifyDate = item.match(/<modify_date>([^<]*)<\/modify_date>/)?.[1]
+      
+      if (corpCode && corpName) {
+        companies.push({
+          corp_code: corpCode,
+          corp_name: corpName,
+          stock_code: stockCode || null,
+          modify_date: modifyDate || null
+        })
+      }
+    }
+    
+    if (companies.length === 0) {
+      return c.json({ success: false, error: 'XML에서 기업 정보를 추출할 수 없습니다.' }, 400)
+    }
+    
+    // DB에 기업 코드 저장 (dart_corps 테이블)
+    // 테이블 생성 (없으면)
+    await db.prepare(`
+      CREATE TABLE IF NOT EXISTS dart_corps (
+        corp_code TEXT PRIMARY KEY,
+        corp_name TEXT NOT NULL,
+        stock_code TEXT,
+        modify_date TEXT,
+        is_collected INTEGER DEFAULT 0,
+        collected_at TEXT,
+        created_at TEXT DEFAULT (datetime('now'))
+      )
+    `).run()
+    
+    // 배치로 삽입 (1000개씩)
+    let inserted = 0
+    let updated = 0
+    const batchSize = 100
+    
+    for (let i = 0; i < Math.min(companies.length, 5000); i += batchSize) {
+      const batch = companies.slice(i, i + batchSize)
+      
+      for (const corp of batch) {
+        try {
+          const existing = await db.prepare('SELECT corp_code FROM dart_corps WHERE corp_code = ?').bind(corp.corp_code).first()
+          
+          if (existing) {
+            await db.prepare(`
+              UPDATE dart_corps SET corp_name = ?, stock_code = ?, modify_date = ? WHERE corp_code = ?
+            `).bind(corp.corp_name, corp.stock_code, corp.modify_date, corp.corp_code).run()
+            updated++
+          } else {
+            await db.prepare(`
+              INSERT INTO dart_corps (corp_code, corp_name, stock_code, modify_date) VALUES (?, ?, ?, ?)
+            `).bind(corp.corp_code, corp.corp_name, corp.stock_code, corp.modify_date).run()
+            inserted++
+          }
+        } catch (e) {
+          // 개별 오류 무시
+        }
+      }
+    }
+    
+    return c.json({
+      success: true,
+      total_parsed: companies.length,
+      inserted,
+      updated,
+      message: `DART 기업 코드 ${companies.length}개 파싱 완료. ${inserted}건 추가, ${updated}건 업데이트.`
+    })
+  } catch (e: any) {
+    return c.json({ success: false, error: e.message }, 500)
+  }
+})
+
+// 37. DART 기업 상세정보 배치 수집
+api.post('/admin/collector/dart/collect-details', async (c) => {
+  try {
+    const db = c.env.DB
+    let apiKey = c.env.DART_API_KEY
+    
+    if (!apiKey) {
+      const result = await db.prepare("SELECT value FROM settings WHERE key = 'api_dart_key'").first<{value: string}>()
+      apiKey = result?.value
+    }
+    
+    if (!apiKey) {
+      return c.json({ success: false, error: 'DART API Key가 설정되지 않았습니다.' }, 400)
+    }
+    
+    const body = await c.req.json().catch(() => ({}))
+    const limit = Math.min(body.limit || 50, 100) // 최대 100개씩
+    const onlyListed = body.onlyListed !== false // 기본값: 상장사만
+    
+    // 수집되지 않은 기업 목록 가져오기
+    let query = 'SELECT corp_code, corp_name, stock_code FROM dart_corps WHERE is_collected = 0'
+    if (onlyListed) {
+      query += " AND stock_code IS NOT NULL AND stock_code != ''"
+    }
+    query += ` LIMIT ${limit}`
+    
+    const corps = await db.prepare(query).all()
+    
+    if (!corps.results || corps.results.length === 0) {
+      return c.json({ success: true, message: '수집할 기업이 없습니다.', collected: 0 })
+    }
+    
+    let collected = 0
+    let errors = 0
+    
+    for (const corp of corps.results as any[]) {
+      try {
+        // DART API로 기업 상세정보 조회
+        const url = `https://opendart.fss.or.kr/api/company.json?crtfc_key=${apiKey}&corp_code=${corp.corp_code}`
+        const res = await fetch(url)
+        const data: any = await res.json()
+        
+        if (data.status === '000') {
+          // companies 테이블에 저장
+          const existing = await db.prepare('SELECT id FROM companies WHERE biz_num = ? OR name = ?')
+            .bind(data.bizr_no || 'NONE', data.corp_name).first()
+          
+          const financialJson = JSON.stringify({
+            induty_code: data.induty_code,
+            est_dt: data.est_dt,
+            acc_mt: data.acc_mt
+          })
+          
+          if (existing) {
+            await db.prepare(`
+              UPDATE companies SET 
+                ceo_name = ?, industry_code = ?, address = ?, 
+                financial_json = ?, source = 'DART', analyzed_at = datetime('now')
+              WHERE id = ?
+            `).bind(
+              data.ceo_nm,
+              data.induty_code,
+              data.adres,
+              financialJson,
+              (existing as any).id
+            ).run()
+          } else {
+            await db.prepare(`
+              INSERT INTO companies (name, biz_num, ceo_name, industry_code, address, financial_json, source, analyzed_at)
+              VALUES (?, ?, ?, ?, ?, ?, 'DART', datetime('now'))
+            `).bind(
+              data.corp_name,
+              data.bizr_no || corp.corp_code,
+              data.ceo_nm,
+              data.induty_code,
+              data.adres,
+              financialJson
+            ).run()
+          }
+          
+          // dart_corps 테이블 업데이트
+          await db.prepare(`
+            UPDATE dart_corps SET is_collected = 1, collected_at = datetime('now') WHERE corp_code = ?
+          `).bind(corp.corp_code).run()
+          
+          collected++
+        } else {
+          errors++
+        }
+        
+        // Rate limiting (DART API 제한 준수)
+        await new Promise(resolve => setTimeout(resolve, 100))
+        
+      } catch (e) {
+        errors++
+      }
+    }
+    
+    // 전체 통계
+    const stats = await db.prepare(`
+      SELECT 
+        COUNT(*) as total,
+        SUM(CASE WHEN is_collected = 1 THEN 1 ELSE 0 END) as collected,
+        SUM(CASE WHEN stock_code IS NOT NULL AND stock_code != '' THEN 1 ELSE 0 END) as listed
+      FROM dart_corps
+    `).first<{total: number, collected: number, listed: number}>()
+    
+    return c.json({
+      success: true,
+      collected,
+      errors,
+      stats: {
+        total_corps: stats?.total || 0,
+        total_collected: stats?.collected || 0,
+        total_listed: stats?.listed || 0,
+        progress: stats?.total ? ((stats?.collected || 0) / stats.total * 100).toFixed(1) + '%' : '0%'
+      },
+      message: `${collected}건 수집 완료, ${errors}건 오류`
+    })
+  } catch (e: any) {
+    return c.json({ success: false, error: e.message }, 500)
+  }
+})
+
+// 38. 수집 현황 조회
+api.get('/admin/collector/status', async (c) => {
+  try {
+    const db = c.env.DB
+    
+    // DART 기업코드 통계
+    let dartStats = { total: 0, collected: 0, listed: 0 }
+    try {
+      const stats = await db.prepare(`
+        SELECT 
+          COUNT(*) as total,
+          SUM(CASE WHEN is_collected = 1 THEN 1 ELSE 0 END) as collected,
+          SUM(CASE WHEN stock_code IS NOT NULL AND stock_code != '' THEN 1 ELSE 0 END) as listed
+        FROM dart_corps
+      `).first<{total: number, collected: number, listed: number}>()
+      if (stats) dartStats = stats
+    } catch (e) {
+      // 테이블이 없을 수 있음
+    }
+    
+    // companies 테이블 통계
+    const companyStats = await db.prepare(`
+      SELECT 
+        COUNT(*) as total,
+        SUM(CASE WHEN source = 'DART' THEN 1 ELSE 0 END) as from_dart,
+        SUM(CASE WHEN source = 'PUBLIC_DATA' THEN 1 ELSE 0 END) as from_public,
+        SUM(CASE WHEN source = 'SARAMIN' THEN 1 ELSE 0 END) as from_saramin,
+        SUM(CASE WHEN source = 'JOBKOREA' THEN 1 ELSE 0 END) as from_jobkorea,
+        SUM(CASE WHEN source = 'SEED' OR source = 'INTEGRATED' THEN 1 ELSE 0 END) as from_seed
+      FROM companies
+    `).first<{total: number, from_dart: number, from_public: number, from_saramin: number, from_jobkorea: number, from_seed: number}>()
+    
+    return c.json({
+      success: true,
+      dart: {
+        total_corps: dartStats.total,
+        collected: dartStats.collected,
+        listed: dartStats.listed,
+        progress: dartStats.total ? ((dartStats.collected / dartStats.total) * 100).toFixed(1) + '%' : '0%'
+      },
+      companies: {
+        total: companyStats?.total || 0,
+        by_source: {
+          dart: companyStats?.from_dart || 0,
+          public_data: companyStats?.from_public || 0,
+          saramin: companyStats?.from_saramin || 0,
+          jobkorea: companyStats?.from_jobkorea || 0,
+          seed: companyStats?.from_seed || 0
+        }
+      }
+    })
+  } catch (e: any) {
+    return c.json({ success: false, error: e.message }, 500)
+  }
+})
+
+// 39. 공공데이터포털 기업정보 수집 (사업자등록 상태조회)
+api.post('/admin/collector/public-data/business', async (c) => {
+  try {
+    const db = c.env.DB
+    const body = await c.req.json()
+    const { apiKey, bizNumbers } = body
+    
+    if (!apiKey) {
+      return c.json({ success: false, error: '공공데이터포털 API Key가 필요합니다.' }, 400)
+    }
+    
+    if (!bizNumbers || !Array.isArray(bizNumbers) || bizNumbers.length === 0) {
+      return c.json({ success: false, error: '사업자번호 목록이 필요합니다.' }, 400)
+    }
+    
+    // 국세청 사업자등록정보 진위확인 API
+    const url = 'https://api.odcloud.kr/api/nts-businessman/v1/status'
+    
+    let collected = 0
+    let errors = 0
+    
+    // 최대 100개씩 처리
+    const batchSize = 100
+    for (let i = 0; i < bizNumbers.length; i += batchSize) {
+      const batch = bizNumbers.slice(i, i + batchSize)
+      
+      try {
+        const res = await fetch(`${url}?serviceKey=${encodeURIComponent(apiKey)}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            b_no: batch.map((b: string) => b.replace(/-/g, ''))
+          })
+        })
+        
+        const data: any = await res.json()
+        
+        if (data.data) {
+          for (const biz of data.data) {
+            if (biz.b_stt === '계속사업자' || biz.b_stt_cd === '01') {
+              // companies 테이블에 저장/업데이트
+              const bizNum = biz.b_no
+              const existing = await db.prepare('SELECT id FROM companies WHERE biz_num = ?').bind(bizNum).first()
+              
+              if (!existing) {
+                await db.prepare(`
+                  INSERT INTO companies (name, biz_num, industry_code, source, analyzed_at)
+                  VALUES (?, ?, ?, 'PUBLIC_DATA', datetime('now'))
+                `).bind(
+                  biz.tax_type || '미확인',
+                  bizNum,
+                  biz.utcc_yn || null
+                ).run()
+                collected++
+              }
+            }
+          }
+        }
+      } catch (e) {
+        errors++
+      }
+    }
+    
+    return c.json({
+      success: true,
+      collected,
+      errors,
+      message: `${collected}건 수집 완료`
+    })
+  } catch (e: any) {
+    return c.json({ success: false, error: e.message }, 500)
+  }
+})
+
+// 40. 채용사이트 기업정보 크롤링 (사람인)
+api.post('/admin/collector/saramin/companies', async (c) => {
+  try {
+    const db = c.env.DB
+    const body = await c.req.json().catch(() => ({}))
+    const page = body.page || 1
+    const keyword = body.keyword || ''
+    
+    // 사람인 기업정보 페이지 크롤링
+    // 참고: 실제 운영시 robots.txt 및 이용약관 확인 필요
+    const url = `https://www.saramin.co.kr/zf_user/company-review/company-list?page=${page}&searchword=${encodeURIComponent(keyword)}`
+    
+    const res = await fetch(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+      }
+    })
+    
+    const html = await res.text()
+    
+    // HTML에서 기업 정보 추출 (간단한 정규식 기반)
+    const companies: any[] = []
+    
+    // 기업명 추출 패턴 (실제 HTML 구조에 따라 조정 필요)
+    const companyPattern = /<a[^>]*href="\/zf_user\/company-review\/view\?csn=(\d+)[^"]*"[^>]*>([^<]+)<\/a>/g
+    let match
+    
+    while ((match = companyPattern.exec(html)) !== null) {
+      const bizNum = match[1]
+      const name = match[2].trim()
+      if (name && bizNum) {
+        companies.push({ name, biz_num: bizNum, source: 'SARAMIN' })
+      }
+    }
+    
+    // 대체 패턴 (class 기반)
+    const altPattern = /class="company_name"[^>]*>([^<]+)</g
+    while ((match = altPattern.exec(html)) !== null) {
+      const name = match[1].trim()
+      if (name && !companies.find(c => c.name === name)) {
+        companies.push({ name, biz_num: null, source: 'SARAMIN' })
+      }
+    }
+    
+    // DB에 저장
+    let inserted = 0
+    let duplicates = 0
+    
+    for (const company of companies) {
+      try {
+        const existing = await db.prepare('SELECT id FROM companies WHERE name = ?').bind(company.name).first()
+        
+        if (!existing) {
+          await db.prepare(`
+            INSERT INTO companies (name, biz_num, source, analyzed_at)
+            VALUES (?, ?, 'SARAMIN', datetime('now'))
+          `).bind(company.name, company.biz_num).run()
+          inserted++
+        } else {
+          duplicates++
+        }
+      } catch (e) {
+        // 오류 무시
+      }
+    }
+    
+    return c.json({
+      success: true,
+      parsed: companies.length,
+      inserted,
+      duplicates,
+      page,
+      message: `${inserted}개 기업 추가 (${duplicates}개 중복)`
+    })
+  } catch (e: any) {
+    return c.json({ success: false, error: e.message }, 500)
+  }
+})
+
+// 41. 잡코리아 기업정보 크롤링
+api.post('/admin/collector/jobkorea/companies', async (c) => {
+  try {
+    const db = c.env.DB
+    const body = await c.req.json().catch(() => ({}))
+    const page = body.page || 1
+    const keyword = body.keyword || ''
+    
+    // 잡코리아 기업리뷰 페이지
+    const url = `https://www.jobkorea.co.kr/company/search?stext=${encodeURIComponent(keyword)}&page=${page}`
+    
+    const res = await fetch(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+      }
+    })
+    
+    const html = await res.text()
+    
+    // HTML에서 기업 정보 추출
+    const companies: any[] = []
+    
+    // 기업명 추출 패턴
+    const companyPattern = /class="name"[^>]*>[\s\S]*?<a[^>]*>([^<]+)<\/a>/g
+    let match
+    
+    while ((match = companyPattern.exec(html)) !== null) {
+      const name = match[1].trim()
+      if (name) {
+        companies.push({ name, source: 'JOBKOREA' })
+      }
+    }
+    
+    // DB에 저장
+    let inserted = 0
+    let duplicates = 0
+    
+    for (const company of companies) {
+      try {
+        const existing = await db.prepare('SELECT id FROM companies WHERE name = ?').bind(company.name).first()
+        
+        if (!existing) {
+          await db.prepare(`
+            INSERT INTO companies (name, source, analyzed_at)
+            VALUES (?, 'JOBKOREA', datetime('now'))
+          `).bind(company.name).run()
+          inserted++
+        } else {
+          duplicates++
+        }
+      } catch (e) {
+        // 오류 무시
+      }
+    }
+    
+    return c.json({
+      success: true,
+      parsed: companies.length,
+      inserted,
+      duplicates,
+      page,
+      message: `${inserted}개 기업 추가 (${duplicates}개 중복)`
+    })
+  } catch (e: any) {
+    return c.json({ success: false, error: e.message }, 500)
+  }
+})
+
+// 42. 인크루트 기업정보 크롤링  
+api.post('/admin/collector/incruit/companies', async (c) => {
+  try {
+    const db = c.env.DB
+    const body = await c.req.json().catch(() => ({}))
+    const page = body.page || 1
+    
+    // 인크루트 기업정보 페이지
+    const url = `https://company.incruit.com/company/companysearch.asp?page=${page}`
+    
+    const res = await fetch(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+      }
+    })
+    
+    const html = await res.text()
+    
+    // HTML에서 기업 정보 추출
+    const companies: any[] = []
+    
+    const companyPattern = /<a[^>]*class="company[^"]*"[^>]*>([^<]+)<\/a>/g
+    let match
+    
+    while ((match = companyPattern.exec(html)) !== null) {
+      const name = match[1].trim()
+      if (name) {
+        companies.push({ name, source: 'INCRUIT' })
+      }
+    }
+    
+    // DB에 저장
+    let inserted = 0
+    
+    for (const company of companies) {
+      try {
+        const existing = await db.prepare('SELECT id FROM companies WHERE name = ?').bind(company.name).first()
+        
+        if (!existing) {
+          await db.prepare(`
+            INSERT INTO companies (name, source, analyzed_at)
+            VALUES (?, 'INCRUIT', datetime('now'))
+          `).bind(company.name).run()
+          inserted++
+        }
+      } catch (e) {
+        // 오류 무시
+      }
+    }
+    
+    return c.json({
+      success: true,
+      parsed: companies.length,
+      inserted,
+      page
+    })
+  } catch (e: any) {
+    return c.json({ success: false, error: e.message }, 500)
+  }
+})
+
+// 43. 대량 수집 자동화 (백그라운드 작업용)
+api.post('/admin/collector/batch-collect', async (c) => {
+  try {
+    const db = c.env.DB
+    const body = await c.req.json().catch(() => ({}))
+    const { source, batchSize = 50 } = body
+    
+    let result: any = { success: false }
+    
+    switch (source) {
+      case 'dart':
+        // DART 상세정보 배치 수집
+        const dartApiKey = c.env.DART_API_KEY
+        if (!dartApiKey) {
+          return c.json({ success: false, error: 'DART API Key 필요' }, 400)
+        }
+        
+        // 미수집 상장사 가져오기
+        const corps = await db.prepare(`
+          SELECT corp_code, corp_name FROM dart_corps 
+          WHERE is_collected = 0 AND stock_code IS NOT NULL AND stock_code != ''
+          LIMIT ?
+        `).bind(batchSize).all()
+        
+        if (!corps.results?.length) {
+          return c.json({ success: true, message: '수집할 상장사가 없습니다.', collected: 0 })
+        }
+        
+        let collected = 0
+        for (const corp of corps.results as any[]) {
+          try {
+            const url = `https://opendart.fss.or.kr/api/company.json?crtfc_key=${dartApiKey}&corp_code=${corp.corp_code}`
+            const res = await fetch(url)
+            const data: any = await res.json()
+            
+            if (data.status === '000') {
+              await db.prepare(`
+                INSERT OR REPLACE INTO companies (name, biz_num, ceo_name, industry_code, address, source, analyzed_at)
+                VALUES (?, ?, ?, ?, ?, 'DART', datetime('now'))
+              `).bind(data.corp_name, data.bizr_no || corp.corp_code, data.ceo_nm, data.induty_code, data.adres).run()
+              
+              await db.prepare('UPDATE dart_corps SET is_collected = 1, collected_at = datetime("now") WHERE corp_code = ?')
+                .bind(corp.corp_code).run()
+              
+              collected++
+            }
+            
+            await new Promise(r => setTimeout(r, 100))
+          } catch (e) {}
+        }
+        
+        result = { success: true, source: 'dart', collected, total: corps.results.length }
+        break
+        
+      default:
+        return c.json({ success: false, error: '지원하지 않는 소스입니다.' }, 400)
+    }
+    
+    return c.json(result)
+  } catch (e: any) {
+    return c.json({ success: false, error: e.message }, 500)
+  }
+})
+
+// 44. 수집 API 키 설정
+api.post('/admin/collector/set-api-key', async (c) => {
+  try {
+    const db = c.env.DB
+    const body = await c.req.json()
+    const { type, apiKey } = body
+    
+    if (!type || !apiKey) {
+      return c.json({ success: false, error: 'type과 apiKey가 필요합니다.' }, 400)
+    }
+    
+    const keyMap: Record<string, string> = {
+      'dart': 'api_dart_key',
+      'public_data': 'api_public_data_key',
+      'openai': 'api_openai_key'
+    }
+    
+    const settingKey = keyMap[type]
+    if (!settingKey) {
+      return c.json({ success: false, error: '지원하지 않는 API 타입입니다.' }, 400)
+    }
+    
+    // settings 테이블에 저장
+    await db.prepare(`
+      INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)
+    `).bind(settingKey, apiKey).run()
+    
+    return c.json({ success: true, message: `${type} API Key가 저장되었습니다.` })
+  } catch (e: any) {
+    return c.json({ success: false, error: e.message }, 500)
+  }
+})
+
 export default api
