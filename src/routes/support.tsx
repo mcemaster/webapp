@@ -79,6 +79,12 @@ support.post('/analyze', async (c) => {
     const categories = ['R&D (기술개발)', '사업화/창업', '수출바우처', '고용지원', '정책자금'];
     const agencies = ['중소벤처기업부', '산업통상자원부', 'KOTRA', '기술보증기금', '정보통신산업진흥원'];
     
+    // Check if documents are attached
+    const hasDocs = companyData.documents && companyData.documents.length > 0;
+    
+    // Get industry info
+    const industry = companyData.industry || companyData.type || '제조업';
+    
     const results = Array.from({ length: 20 }).map((_, i) => {
       const category = categories[i % categories.length];
       const agency = agencies[i % agencies.length];
@@ -90,10 +96,10 @@ support.post('/analyze', async (c) => {
       let reason = '';
 
       if (category.includes('R&D')) {
-        title = `2026년 ${companyData.ksic} 핵심전략기술 개발사업 (${i+1}차)`;
+        title = `2026년 ${industry} 핵심전략기술 개발사업 (${i+1}차)`;
         reason = hasDocs 
           ? `제출하신 <strong>사업계획서(${companyData.documents[0] || '자료'})</strong>에서 확인된 독창적인 기술 구현 방식이 이 과제의 평가 지표인 '기술적 차별성' 항목에서 고득점이 예상됩니다. 특히 R&D 기획 구체성이 돋보입니다.`
-          : `귀사의 <strong>${companyData.ksic}</strong> 업종과 연구개발 전담인력 현황을 볼 때, 기술개발 과제 참여 요건을 충족합니다. 구체적인 기술 명세서가 보완된다면 선정 확률이 높습니다.`;
+          : `귀사의 <strong>${industry}</strong> 업종과 연구개발 전담인력 현황을 볼 때, 기술개발 과제 참여 요건을 충족합니다. 구체적인 기술 명세서가 보완된다면 선정 확률이 높습니다.`;
       } else if (category.includes('사업화')) {
         title = `초기창업패키지 (특화분야)`;
         reason = hasDocs

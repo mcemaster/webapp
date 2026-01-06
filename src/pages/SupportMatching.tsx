@@ -8,12 +8,12 @@ import { html } from 'hono/html'
 export const SupportMatching = (props: { user: any }) => {
   return (
     <Layout user={props.user}>
-      <!-- Landing Page (Initially Visible) -->
+      {/* Landing Page (Initially Visible) */}
       <div id="view-landing">
         <LandingPage />
       </div>
 
-      <!-- Application Wizard (Initially Hidden) -->
+      {/* Application Wizard (Initially Hidden) */}
       <div id="view-app" class="hidden">
         <InputForm />
         <LoadingScreen />
