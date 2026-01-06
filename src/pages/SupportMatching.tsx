@@ -16,19 +16,15 @@ export const SupportMatching = (props: { user: any }) => {
         let currentStep = 1;
         const totalSteps = 5;
         
-        const updateWizard = () => {
-          // Hide all steps
+        function updateWizard() {
           for(let i=1; i<=totalSteps; i++) {
             document.getElementById('step-'+i).classList.add('hidden');
           }
-          // Show current
           document.getElementById('step-'+currentStep).classList.remove('hidden');
           
-          // Update Header
           document.getElementById('current-step-num').innerText = currentStep;
           document.getElementById('progress-bar').style.width = (currentStep / totalSteps * 100) + '%';
           
-          // Update Buttons
           const btnPrev = document.getElementById('btn-prev');
           const btnNext = document.getElementById('btn-next');
           const btnSubmit = document.getElementById('btn-submit');
@@ -44,30 +40,18 @@ export const SupportMatching = (props: { user: any }) => {
             btnSubmit.classList.add('hidden');
           }
           
-          // Validate Step 1 immediately to enable/disable Next
-          if(currentStep === 1) validateStep1();
-          else btnNext.disabled = false;
-        };
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
 
-        // Button Handlers
         document.getElementById('btn-prev').onclick = () => { if(currentStep > 1) { currentStep--; updateWizard(); } };
         document.getElementById('btn-next').onclick = () => { if(currentStep < totalSteps) { currentStep++; updateWizard(); } };
 
-        // --- Step 1 Validation ---
+        // --- Search Logic (with Mapping) ---
         const searchInput = document.getElementById('company-search');
-        const validateStep1 = () => {
-          const btnNext = document.getElementById('btn-next');
-          if(searchInput.value.length > 1) btnNext.disabled = false;
-          else btnNext.disabled = true;
-        };
-        searchInput.addEventListener('input', validateStep1);
-
-        // --- Search Logic ---
         const list = document.getElementById('autocomplete-list');
         let debounceTimer;
         
         searchInput.addEventListener('input', (e) => {
-          validateStep1();
           const val = e.target.value;
           clearTimeout(debounceTimer);
           if (val.length < 1) { list.classList.add('hidden'); return; }
@@ -79,8 +63,8 @@ export const SupportMatching = (props: { user: any }) => {
               if(data.length === 0) { list.classList.add('hidden'); return; }
               data.forEach(item => {
                 const div = document.createElement('div');
-                div.className = 'px-6 py-4 hover:bg-slate-50 cursor-pointer border-b border-slate-50 text-left';
-                div.innerHTML = \`<div class="font-bold text-slate-800 text-lg">\${item.name}</div><div class="text-xs text-slate-500 font-mono">\${item.code} | \${item.ceo}</div>\`;
+                div.className = 'px-5 py-3 hover:bg-indigo-50 cursor-pointer border-b border-slate-100 text-left transition';
+                div.innerHTML = \`<div class="font-bold text-slate-800">\${item.name}</div><div class="text-xs text-slate-500">\${item.code} | \${item.ceo}</div>\`;
                 div.onclick = () => autoFill(item);
                 list.appendChild(div);
               });
@@ -92,8 +76,6 @@ export const SupportMatching = (props: { user: any }) => {
         async function autoFill(item) {
           searchInput.value = item.name;
           list.classList.add('hidden');
-          validateStep1();
-          
           try {
             const res = await fetch(\`/api/dart/data?code=\${item.code}\`);
             const json = await res.json();
@@ -103,11 +85,20 @@ export const SupportMatching = (props: { user: any }) => {
               setValue('basic-ceo', d.ceo);
               setValue('basic-est', d.est_date);
               setValue('basic-addr', d.address);
+              setValue('basic-type', '중소기업'); // Mock
               setValue('basic-industry', d.corp_cls === 'Y' ? '제조업 (KOSPI)' : '정보통신업');
-              setValue('fin-rev-2024', Math.floor(Math.random()*50000+1000));
               
-              // Auto Advance to Step 2
-              setTimeout(() => { currentStep = 2; updateWizard(); }, 500);
+              // Mock Financials (3 Years)
+              setValue('fin-0-2024', Math.floor(Math.random()*50000+5000)); // Revenue
+              setValue('fin-1-2024', Math.floor(Math.random()*5000+100)); // Profit
+              setValue('fin-5-2024', Math.floor(Math.random()*10000+1000)); // Capital
+              setValue('fin-0-2023', Math.floor(Math.random()*40000+4000));
+              
+              // Mock HR
+              setValue('hr-total', Math.floor(Math.random()*200+10));
+              setValue('hr-rnd', Math.floor(Math.random()*20+2));
+              
+              alert('DART 데이터가 연동되었습니다. 상세 정보를 확인해주세요.');
             }
           } catch(e) { alert('연동 실패'); }
         }
@@ -125,15 +116,16 @@ export const SupportMatching = (props: { user: any }) => {
               for (let i = 0; i < files.length; i++) {
                 uploadedFiles.push(files[i].name);
                 const div = document.createElement('div');
-                div.className = 'flex items-center text-sm text-indigo-700 bg-indigo-50 px-3 py-2 rounded-lg border border-indigo-100 mt-2 font-bold';
-                div.innerHTML = \`<i class="fas fa-check-circle mr-2"></i> \${files[i].name}\`;
+                div.className = 'flex items-center justify-between p-3 bg-white border border-slate-200 rounded-lg text-sm shadow-sm';
+                div.innerHTML = \`<span class="font-bold text-indigo-700"><i class="fas fa-file-alt mr-2"></i>\${files[i].name}</span><button type="button" class="text-slate-400 hover:text-red-500"><i class="fas fa-times"></i></button>\`;
+                div.querySelector('button').onclick = () => { div.remove(); };
                 fileList.appendChild(div);
               }
             }
           });
         }
 
-        // --- Submit & Analyze ---
+        // --- Submit & Analyze (The Big Payload) ---
         document.getElementById('btn-submit').addEventListener('click', async () => {
           document.getElementById('wizard-container').classList.add('hidden');
           const loading = document.getElementById('view-loading');
@@ -142,10 +134,71 @@ export const SupportMatching = (props: { user: any }) => {
 
           animateLoading();
 
+          // 1. Gather Basic
+          const basic = {
+            name: getValue('basic-name'),
+            ceo: getValue('basic-ceo'),
+            bizno: getValue('basic-bizno'),
+            est: getValue('basic-est'),
+            type: getValue('basic-type'),
+            addr: getValue('basic-addr'),
+            industry: getValue('basic-industry'),
+            website: getValue('basic-url')
+          };
+
+          // 2. Gather Financials (Dynamic)
+          const financial = {};
+          ['2023', '2024', '2025'].forEach(year => {
+            financial[year] = {
+              revenue: getValue('fin-0-'+year),
+              profit: getValue('fin-1-'+year),
+              netIncome: getValue('fin-2-'+year),
+              assets: getValue('fin-3-'+year),
+              debt: getValue('fin-4-'+year),
+              capital: getValue('fin-5-'+year),
+              rnd: getValue('fin-6-'+year),
+              export: getValue('fin-7-'+year)
+            };
+          });
+
+          // 3. Gather HR & Tech
+          const hr = {
+            total: getValue('hr-total'),
+            rnd: getValue('hr-rnd'),
+            youth: getValue('hr-youth'),
+            female: getValue('hr-female'),
+            newHire: getValue('hr-last-hire'),
+            planHire: getValue('hr-plan-hire')
+          };
+          
+          const certs = Array.from(document.querySelectorAll('input[name="certs"]:checked')).map(cb => cb.value);
+          
+          const tech = {
+            tcb: getValue('tech-tcb'),
+            patents: {
+              reg: getValue('ip-reg'),
+              app: getValue('ip-app')
+            },
+            certs: certs
+          };
+
+          // 4. Strategy
+          const strategy = {
+            product: getValue('biz-product'),
+            target: getValue('biz-target'),
+            exportCountry: getValue('biz-export-country'),
+            descTech: getValue('desc-tech'),
+            descGoal: getValue('desc-goal'),
+            descFund: getValue('desc-fund')
+          };
+
+          // Combine into Massive JSON
           const companyData = {
-            name: document.getElementById('basic-name').value || searchInput.value,
-            industry: document.getElementById('basic-industry').value,
-            rev_2024: document.getElementById('fin-rev-2024').value,
+            ...basic,
+            financial,
+            hr,
+            tech,
+            strategy,
             documents: uploadedFiles
           };
 
@@ -162,9 +215,14 @@ export const SupportMatching = (props: { user: any }) => {
               loading.classList.remove('flex');
               document.getElementById('view-result').classList.remove('hidden');
               renderReport(result.data);
-            }, 5000); 
-          } catch(e) { alert('오류'); location.reload(); }
+            }, 6000); 
+          } catch(e) { alert('분석 중 오류가 발생했습니다.'); location.reload(); }
         });
+
+        function getValue(id) {
+          const el = document.getElementById(id);
+          return el ? el.value : '';
+        }
 
         function animateLoading() {
           const bar = document.getElementById('loading-bar');
@@ -176,9 +234,9 @@ export const SupportMatching = (props: { user: any }) => {
             if(bar) bar.style.width = w + '%';
             if(per) per.innerText = Math.floor(w) + '%';
             
-            if(w > 25) activateStep('step-2');
+            if(w > 20) activateStep('step-2');
             if(w > 50) activateStep('step-3');
-            if(w > 75) activateStep('step-4');
+            if(w > 80) activateStep('step-4');
             
             if(w >= 100) clearInterval(interval);
           }, 100);
@@ -198,24 +256,27 @@ export const SupportMatching = (props: { user: any }) => {
           if(!list) return;
           list.innerHTML = items.map((item, i) => \`
             <div class="bg-white p-6 rounded-2xl border border-slate-200 hover:border-indigo-400 hover:shadow-lg transition group">
-              <div class="flex justify-between items-start mb-4">
+              <div class="flex flex-col md:flex-row justify-between items-start mb-4 gap-4">
                 <div class="flex items-start gap-4">
-                  <div class="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center font-bold text-slate-600 group-hover:bg-indigo-600 group-hover:text-white transition">\${i+1}</div>
+                  <div class="w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center font-extrabold text-slate-500 text-xl group-hover:bg-indigo-600 group-hover:text-white transition">\${i+1}</div>
                   <div>
                     <span class="inline-block px-2 py-1 bg-slate-100 text-slate-600 text-xs font-bold rounded mb-1">\${item.category} | \${item.agency}</span>
-                    <h3 class="text-xl font-bold text-slate-900 group-hover:text-indigo-600 transition">\${item.title}</h3>
+                    <h3 class="text-xl font-bold text-slate-900 group-hover:text-indigo-600 transition leading-tight">\${item.title}</h3>
                   </div>
                 </div>
-                <div class="text-right">
-                  <div class="text-2xl font-extrabold text-indigo-600">\${item.matchScore}점</div>
-                  <div class="text-xs text-slate-400">\${item.amount}</div>
+                <div class="text-right flex-shrink-0">
+                  <div class="text-3xl font-extrabold text-indigo-600">\${item.matchScore}<span class="text-sm text-slate-400 ml-1 font-medium">점</span></div>
+                  <div class="text-xs text-slate-500 font-bold">\${item.amount}</div>
                 </div>
               </div>
-              <div class="bg-indigo-50/50 p-4 rounded-xl border border-indigo-100 text-sm text-slate-700 leading-relaxed">
+              <div class="bg-indigo-50/50 p-5 rounded-xl border border-indigo-100 text-sm text-slate-700 leading-relaxed relative">
+                <i class="fas fa-quote-left absolute top-3 left-3 text-indigo-200 text-2xl -z-10"></i>
+                <strong class="text-indigo-700 block mb-1">AI 매칭 분석:</strong>
                 \${item.aiReason}
               </div>
-              <div class="mt-4 flex justify-end text-xs text-slate-400 font-bold">
-                마감일: \${item.deadline}
+              <div class="mt-4 pt-4 border-t border-slate-100 flex justify-between items-center">
+                <span class="text-xs text-slate-400 font-bold"><i class="far fa-clock mr-1"></i> 마감: \${item.deadline}</span>
+                <button class="text-sm font-bold text-indigo-600 hover:underline">공고 상세 보기 <i class="fas fa-arrow-right ml-1"></i></button>
               </div>
             </div>
           \`).join('');
