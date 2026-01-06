@@ -757,24 +757,40 @@ export const Admin = (props: { user: any, tab?: string }) => {
             }
           }
           
-          function initCharts() {
-            // Weekly Activity Chart
+          async function initCharts() {
+            // Weekly Activity Chart - Load from API
             const weeklyCtx = document.getElementById('weeklyChart');
             if (weeklyCtx) {
+              let weeklyLabels = ['월', '화', '수', '목', '금', '토', '일'];
+              let aiData = [0, 0, 0, 0, 0, 0, 0];
+              let visitorData = [0, 0, 0, 0, 0, 0, 0];
+              
+              try {
+                const res = await fetch('/api/admin/chart/weekly');
+                if (res.ok) {
+                  const data = await res.json();
+                  weeklyLabels = data.labels || weeklyLabels;
+                  aiData = data.aiAnalysis || aiData;
+                  visitorData = data.visitors || visitorData;
+                }
+              } catch(e) {
+                console.log('Weekly chart data load error:', e);
+              }
+              
               new Chart(weeklyCtx, {
                 type: 'line',
                 data: {
-                  labels: ['월', '화', '수', '목', '금', '토', '일'],
+                  labels: weeklyLabels,
                   datasets: [{
-                    label: '방문자',
-                    data: [120, 150, 180, 140, 200, 80, 60],
+                    label: '회원 활동',
+                    data: visitorData,
                     borderColor: '#3b82f6',
                     backgroundColor: 'rgba(59, 130, 246, 0.1)',
                     fill: true,
                     tension: 0.4
                   }, {
                     label: 'AI 분석',
-                    data: [20, 35, 45, 30, 55, 15, 10],
+                    data: aiData,
                     borderColor: '#8b5cf6',
                     backgroundColor: 'rgba(139, 92, 246, 0.1)',
                     fill: true,
@@ -790,15 +806,29 @@ export const Admin = (props: { user: any, tab?: string }) => {
               });
             }
             
-            // Service Usage Chart
+            // Service Usage Chart - Load from API
             const serviceCtx = document.getElementById('serviceChart');
             if (serviceCtx) {
+              let serviceLabels = ['지원사업 매칭', '공급사 찾기', 'ISO 인증', 'SPEC 평가'];
+              let serviceData = [0, 0, 0, 0];
+              
+              try {
+                const res = await fetch('/api/admin/chart/services');
+                if (res.ok) {
+                  const data = await res.json();
+                  serviceLabels = data.labels || serviceLabels;
+                  serviceData = data.data || serviceData;
+                }
+              } catch(e) {
+                console.log('Services chart data load error:', e);
+              }
+              
               new Chart(serviceCtx, {
                 type: 'doughnut',
                 data: {
-                  labels: ['지원사업 매칭', '공급사 찾기', 'ISO 인증', 'SPEC 평가'],
+                  labels: serviceLabels,
                   datasets: [{
-                    data: [45, 25, 20, 10],
+                    data: serviceData,
                     backgroundColor: ['#3b82f6', '#8b5cf6', '#10b981', '#f59e0b']
                   }]
                 },
