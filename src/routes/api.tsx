@@ -8,13 +8,16 @@ type Bindings = {
 
 const api = new Hono<{ Bindings: Bindings }>()
 
+// ==========================================
+// DART API Integration
+// ==========================================
+
 // 1. DART Connection Test
 api.get('/dart/test', async (c) => {
   const apiKey = c.env.DART_API_KEY
   if (!apiKey) return c.json({ success: false, message: 'API Key Missing' })
   
   try {
-    // Test with Samsung Electronics Code
     const url = `https://opendart.fss.or.kr/api/company.json?crtfc_key=${apiKey}&corp_code=00126380`
     const res = await fetch(url)
     const data: any = await res.json()
@@ -59,11 +62,30 @@ api.get('/dart/data', async (c) => {
   }
 })
 
-// 3. Company Search (Autocomplete Mock)
-api.get('/search/company', (c) => {
+// 3. Company Search (from DB + Mock fallback)
+api.get('/search/company', async (c) => {
   const q = c.req.query('q') || ''
   if (q.length < 1) return c.json([])
   
+  try {
+    // Try from DB first
+    const db = c.env.DB
+    if (db) {
+      const result = await db.prepare(
+        `SELECT name, biz_num as code, 
+         (SELECT name FROM users WHERE users.id = companies.user_id) as ceo
+         FROM companies WHERE name LIKE ? LIMIT 10`
+      ).bind(`%${q}%`).all()
+      
+      if (result.results && result.results.length > 0) {
+        return c.json(result.results)
+      }
+    }
+  } catch (e) {
+    console.log('DB search failed, using mock')
+  }
+  
+  // Fallback to mock
   const mockDB = [
     { name: '삼성전자', code: '00126380', ceo: '한종희' },
     { name: '삼성에스디아이', code: '00126362', ceo: '최윤호' },
@@ -75,72 +97,325 @@ api.get('/search/company', (c) => {
   return c.json(mockDB.filter(x => x.name.includes(q)))
 })
 
-// 4. Admin Stats
-api.get('/admin/stats', (c) => {
-  return c.json({
-    users: 1250,
-    aiUsage: 150,
-    grants: 320,
-    pending: 5
-  })
+// ==========================================
+// Admin Dashboard APIs (Real DB Connected)
+// ==========================================
+
+// 4. Admin Stats - Real DB
+api.get('/admin/stats', async (c) => {
+  try {
+    const db = c.env.DB
+    
+    // Get user count
+    const usersResult = await db.prepare('SELECT COUNT(*) as count FROM users').first<{count: number}>()
+    const users = usersResult?.count || 0
+    
+    // Get AI analysis count
+    const aiResult = await db.prepare('SELECT COUNT(*) as count FROM analysis_logs').first<{count: number}>()
+    const aiUsage = aiResult?.count || 0
+    
+    // Get grants count
+    const grantsResult = await db.prepare('SELECT COUNT(*) as count FROM grants').first<{count: number}>()
+    const grants = grantsResult?.count || 0
+    
+    // Get pending partners count
+    const pendingResult = await db.prepare("SELECT COUNT(*) as count FROM partners WHERE status = 'pending'").first<{count: number}>()
+    const pending = pendingResult?.count || 0
+    
+    return c.json({ users, aiUsage, grants, pending })
+  } catch (e: any) {
+    console.error('Admin stats error:', e)
+    return c.json({ users: 0, aiUsage: 0, grants: 0, pending: 0, error: e.message })
+  }
 })
 
-// 5. Admin Data Tables
-api.get('/admin/companies', (c) => {
-  return c.json({
-    companies: [
-      { name: '(주)테스트기업', ceo: '김대표', industry: '제조업', revenue: '50억원', created_at: '2026-01-05' },
-      { name: '삼성전자', ceo: '한종희', industry: '전자', revenue: '300조원', created_at: '2026-01-04' },
-      { name: '현대자동차', ceo: '정의선', industry: '자동차', revenue: '150조원', created_at: '2026-01-03' }
-    ]
-  })
+// 5. Admin - Companies List
+api.get('/admin/companies', async (c) => {
+  try {
+    const db = c.env.DB
+    const result = await db.prepare(`
+      SELECT 
+        c.id,
+        c.name,
+        c.biz_num,
+        c.industry_code as industry,
+        c.employee_count,
+        c.financial_json,
+        c.certifications,
+        c.analyzed_at as created_at,
+        u.name as ceo
+      FROM companies c
+      LEFT JOIN users u ON c.user_id = u.id
+      ORDER BY c.analyzed_at DESC
+      LIMIT 100
+    `).all()
+    
+    const companies = (result.results || []).map((c: any) => {
+      let revenue = '-'
+      try {
+        if (c.financial_json) {
+          const fin = JSON.parse(c.financial_json)
+          revenue = fin.revenue ? `${(fin.revenue / 100000000).toFixed(1)}억원` : '-'
+        }
+      } catch {}
+      
+      return {
+        id: c.id,
+        name: c.name || '-',
+        ceo: c.ceo || '-',
+        industry: c.industry || '-',
+        revenue,
+        created_at: c.created_at ? c.created_at.split('T')[0] : '-'
+      }
+    })
+    
+    return c.json({ companies })
+  } catch (e: any) {
+    console.error('Admin companies error:', e)
+    return c.json({ companies: [], error: e.message })
+  }
 })
 
-api.get('/admin/grants', (c) => {
-  return c.json({
-    grants: [
-      { title: '2026 AI 바우처 지원사업', agency: 'NIPA', amount: '최대 3억원', deadline: '2026-05-01', status: 'active' },
-      { title: '혁신성장 R&D 지원', agency: '중소벤처기업부', amount: '최대 5억원', deadline: '2026-04-15', status: 'active' },
-      { title: '수출바우처 사업', agency: 'KOTRA', amount: '최대 1억원', deadline: '2026-03-31', status: 'active' }
-    ]
-  })
+// 6. Admin - Grants List
+api.get('/admin/grants', async (c) => {
+  try {
+    const db = c.env.DB
+    const result = await db.prepare(`
+      SELECT 
+        id, title, agency, type, max_amount, deadline, url
+      FROM grants 
+      ORDER BY deadline ASC
+      LIMIT 100
+    `).all()
+    
+    const today = new Date().toISOString().split('T')[0]
+    
+    const grants = (result.results || []).map((g: any) => ({
+      id: g.id,
+      title: g.title || '-',
+      agency: g.agency || '-',
+      amount: g.max_amount ? `최대 ${(g.max_amount / 1000).toFixed(0)}만원` : '-',
+      deadline: g.deadline || '-',
+      status: g.deadline && g.deadline >= today ? 'active' : 'closed',
+      url: g.url
+    }))
+    
+    return c.json({ grants })
+  } catch (e: any) {
+    console.error('Admin grants error:', e)
+    return c.json({ grants: [], error: e.message })
+  }
 })
 
-api.get('/admin/logs', (c) => {
-  return c.json({
-    logs: [
-      { created_at: '2026-01-06 14:30', user_email: 'user@example.com', company_name: '테스트기업', match_count: 15, tokens_used: '2,450' },
-      { created_at: '2026-01-06 13:15', user_email: 'admin@mce.re.kr', company_name: '삼성전자', match_count: 20, tokens_used: '3,100' },
-      { created_at: '2026-01-05 17:45', user_email: 'partner@test.com', company_name: '현대자동차', match_count: 18, tokens_used: '2,800' }
-    ]
-  })
+// 7. Admin - AI Analysis Logs
+api.get('/admin/logs', async (c) => {
+  try {
+    const db = c.env.DB
+    const result = await db.prepare(`
+      SELECT 
+        l.id,
+        l.created_at,
+        l.match_score,
+        l.ai_reasoning,
+        l.result_json,
+        u.email as user_email,
+        u.name as user_name,
+        c.name as company_name
+      FROM analysis_logs l
+      LEFT JOIN users u ON l.user_id = u.id
+      LEFT JOIN companies c ON l.company_id = c.id
+      ORDER BY l.created_at DESC
+      LIMIT 100
+    `).all()
+    
+    const logs = (result.results || []).map((l: any) => {
+      let matchCount = 0
+      let tokensUsed = '-'
+      
+      try {
+        if (l.result_json) {
+          const parsed = JSON.parse(l.result_json)
+          matchCount = Array.isArray(parsed.data) ? parsed.data.length : (parsed.matchCount || 0)
+          tokensUsed = parsed.tokens_used || '-'
+        }
+      } catch {}
+      
+      return {
+        id: l.id,
+        created_at: l.created_at || '-',
+        user_email: l.user_email || '-',
+        company_name: l.company_name || '-',
+        match_count: matchCount || l.match_score || 0,
+        tokens_used: tokensUsed
+      }
+    })
+    
+    return c.json({ logs })
+  } catch (e: any) {
+    console.error('Admin logs error:', e)
+    return c.json({ logs: [], error: e.message })
+  }
 })
 
-api.get('/admin/users', (c) => {
-  return c.json({
-    users: [
-      { name: '최고관리자', email: 'admin@mce.re.kr', role: 'admin', created_at: '2025-12-01', ai_usage: 45 },
-      { name: '김철수', email: 'user@example.com', role: 'user', created_at: '2026-01-02', ai_usage: 12 },
-      { name: '박영희', email: 'partner@test.com', role: 'partner', created_at: '2026-01-03', ai_usage: 8 }
-    ]
-  })
+// 8. Admin - Users List
+api.get('/admin/users', async (c) => {
+  try {
+    const db = c.env.DB
+    const result = await db.prepare(`
+      SELECT 
+        u.id,
+        u.name,
+        u.email,
+        u.role,
+        u.company_name,
+        u.created_at,
+        (SELECT COUNT(*) FROM analysis_logs WHERE user_id = u.id) as ai_usage
+      FROM users u
+      ORDER BY u.created_at DESC
+      LIMIT 100
+    `).all()
+    
+    const users = (result.results || []).map((u: any) => ({
+      id: u.id,
+      name: u.name || '-',
+      email: u.email || '-',
+      role: u.role || 'user',
+      company_name: u.company_name || '-',
+      created_at: u.created_at ? u.created_at.split('T')[0] : '-',
+      ai_usage: u.ai_usage || 0
+    }))
+    
+    return c.json({ users })
+  } catch (e: any) {
+    console.error('Admin users error:', e)
+    return c.json({ users: [], error: e.message })
+  }
 })
 
-// Admin Deploy Trigger
+// 9. Admin - Partners (Pending Approvals)
+api.get('/admin/partners', async (c) => {
+  try {
+    const db = c.env.DB
+    const result = await db.prepare(`
+      SELECT id, company_name, ceo_name, biz_num, phone, status, applied_at
+      FROM partners
+      ORDER BY applied_at DESC
+      LIMIT 100
+    `).all()
+    
+    const partners = (result.results || []).map((p: any) => ({
+      id: p.id,
+      company_name: p.company_name || '-',
+      ceo_name: p.ceo_name || '-',
+      phone: p.phone || '-',
+      status: p.status || 'pending',
+      applied_at: p.applied_at ? p.applied_at.split('T')[0] : '-'
+    }))
+    
+    return c.json({ partners })
+  } catch (e: any) {
+    console.error('Admin partners error:', e)
+    return c.json({ partners: [], error: e.message })
+  }
+})
+
+// 10. Admin - Approve/Reject Partner
+api.post('/admin/partners/:id/approve', async (c) => {
+  try {
+    const db = c.env.DB
+    const id = c.req.param('id')
+    
+    await db.prepare("UPDATE partners SET status = 'approved' WHERE id = ?").bind(id).run()
+    
+    return c.json({ success: true })
+  } catch (e: any) {
+    return c.json({ success: false, error: e.message })
+  }
+})
+
+api.post('/admin/partners/:id/reject', async (c) => {
+  try {
+    const db = c.env.DB
+    const id = c.req.param('id')
+    
+    await db.prepare("UPDATE partners SET status = 'rejected' WHERE id = ?").bind(id).run()
+    
+    return c.json({ success: true })
+  } catch (e: any) {
+    return c.json({ success: false, error: e.message })
+  }
+})
+
+// 11. Admin Deploy Trigger
 api.post('/admin/deploy', async (c) => {
-  // Placeholder - In production, trigger Cloudflare deployment webhook
+  // In production, trigger Cloudflare deployment webhook
   return c.json({ success: true, message: 'Deploy triggered' })
 })
 
-// 6. User Registration
+// ==========================================
+// User Registration & Auth
+// ==========================================
+
+// 12. User Registration - Real DB
 api.post('/register', async (c) => {
   try {
     const body = await c.req.json()
-    // TODO: Save to DB
-    // await c.env.DB.prepare('INSERT INTO users ...').run()
+    const { email, name, companyName, userType, phone } = body
+    
+    if (!email || !name) {
+      return c.json({ success: false, error: '필수 항목을 입력해주세요.' }, 400)
+    }
+    
+    const db = c.env.DB
+    
+    // Check if email already exists
+    const existing = await db.prepare('SELECT id FROM users WHERE email = ?').bind(email).first()
+    if (existing) {
+      return c.json({ success: false, error: '이미 등록된 이메일입니다.' }, 400)
+    }
+    
+    // Insert new user
+    const role = userType === 'partner' ? 'partner' : 'user'
+    await db.prepare(`
+      INSERT INTO users (email, name, company_name, role) 
+      VALUES (?, ?, ?, ?)
+    `).bind(email, name, companyName || null, role).run()
+    
+    // If partner, also add to partners table for approval
+    if (userType === 'partner') {
+      await db.prepare(`
+        INSERT INTO partners (company_name, ceo_name, phone, status)
+        VALUES (?, ?, ?, 'pending')
+      `).bind(companyName, name, phone || null).run()
+    }
+    
     return c.json({ success: true, message: '회원가입이 완료되었습니다.' })
   } catch (e: any) {
+    console.error('Registration error:', e)
     return c.json({ success: false, error: e.message }, 400)
+  }
+})
+
+// ==========================================
+// Analysis Log Recording (for SupportMatching)
+// ==========================================
+
+// 13. Save Analysis Log
+api.post('/analysis/log', async (c) => {
+  try {
+    const body = await c.req.json()
+    const { userId, companyId, resultJson } = body
+    
+    const db = c.env.DB
+    
+    await db.prepare(`
+      INSERT INTO analysis_logs (user_id, company_id, result_json, created_at)
+      VALUES (?, ?, ?, datetime('now'))
+    `).bind(userId || null, companyId || null, JSON.stringify(resultJson)).run()
+    
+    return c.json({ success: true })
+  } catch (e: any) {
+    return c.json({ success: false, error: e.message })
   }
 })
 

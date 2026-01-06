@@ -528,6 +528,10 @@ export const Admin = (props: { user: any, tab?: string }) => {
             if (tab === 'grants') loadGrants();
             if (tab === 'logs') loadLogs();
             if (tab === 'users') loadUsers();
+            if (tab === 'partners') loadPartners();
+            
+            // Load recent activity for overview
+            if (tab === 'overview') loadRecentActivity();
           }
           
           async function loadCompanies() {
@@ -627,6 +631,129 @@ export const Admin = (props: { user: any, tab?: string }) => {
               }
             } catch(e) {
               console.log('Users load error:', e);
+            }
+          }
+          
+          async function loadPartners() {
+            try {
+              const res = await fetch('/api/admin/partners');
+              if (res.ok) {
+                const data = await res.json();
+                const tbody = document.getElementById('partner-table');
+                if (data.partners && data.partners.length > 0) {
+                  tbody.innerHTML = data.partners.map(p => 
+                    '<tr class="hover:bg-slate-50">' +
+                    '<td class="px-5 py-3 font-medium text-slate-800">' + (p.company_name || '-') + '</td>' +
+                    '<td class="px-5 py-3 text-slate-600">' + (p.ceo_name || '-') + '</td>' +
+                    '<td class="px-5 py-3 text-slate-600">' + (p.phone || '-') + '</td>' +
+                    '<td class="px-5 py-3 text-slate-500 text-xs">' + (p.applied_at || '-') + '</td>' +
+                    '<td class="px-5 py-3"><span class="px-2 py-1 text-xs rounded-full ' + 
+                      (p.status === 'approved' ? 'bg-green-100 text-green-700' : 
+                       p.status === 'rejected' ? 'bg-red-100 text-red-700' : 
+                       'bg-yellow-100 text-yellow-700') + '">' + 
+                      (p.status === 'approved' ? '승인됨' : p.status === 'rejected' ? '거절됨' : '대기중') + '</span></td>' +
+                    '<td class="px-5 py-3 text-center">' +
+                      (p.status === 'pending' ? 
+                        '<button onclick="approvePartner(' + p.id + ')" class="px-2 py-1 bg-green-600 text-white text-xs rounded mr-1 hover:bg-green-700">승인</button>' +
+                        '<button onclick="rejectPartner(' + p.id + ')" class="px-2 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700">거절</button>'
+                      : '-') +
+                    '</td>' +
+                    '</tr>'
+                  ).join('');
+                } else {
+                  tbody.innerHTML = '<tr><td colspan="6" class="px-5 py-8 text-center text-slate-400">승인 대기 중인 파트너가 없습니다.</td></tr>';
+                }
+              }
+            } catch(e) {
+              console.log('Partners load error:', e);
+            }
+          }
+          
+          async function approvePartner(id) {
+            if (confirm('이 파트너를 승인하시겠습니까?')) {
+              try {
+                const res = await fetch('/api/admin/partners/' + id + '/approve', { method: 'POST' });
+                if (res.ok) {
+                  alert('승인되었습니다.');
+                  loadPartners();
+                }
+              } catch(e) {
+                alert('승인 처리 중 오류가 발생했습니다.');
+              }
+            }
+          }
+          
+          async function rejectPartner(id) {
+            if (confirm('이 파트너를 거절하시겠습니까?')) {
+              try {
+                const res = await fetch('/api/admin/partners/' + id + '/reject', { method: 'POST' });
+                if (res.ok) {
+                  alert('거절되었습니다.');
+                  loadPartners();
+                }
+              } catch(e) {
+                alert('거절 처리 중 오류가 발생했습니다.');
+              }
+            }
+          }
+          
+          async function loadRecentActivity() {
+            const el = document.getElementById('recent-activity');
+            try {
+              const [logsRes, usersRes] = await Promise.all([
+                fetch('/api/admin/logs'),
+                fetch('/api/admin/users')
+              ]);
+              
+              let activities = [];
+              
+              if (logsRes.ok) {
+                const logsData = await logsRes.json();
+                if (logsData.logs && logsData.logs.length > 0) {
+                  logsData.logs.slice(0, 3).forEach(l => {
+                    activities.push({
+                      icon: 'fa-robot',
+                      iconBg: 'bg-indigo-100',
+                      iconColor: 'text-indigo-600',
+                      title: 'AI 분석 완료',
+                      desc: (l.company_name || '기업') + ' - ' + (l.match_count || 0) + '건 매칭',
+                      time: l.created_at || '-'
+                    });
+                  });
+                }
+              }
+              
+              if (usersRes.ok) {
+                const usersData = await usersRes.json();
+                if (usersData.users && usersData.users.length > 0) {
+                  usersData.users.slice(0, 2).forEach(u => {
+                    activities.push({
+                      icon: 'fa-user-plus',
+                      iconBg: 'bg-green-100',
+                      iconColor: 'text-green-600',
+                      title: '신규 회원 가입',
+                      desc: u.name + ' (' + u.email + ')',
+                      time: u.created_at || '-'
+                    });
+                  });
+                }
+              }
+              
+              if (activities.length > 0) {
+                el.innerHTML = activities.slice(0, 5).map(a => 
+                  '<div class="flex items-center p-4 hover:bg-slate-50">' +
+                  '<div class="w-10 h-10 ' + a.iconBg + ' rounded-full flex items-center justify-center mr-4">' +
+                  '<i class="fas ' + a.icon + ' ' + a.iconColor + '"></i></div>' +
+                  '<div class="flex-1"><p class="text-sm font-medium text-slate-800">' + a.title + '</p>' +
+                  '<p class="text-xs text-slate-500">' + a.desc + '</p></div>' +
+                  '<span class="text-xs text-slate-400">' + a.time + '</span></div>'
+                ).join('');
+              } else {
+                el.innerHTML = '<div class="p-4 text-center text-slate-400 text-sm">최근 활동이 없습니다.</div>';
+              }
+            } catch(e) {
+              console.log('Recent activity load error:', e);
+              el.innerHTML = '<div class="p-4 text-center text-slate-400 text-sm">데이터를 불러올 수 없습니다.</div>';
             }
           }
           
