@@ -98,6 +98,42 @@ api.get('/search/company', async (c) => {
 })
 
 // ==========================================
+// DB Migration - 스키마 업데이트
+// ==========================================
+api.post('/admin/db/migrate', async (c) => {
+  try {
+    const db = c.env.DB
+    const results: string[] = []
+    
+    // 새 컬럼 추가 (이미 있으면 무시)
+    const migrations = [
+      { sql: "ALTER TABLE companies ADD COLUMN executives_json TEXT", name: "executives_json" },
+      { sql: "ALTER TABLE companies ADD COLUMN shareholders_json TEXT", name: "shareholders_json" },
+      { sql: "ALTER TABLE companies ADD COLUMN detail_json TEXT", name: "detail_json" },
+      { sql: "ALTER TABLE companies ADD COLUMN source TEXT DEFAULT 'MANUAL'", name: "source" },
+      { sql: "ALTER TABLE companies ADD COLUMN corp_code TEXT", name: "corp_code" },
+    ]
+    
+    for (const m of migrations) {
+      try {
+        await db.prepare(m.sql).run()
+        results.push(`✅ ${m.name} 추가 완료`)
+      } catch (e: any) {
+        if (e.message?.includes('duplicate column')) {
+          results.push(`⏭️ ${m.name} 이미 존재`)
+        } else {
+          results.push(`❌ ${m.name} 실패: ${e.message}`)
+        }
+      }
+    }
+    
+    return c.json({ success: true, results })
+  } catch (e: any) {
+    return c.json({ success: false, error: e.message }, 500)
+  }
+})
+
+// ==========================================
 // Admin Dashboard APIs (Real DB Connected)
 // ==========================================
 
@@ -2051,6 +2087,176 @@ api.post('/admin/companies/import-json', async (c) => {
       inserted,
       errors,
       message: `${inserted}개 기업 추가 완료 (${errors}건 오류/중복)`
+    })
+  } catch (e: any) {
+    return c.json({ success: false, error: e.message }, 500)
+  }
+})
+
+// 35-3. Admin - DART 상세 정보 업로드 (대표, 재무, 임원, 주주 등)
+api.post('/admin/companies/import-detail', async (c) => {
+  try {
+    const db = c.env.DB
+    const body = await c.req.json()
+    const { companies } = body
+    
+    if (!companies || !Array.isArray(companies)) {
+      return c.json({ success: false, error: 'companies 배열이 필요합니다.' }, 400)
+    }
+    
+    let updated = 0
+    let inserted = 0
+    let errors = 0
+    
+    for (const company of companies) {
+      try {
+        // 재무정보 JSON 구성
+        const financialJson = JSON.stringify({
+          total_assets: company.financial?.total_assets || null,
+          total_liabilities: company.financial?.total_liabilities || null,
+          total_equity: company.financial?.total_equity || null,
+          revenue: company.financial?.revenue || null,
+          operating_profit: company.financial?.operating_profit || null,
+          net_income: company.financial?.net_income || null,
+          stock_code: company.stock_code || null,
+          corp_code: company.corp_code || null,
+        })
+        
+        // 임원정보 JSON
+        const executivesJson = JSON.stringify(company.executives || [])
+        
+        // 주주정보 JSON
+        const shareholdersJson = JSON.stringify(company.shareholders || [])
+        
+        // 상세정보 JSON (주소, 전화, 홈페이지 등)
+        const detailJson = JSON.stringify({
+          corp_name_eng: company.corp_name_eng || null,
+          corp_cls: company.corp_cls || null,
+          jurir_no: company.jurir_no || null,
+          adres: company.adres || null,
+          hm_url: company.hm_url || null,
+          ir_url: company.ir_url || null,
+          phn_no: company.phn_no || null,
+          fax_no: company.fax_no || null,
+          acc_mt: company.acc_mt || null,
+          avg_salary: company.employee?.avg_salary || null,
+        })
+        
+        // 기존 데이터 확인 (stock_code 또는 이름으로)
+        const existing = await db.prepare(
+          'SELECT id FROM companies WHERE biz_num = ? OR name = ?'
+        ).bind(company.stock_code || company.bizr_no, company.corp_name).first()
+        
+        if (existing) {
+          // 업데이트
+          await db.prepare(`
+            UPDATE companies SET
+              ceo_name = ?,
+              industry_code = ?,
+              founding_date = ?,
+              employee_count = ?,
+              financial_json = ?,
+              executives_json = ?,
+              shareholders_json = ?,
+              detail_json = ?,
+              source = ?,
+              analyzed_at = datetime('now')
+            WHERE id = ?
+          `).bind(
+            company.ceo_nm || null,
+            company.induty_code || null,
+            company.est_dt ? `${company.est_dt.slice(0,4)}-${company.est_dt.slice(4,6)}-${company.est_dt.slice(6,8)}` : null,
+            company.employee?.employee_count || null,
+            financialJson,
+            executivesJson,
+            shareholdersJson,
+            detailJson,
+            'DART_DETAIL',
+            existing.id
+          ).run()
+          updated++
+        } else {
+          // 신규 삽입
+          await db.prepare(`
+            INSERT INTO companies (name, biz_num, ceo_name, industry_code, founding_date, employee_count, financial_json, executives_json, shareholders_json, detail_json, source, analyzed_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
+          `).bind(
+            company.corp_name,
+            company.stock_code || company.bizr_no || null,
+            company.ceo_nm || null,
+            company.induty_code || null,
+            company.est_dt ? `${company.est_dt.slice(0,4)}-${company.est_dt.slice(4,6)}-${company.est_dt.slice(6,8)}` : null,
+            company.employee?.employee_count || null,
+            financialJson,
+            executivesJson,
+            shareholdersJson,
+            detailJson,
+            'DART_DETAIL'
+          ).run()
+          inserted++
+        }
+      } catch (e) {
+        console.error('Company import error:', e)
+        errors++
+      }
+    }
+    
+    return c.json({
+      success: true,
+      total: companies.length,
+      inserted,
+      updated,
+      errors,
+      message: `${updated}개 업데이트, ${inserted}개 신규 추가 (${errors}건 오류)`
+    })
+  } catch (e: any) {
+    return c.json({ success: false, error: e.message }, 500)
+  }
+})
+
+// 35-4. Admin - 기업 상세 정보 조회 (단일 기업)
+api.get('/admin/companies/:id/detail', async (c) => {
+  try {
+    const db = c.env.DB
+    const id = c.req.param('id')
+    
+    const company = await db.prepare(`
+      SELECT * FROM companies WHERE id = ?
+    `).bind(id).first()
+    
+    if (!company) {
+      return c.json({ success: false, error: '기업을 찾을 수 없습니다.' }, 404)
+    }
+    
+    // JSON 필드 파싱
+    let financial = {}
+    let executives = []
+    let shareholders = []
+    let detail = {}
+    
+    try { financial = JSON.parse((company as any).financial_json || '{}') } catch {}
+    try { executives = JSON.parse((company as any).executives_json || '[]') } catch {}
+    try { shareholders = JSON.parse((company as any).shareholders_json || '[]') } catch {}
+    try { detail = JSON.parse((company as any).detail_json || '{}') } catch {}
+    
+    return c.json({
+      success: true,
+      company: {
+        id: (company as any).id,
+        name: (company as any).name,
+        biz_num: (company as any).biz_num,
+        ceo_name: (company as any).ceo_name,
+        industry_code: (company as any).industry_code,
+        founding_date: (company as any).founding_date,
+        employee_count: (company as any).employee_count,
+        certifications: (company as any).certifications,
+        source: (company as any).source,
+        analyzed_at: (company as any).analyzed_at,
+        financial,
+        executives,
+        shareholders,
+        detail,
+      }
     })
   } catch (e: any) {
     return c.json({ success: false, error: e.message }, 500)
