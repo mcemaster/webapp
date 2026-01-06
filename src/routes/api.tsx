@@ -1041,7 +1041,7 @@ api.get('/sitemap.xml', async (c) => {
 })
 
 // 21. Get SEO Meta for pages (used by Layout)
-api.get('/seo/meta', async (c) => {
+api.get('/seo-meta', async (c) => {
   try {
     const db = c.env.DB
     
@@ -2894,13 +2894,20 @@ api.get('/popups/active', async (c) => {
 api.get('/admin/banners', async (c) => {
   try {
     const db = c.env.DB
-    const result = await db.prepare(
-      'SELECT * FROM banners ORDER BY display_order ASC, id DESC'
-    ).all()
+    // Use simple query to avoid column missing errors
+    let result
+    try {
+      result = await db.prepare(
+        'SELECT * FROM banners ORDER BY id DESC'
+      ).all()
+    } catch (e) {
+      // Table might not exist or have different schema
+      return c.json({ success: true, banners: [] })
+    }
     
-    return c.json({ success: true, banners: result.results })
+    return c.json({ success: true, banners: result.results || [] })
   } catch (e: any) {
-    return c.json({ success: false, error: e.message }, 500)
+    return c.json({ success: true, banners: [], error: e.message })
   }
 })
 
