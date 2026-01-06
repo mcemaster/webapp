@@ -25,7 +25,7 @@ export const InputForm = () => html`
           <div class="mb-8 pb-6 border-b border-slate-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
               <h2 class="text-2xl font-extrabold text-slate-900">Step 1. 기업 식별 정보</h2>
-              <p class="text-slate-500 text-sm mt-1">DART 검색을 통해 기본 정보를 자동으로 채울 수 있습니다.</p>
+              <p class="text-slate-500 text-sm mt-1">입력하고 싶은 정보만 입력하세요. 부분 데이터로도 분석 가능합니다.</p>
             </div>
             <div class="relative w-full md:w-96">
               <input type="text" id="company-search" placeholder="DART 기업명 검색 (자동완성)" 
@@ -37,11 +37,11 @@ export const InputForm = () => html`
 
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <div class="lg:col-span-2">
-              <label class="form-label">법인명(상호) <span class="text-red-500">*</span></label>
+              <label class="form-label">법인명(상호)</label>
               <input type="text" id="basic-name" class="form-input bg-slate-50" placeholder="(주)회사명" />
             </div>
             <div>
-              <label class="form-label">대표자명 <span class="text-red-500">*</span></label>
+              <label class="form-label">대표자명</label>
               <input type="text" id="basic-ceo" class="form-input bg-slate-50" />
             </div>
             <div>
@@ -59,6 +59,7 @@ export const InputForm = () => html`
             <div>
               <label class="form-label">기업형태</label>
               <select id="basic-type" class="form-input">
+                <option value="">선택안함</option>
                 <option>중소기업</option><option>중견기업</option><option>스타트업(7년미만)</option><option>예비창업자</option><option>대기업</option>
               </select>
             </div>
@@ -92,7 +93,7 @@ export const InputForm = () => html`
         <div id="step-2" class="step-content hidden p-8 md:p-10">
           <div class="mb-8">
             <h2 class="text-2xl font-extrabold text-slate-900">Step 2. 재무 성장성 분석 (3개년)</h2>
-            <p class="text-slate-500 text-sm mt-1">성장성을 평가하기 위해 최근 3년치 데이터를 입력해주세요. (단위: 백만원)</p>
+            <p class="text-slate-500 text-sm mt-1">모르는 항목은 비워두셔도 됩니다.</p>
           </div>
 
           <div class="overflow-x-auto rounded-xl border border-slate-200 shadow-sm">
@@ -137,7 +138,7 @@ export const InputForm = () => html`
         <div id="step-3" class="step-content hidden p-8 md:p-10">
           <div class="mb-8">
             <h2 class="text-2xl font-extrabold text-slate-900">Step 3. 기술력 및 인력 구조</h2>
-            <p class="text-slate-500 text-sm mt-1">R&D 역량과 고용 창출 실적은 선정 평가의 핵심 가점입니다.</p>
+            <p class="text-slate-500 text-sm mt-1">해당되는 내용만 선택하거나 입력하세요.</p>
           </div>
 
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
@@ -190,7 +191,7 @@ export const InputForm = () => html`
         <div id="step-4" class="step-content hidden p-8 md:p-10">
           <div class="mb-8">
             <h2 class="text-2xl font-extrabold text-slate-900">Step 4. 시장 진출 및 사업 전략</h2>
-            <p class="text-slate-500 text-sm mt-1">AI가 가장 중요하게 분석하는 비정형 데이터 영역입니다. 최대한 상세히 기술해주세요.</p>
+            <p class="text-slate-500 text-sm mt-1">작성하지 않아도 무방합니다.</p>
           </div>
 
           <div class="grid grid-cols-1 gap-8">
@@ -214,7 +215,7 @@ export const InputForm = () => html`
             </div>
 
             <div>
-              <label class="form-label text-blue-600">핵심 기술 및 제품의 차별성 (Critical)</label>
+              <label class="form-label text-blue-600">핵심 기술 및 제품의 차별성</label>
               <textarea id="desc-tech" class="form-textarea h-32" placeholder="경쟁사 대비 우리 기술의 독창성, 기술적 장벽, 특허 보유 현황 등을 서술해주세요."></textarea>
             </div>
 
@@ -236,7 +237,7 @@ export const InputForm = () => html`
               <i class="fas fa-folder-open text-3xl"></i>
             </div>
             <h2 class="text-2xl font-extrabold text-slate-900 mb-2">증빙 자료 및 사업계획서 첨부</h2>
-            <p class="text-slate-500">사업자등록증, 재무제표, 회사소개서를 첨부하면 AI 분석 신뢰도가 200% 상승합니다.</p>
+            <p class="text-slate-500">파일이 없어도 분석은 가능합니다.</p>
           </div>
 
           <div class="max-w-2xl mx-auto">
