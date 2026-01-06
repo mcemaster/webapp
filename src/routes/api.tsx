@@ -2519,4 +2519,873 @@ api.post('/admin/collector/set-api-key', async (c) => {
   }
 })
 
+// ==========================================
+// SETTINGS MANAGEMENT APIs
+// ==========================================
+
+// 45. Get all SEO settings
+api.get('/admin/settings/seo', async (c) => {
+  try {
+    const db = c.env.DB
+    const result = await db.prepare(
+      'SELECT setting_key, setting_value FROM site_settings WHERE setting_group = ?'
+    ).bind('seo').all()
+    
+    const settings: Record<string, string> = {}
+    for (const row of result.results as any[]) {
+      settings[row.setting_key] = row.setting_value
+    }
+    
+    return c.json({ success: true, settings })
+  } catch (e: any) {
+    return c.json({ success: false, error: e.message }, 500)
+  }
+})
+
+// 46. Save SEO settings
+api.post('/admin/settings/seo', async (c) => {
+  try {
+    const db = c.env.DB
+    const body = await c.req.json()
+    
+    const seoFields = [
+      'seo_title', 'seo_description', 'seo_keywords', 'seo_url',
+      'seo_og_title', 'seo_og_description', 'seo_og_image',
+      'seo_company_name', 'seo_phone', 'seo_email', 'seo_address'
+    ]
+    
+    let updated = 0
+    for (const key of seoFields) {
+      if (body[key] !== undefined) {
+        await db.prepare(`
+          INSERT OR REPLACE INTO site_settings (setting_key, setting_value, setting_group, updated_at)
+          VALUES (?, ?, 'seo', datetime('now'))
+        `).bind(key, body[key]).run()
+        updated++
+      }
+    }
+    
+    return c.json({ success: true, message: `${updated}개 설정이 저장되었습니다.`, updated })
+  } catch (e: any) {
+    return c.json({ success: false, error: e.message }, 500)
+  }
+})
+
+// 47. Generate sitemap.xml
+api.get('/sitemap.xml', async (c) => {
+  try {
+    const db = c.env.DB
+    const urlResult = await db.prepare(
+      "SELECT setting_value FROM site_settings WHERE setting_key = 'seo_url'"
+    ).first() as any
+    
+    const baseUrl = urlResult?.setting_value || 'https://www.mce.ai.kr'
+    const now = new Date().toISOString().split('T')[0]
+    
+    const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>${baseUrl}</loc>
+    <lastmod>${now}</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>${baseUrl}/grants</loc>
+    <lastmod>${now}</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>${baseUrl}/analysis</loc>
+    <lastmod>${now}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>${baseUrl}/partners</loc>
+    <lastmod>${now}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>${baseUrl}/about</loc>
+    <lastmod>${now}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>${baseUrl}/contact</loc>
+    <lastmod>${now}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>${baseUrl}/terms</loc>
+    <lastmod>${now}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>${baseUrl}/privacy</loc>
+    <lastmod>${now}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.3</priority>
+  </url>
+</urlset>`
+    
+    return new Response(sitemap, {
+      headers: { 'Content-Type': 'application/xml' }
+    })
+  } catch (e: any) {
+    return c.json({ error: e.message }, 500)
+  }
+})
+
+// 48. Generate robots.txt
+api.get('/robots.txt', async (c) => {
+  try {
+    const db = c.env.DB
+    const urlResult = await db.prepare(
+      "SELECT setting_value FROM site_settings WHERE setting_key = 'seo_url'"
+    ).first() as any
+    
+    const baseUrl = urlResult?.setting_value || 'https://www.mce.ai.kr'
+    
+    const robots = `User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /api/
+Disallow: /auth/
+
+Sitemap: ${baseUrl}/sitemap.xml`
+    
+    return new Response(robots, {
+      headers: { 'Content-Type': 'text/plain' }
+    })
+  } catch (e: any) {
+    return c.json({ error: e.message }, 500)
+  }
+})
+
+// ==========================================
+// TERMS MANAGEMENT APIs
+// ==========================================
+
+// 49. Get all terms
+api.get('/admin/terms', async (c) => {
+  try {
+    const db = c.env.DB
+    const result = await db.prepare(
+      'SELECT * FROM terms ORDER BY term_type'
+    ).all()
+    
+    return c.json({ success: true, terms: result.results })
+  } catch (e: any) {
+    return c.json({ success: false, error: e.message }, 500)
+  }
+})
+
+// 50. Get single term
+api.get('/admin/terms/:type', async (c) => {
+  try {
+    const db = c.env.DB
+    const termType = c.req.param('type')
+    
+    const result = await db.prepare(
+      'SELECT * FROM terms WHERE term_type = ? AND is_active = 1 ORDER BY id DESC LIMIT 1'
+    ).bind(termType).first()
+    
+    if (!result) {
+      return c.json({ success: false, error: '약관을 찾을 수 없습니다.' }, 404)
+    }
+    
+    return c.json({ success: true, term: result })
+  } catch (e: any) {
+    return c.json({ success: false, error: e.message }, 500)
+  }
+})
+
+// 51. Save/update term
+api.post('/admin/terms', async (c) => {
+  try {
+    const db = c.env.DB
+    const body = await c.req.json()
+    const { id, term_type, title, content, version, is_required, is_active } = body
+    
+    if (!term_type || !title) {
+      return c.json({ success: false, error: '약관 유형과 제목은 필수입니다.' }, 400)
+    }
+    
+    if (id) {
+      // Update existing
+      await db.prepare(`
+        UPDATE terms SET title = ?, content = ?, version = ?, is_required = ?, is_active = ?, updated_at = datetime('now')
+        WHERE id = ?
+      `).bind(title, content || '', version || '1.0', is_required ? 1 : 0, is_active ? 1 : 0, id).run()
+      
+      return c.json({ success: true, message: '약관이 수정되었습니다.' })
+    } else {
+      // Create new
+      await db.prepare(`
+        INSERT INTO terms (term_type, title, content, version, is_required, is_active, created_at, updated_at)
+        VALUES (?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
+      `).bind(term_type, title, content || '', version || '1.0', is_required ? 1 : 0, is_active ? 1 : 0).run()
+      
+      return c.json({ success: true, message: '약관이 생성되었습니다.' })
+    }
+  } catch (e: any) {
+    return c.json({ success: false, error: e.message }, 500)
+  }
+})
+
+// 52. Delete term
+api.delete('/admin/terms/:id', async (c) => {
+  try {
+    const db = c.env.DB
+    const id = c.req.param('id')
+    
+    await db.prepare('DELETE FROM terms WHERE id = ?').bind(id).run()
+    
+    return c.json({ success: true, message: '약관이 삭제되었습니다.' })
+  } catch (e: any) {
+    return c.json({ success: false, error: e.message }, 500)
+  }
+})
+
+// Public endpoints for terms
+api.get('/terms/:type', async (c) => {
+  try {
+    const db = c.env.DB
+    const termType = c.req.param('type')
+    
+    const result = await db.prepare(
+      'SELECT title, content, version, updated_at FROM terms WHERE term_type = ? AND is_active = 1 ORDER BY id DESC LIMIT 1'
+    ).bind(termType).first()
+    
+    if (!result) {
+      return c.json({ success: false, error: '약관을 찾을 수 없습니다.' }, 404)
+    }
+    
+    return c.json({ success: true, term: result })
+  } catch (e: any) {
+    return c.json({ success: false, error: e.message }, 500)
+  }
+})
+
+// ==========================================
+// POPUP/BANNER MANAGEMENT APIs
+// ==========================================
+
+// 53. Get all popups
+api.get('/admin/popups', async (c) => {
+  try {
+    const db = c.env.DB
+    const result = await db.prepare(
+      'SELECT * FROM popups ORDER BY display_order ASC, id DESC'
+    ).all()
+    
+    return c.json({ success: true, popups: result.results })
+  } catch (e: any) {
+    return c.json({ success: false, error: e.message }, 500)
+  }
+})
+
+// 54. Create/update popup
+api.post('/admin/popups', async (c) => {
+  try {
+    const db = c.env.DB
+    const body = await c.req.json()
+    const { 
+      id, title, content, image_url, link_url, position, 
+      width, height, start_date, end_date, show_today_close, 
+      is_active, display_order, target_pages 
+    } = body
+    
+    if (!title) {
+      return c.json({ success: false, error: '팝업 제목은 필수입니다.' }, 400)
+    }
+    
+    if (id) {
+      await db.prepare(`
+        UPDATE popups SET 
+          title = ?, content = ?, image_url = ?, link_url = ?, position = ?,
+          width = ?, height = ?, start_date = ?, end_date = ?, show_today_close = ?,
+          is_active = ?, display_order = ?, target_pages = ?
+        WHERE id = ?
+      `).bind(
+        title, content || '', image_url || '', link_url || '', position || 'center',
+        width || 500, height || 400, start_date || null, end_date || null, show_today_close ? 1 : 0,
+        is_active ? 1 : 0, display_order || 0, target_pages || 'all', id
+      ).run()
+      
+      return c.json({ success: true, message: '팝업이 수정되었습니다.' })
+    } else {
+      await db.prepare(`
+        INSERT INTO popups (title, content, image_url, link_url, position, width, height, start_date, end_date, show_today_close, is_active, display_order, target_pages, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
+      `).bind(
+        title, content || '', image_url || '', link_url || '', position || 'center',
+        width || 500, height || 400, start_date || null, end_date || null, show_today_close ? 1 : 0,
+        is_active ? 1 : 0, display_order || 0, target_pages || 'all'
+      ).run()
+      
+      return c.json({ success: true, message: '팝업이 생성되었습니다.' })
+    }
+  } catch (e: any) {
+    return c.json({ success: false, error: e.message }, 500)
+  }
+})
+
+// 55. Delete popup
+api.delete('/admin/popups/:id', async (c) => {
+  try {
+    const db = c.env.DB
+    const id = c.req.param('id')
+    
+    await db.prepare('DELETE FROM popups WHERE id = ?').bind(id).run()
+    
+    return c.json({ success: true, message: '팝업이 삭제되었습니다.' })
+  } catch (e: any) {
+    return c.json({ success: false, error: e.message }, 500)
+  }
+})
+
+// 56. Get active popups for frontend
+api.get('/popups/active', async (c) => {
+  try {
+    const db = c.env.DB
+    const page = c.req.query('page') || 'all'
+    const now = new Date().toISOString().split('T')[0]
+    
+    const result = await db.prepare(`
+      SELECT id, title, content, image_url, link_url, position, width, height, show_today_close
+      FROM popups 
+      WHERE is_active = 1 
+        AND (start_date IS NULL OR start_date <= ?)
+        AND (end_date IS NULL OR end_date >= ?)
+        AND (target_pages = 'all' OR target_pages LIKE ?)
+      ORDER BY display_order ASC
+    `).bind(now, now, '%' + page + '%').all()
+    
+    return c.json({ success: true, popups: result.results })
+  } catch (e: any) {
+    return c.json({ success: false, error: e.message }, 500)
+  }
+})
+
+// 57. Get all banners
+api.get('/admin/banners', async (c) => {
+  try {
+    const db = c.env.DB
+    const result = await db.prepare(
+      'SELECT * FROM banners ORDER BY display_order ASC, id DESC'
+    ).all()
+    
+    return c.json({ success: true, banners: result.results })
+  } catch (e: any) {
+    return c.json({ success: false, error: e.message }, 500)
+  }
+})
+
+// 58. Create/update banner
+api.post('/admin/banners', async (c) => {
+  try {
+    const db = c.env.DB
+    const body = await c.req.json()
+    const { 
+      id, title, subtitle, image_url, link_url, banner_type, position,
+      background_color, text_color, start_date, end_date, is_active, display_order 
+    } = body
+    
+    if (!title) {
+      return c.json({ success: false, error: '배너 제목은 필수입니다.' }, 400)
+    }
+    
+    if (id) {
+      await db.prepare(`
+        UPDATE banners SET 
+          title = ?, subtitle = ?, image_url = ?, link_url = ?, banner_type = ?, position = ?,
+          background_color = ?, text_color = ?, start_date = ?, end_date = ?, is_active = ?, display_order = ?
+        WHERE id = ?
+      `).bind(
+        title, subtitle || '', image_url || '', link_url || '', banner_type || 'main', position || 'top',
+        background_color || '#3B82F6', text_color || '#FFFFFF', start_date || null, end_date || null,
+        is_active ? 1 : 0, display_order || 0, id
+      ).run()
+      
+      return c.json({ success: true, message: '배너가 수정되었습니다.' })
+    } else {
+      await db.prepare(`
+        INSERT INTO banners (title, subtitle, image_url, link_url, banner_type, position, background_color, text_color, start_date, end_date, is_active, display_order, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
+      `).bind(
+        title, subtitle || '', image_url || '', link_url || '', banner_type || 'main', position || 'top',
+        background_color || '#3B82F6', text_color || '#FFFFFF', start_date || null, end_date || null,
+        is_active ? 1 : 0, display_order || 0
+      ).run()
+      
+      return c.json({ success: true, message: '배너가 생성되었습니다.' })
+    }
+  } catch (e: any) {
+    return c.json({ success: false, error: e.message }, 500)
+  }
+})
+
+// 59. Delete banner
+api.delete('/admin/banners/:id', async (c) => {
+  try {
+    const db = c.env.DB
+    const id = c.req.param('id')
+    
+    await db.prepare('DELETE FROM banners WHERE id = ?').bind(id).run()
+    
+    return c.json({ success: true, message: '배너가 삭제되었습니다.' })
+  } catch (e: any) {
+    return c.json({ success: false, error: e.message }, 500)
+  }
+})
+
+// 60. Get active banners for frontend
+api.get('/banners/active', async (c) => {
+  try {
+    const db = c.env.DB
+    const bannerType = c.req.query('type') || 'main'
+    const now = new Date().toISOString().split('T')[0]
+    
+    const result = await db.prepare(`
+      SELECT id, title, subtitle, image_url, link_url, position, background_color, text_color
+      FROM banners 
+      WHERE is_active = 1 AND banner_type = ?
+        AND (start_date IS NULL OR start_date <= ?)
+        AND (end_date IS NULL OR end_date >= ?)
+      ORDER BY display_order ASC
+    `).bind(bannerType, now, now).all()
+    
+    return c.json({ success: true, banners: result.results })
+  } catch (e: any) {
+    return c.json({ success: false, error: e.message }, 500)
+  }
+})
+
+// 61. Track banner click
+api.post('/banners/:id/click', async (c) => {
+  try {
+    const db = c.env.DB
+    const id = c.req.param('id')
+    
+    await db.prepare('UPDATE banners SET click_count = click_count + 1 WHERE id = ?').bind(id).run()
+    
+    return c.json({ success: true })
+  } catch (e: any) {
+    return c.json({ success: false, error: e.message }, 500)
+  }
+})
+
+// ==========================================
+// MARKETING CHANNELS APIs
+// ==========================================
+
+// 62. Get all marketing channels
+api.get('/admin/marketing-channels', async (c) => {
+  try {
+    const db = c.env.DB
+    const result = await db.prepare('SELECT * FROM marketing_channels ORDER BY channel_type').all()
+    
+    return c.json({ success: true, channels: result.results })
+  } catch (e: any) {
+    return c.json({ success: false, error: e.message }, 500)
+  }
+})
+
+// 63. Update marketing channel
+api.post('/admin/marketing-channels', async (c) => {
+  try {
+    const db = c.env.DB
+    const body = await c.req.json()
+    const { id, tracking_id, config_json, is_active } = body
+    
+    if (!id) {
+      return c.json({ success: false, error: '채널 ID가 필요합니다.' }, 400)
+    }
+    
+    await db.prepare(`
+      UPDATE marketing_channels 
+      SET tracking_id = ?, config_json = ?, is_active = ?, updated_at = datetime('now')
+      WHERE id = ?
+    `).bind(tracking_id || '', config_json || '{}', is_active ? 1 : 0, id).run()
+    
+    return c.json({ success: true, message: '마케팅 채널이 업데이트되었습니다.' })
+  } catch (e: any) {
+    return c.json({ success: false, error: e.message }, 500)
+  }
+})
+
+// 64. Get active tracking scripts for frontend
+api.get('/tracking-scripts', async (c) => {
+  try {
+    const db = c.env.DB
+    const result = await db.prepare(
+      'SELECT channel_type, tracking_id, config_json FROM marketing_channels WHERE is_active = 1'
+    ).all()
+    
+    const scripts: string[] = []
+    
+    for (const channel of result.results as any[]) {
+      switch (channel.channel_type) {
+        case 'google_analytics':
+          if (channel.tracking_id) {
+            scripts.push(`
+<!-- Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=${channel.tracking_id}"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', '${channel.tracking_id}');
+</script>`)
+          }
+          break
+          
+        case 'facebook_pixel':
+          if (channel.tracking_id) {
+            scripts.push(`
+<!-- Facebook Pixel -->
+<script>
+  !function(f,b,e,v,n,t,s)
+  {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+  n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+  if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+  n.queue=[];t=b.createElement(e);t.async=!0;
+  t.src=v;s=b.getElementsByTagName(e)[0];
+  s.parentNode.insertBefore(t,s)}(window, document,'script',
+  'https://connect.facebook.net/en_US/fbevents.js');
+  fbq('init', '${channel.tracking_id}');
+  fbq('track', 'PageView');
+</script>`)
+          }
+          break
+          
+        case 'naver_analytics':
+          if (channel.tracking_id) {
+            scripts.push(`
+<!-- Naver Analytics -->
+<script>
+  if(!wcs_add) var wcs_add = {};
+  wcs_add["wa"] = "${channel.tracking_id}";
+  if(window.wcs){wcs_do();}
+</script>
+<script src="//wcs.naver.net/wcslog.js"></script>`)
+          }
+          break
+          
+        case 'kakao_pixel':
+          if (channel.tracking_id) {
+            scripts.push(`
+<!-- Kakao Pixel -->
+<script>
+  kakaoPixel('${channel.tracking_id}').pageView();
+</script>`)
+          }
+          break
+      }
+    }
+    
+    return c.json({ success: true, scripts })
+  } catch (e: any) {
+    return c.json({ success: false, error: e.message }, 500)
+  }
+})
+
+// ==========================================
+// CHAT CHANNELS APIs
+// ==========================================
+
+// 65. Get all chat channels
+api.get('/admin/chat-channels', async (c) => {
+  try {
+    const db = c.env.DB
+    const result = await db.prepare('SELECT * FROM chat_channels ORDER BY channel_type').all()
+    
+    return c.json({ success: true, channels: result.results })
+  } catch (e: any) {
+    return c.json({ success: false, error: e.message }, 500)
+  }
+})
+
+// 66. Update chat channel
+api.post('/admin/chat-channels', async (c) => {
+  try {
+    const db = c.env.DB
+    const body = await c.req.json()
+    const { id, channel_id, plugin_key, config_json, is_active, display_position } = body
+    
+    if (!id) {
+      return c.json({ success: false, error: '채널 ID가 필요합니다.' }, 400)
+    }
+    
+    await db.prepare(`
+      UPDATE chat_channels 
+      SET channel_id = ?, plugin_key = ?, config_json = ?, is_active = ?, display_position = ?, updated_at = datetime('now')
+      WHERE id = ?
+    `).bind(channel_id || '', plugin_key || '', config_json || '{}', is_active ? 1 : 0, display_position || 'bottom-right', id).run()
+    
+    return c.json({ success: true, message: '상담 채널이 업데이트되었습니다.' })
+  } catch (e: any) {
+    return c.json({ success: false, error: e.message }, 500)
+  }
+})
+
+// 67. Get active chat widget for frontend
+api.get('/chat-widget', async (c) => {
+  try {
+    const db = c.env.DB
+    const result = await db.prepare(
+      'SELECT channel_type, channel_id, plugin_key, config_json, display_position FROM chat_channels WHERE is_active = 1 LIMIT 1'
+    ).first() as any
+    
+    if (!result) {
+      return c.json({ success: true, widget: null })
+    }
+    
+    let widgetScript = ''
+    
+    switch (result.channel_type) {
+      case 'kakao_channel':
+        if (result.channel_id) {
+          widgetScript = `
+<!-- Kakao Channel -->
+<script>
+  window.kakaoAs498 = function() {
+    Kakao.Channel.chat({ channelPublicId: '${result.channel_id}' });
+  };
+</script>
+<div id="kakao-chat-btn" style="position:fixed;${result.display_position === 'bottom-right' ? 'right:20px;bottom:20px;' : 'left:20px;bottom:20px;'}z-index:9999;cursor:pointer;" onclick="kakaoAs498()">
+  <img src="https://developers.kakao.com/assets/img/about/logos/channel/consult_small_yellow_pc.png" alt="카카오톡 상담"/>
+</div>`
+        }
+        break
+        
+      case 'channel_talk':
+        if (result.plugin_key) {
+          widgetScript = `
+<!-- Channel Talk -->
+<script>
+  (function() {
+    var w = window;
+    if (w.ChannelIO) return;
+    var ch = function() { ch.c(arguments); };
+    ch.q = [];
+    ch.c = function(args) { ch.q.push(args); };
+    w.ChannelIO = ch;
+    function l() {
+      if (w.ChannelIOInitialized) return;
+      w.ChannelIOInitialized = true;
+      var s = document.createElement('script');
+      s.type = 'text/javascript';
+      s.async = true;
+      s.src = 'https://cdn.channel.io/plugin/ch-plugin-web.js';
+      var x = document.getElementsByTagName('script')[0];
+      x.parentNode.insertBefore(s, x);
+    }
+    if (document.readyState === 'complete') { l(); }
+    else { w.addEventListener('DOMContentLoaded', l); w.addEventListener('load', l); }
+  })();
+  ChannelIO('boot', { "pluginKey": "${result.plugin_key}" });
+</script>`
+        }
+        break
+        
+      case 'tawk_to':
+        if (result.channel_id) {
+          widgetScript = `
+<!-- Tawk.to -->
+<script>
+  var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
+  (function(){
+    var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
+    s1.async=true;
+    s1.src='https://embed.tawk.to/${result.channel_id}';
+    s1.charset='UTF-8';
+    s1.setAttribute('crossorigin','*');
+    s0.parentNode.insertBefore(s1,s0);
+  })();
+</script>`
+        }
+        break
+        
+      case 'naver_talktalk':
+        if (result.channel_id) {
+          widgetScript = `
+<!-- Naver TalkTalk -->
+<div id="naver-talktalk-btn" style="position:fixed;${result.display_position === 'bottom-right' ? 'right:20px;bottom:20px;' : 'left:20px;bottom:20px;'}z-index:9999;">
+  <a href="http://talk.naver.com/${result.channel_id}" target="_blank">
+    <img src="https://ssl.pstatic.net/static/pwe/btn/talk_naver_main.png" alt="네이버 톡톡"/>
+  </a>
+</div>`
+        }
+        break
+    }
+    
+    return c.json({ 
+      success: true, 
+      widget: {
+        type: result.channel_type,
+        position: result.display_position,
+        script: widgetScript
+      }
+    })
+  } catch (e: any) {
+    return c.json({ success: false, error: e.message }, 500)
+  }
+})
+
+// ==========================================
+// EXTERNAL APIs Management
+// ==========================================
+
+// 68. Get all external APIs
+api.get('/admin/external-apis', async (c) => {
+  try {
+    const db = c.env.DB
+    const result = await db.prepare('SELECT * FROM external_apis ORDER BY api_type').all()
+    
+    // Mask sensitive data
+    const apis = (result.results as any[]).map(api => ({
+      ...api,
+      client_secret: api.client_secret ? '••••••••' : '',
+      api_key: api.api_key ? '••••••••' : ''
+    }))
+    
+    return c.json({ success: true, apis })
+  } catch (e: any) {
+    return c.json({ success: false, error: e.message }, 500)
+  }
+})
+
+// 69. Update external API
+api.post('/admin/external-apis', async (c) => {
+  try {
+    const db = c.env.DB
+    const body = await c.req.json()
+    const { id, client_id, client_secret, api_key, config_json, is_active, callback_url } = body
+    
+    if (!id) {
+      return c.json({ success: false, error: 'API ID가 필요합니다.' }, 400)
+    }
+    
+    // Get current values if secrets are masked
+    const current = await db.prepare('SELECT client_secret, api_key FROM external_apis WHERE id = ?').bind(id).first() as any
+    
+    const finalSecret = client_secret === '••••••••' ? current?.client_secret || '' : (client_secret || '')
+    const finalApiKey = api_key === '••••••••' ? current?.api_key || '' : (api_key || '')
+    
+    await db.prepare(`
+      UPDATE external_apis 
+      SET client_id = ?, client_secret = ?, api_key = ?, config_json = ?, is_active = ?, callback_url = ?, updated_at = datetime('now')
+      WHERE id = ?
+    `).bind(client_id || '', finalSecret, finalApiKey, config_json || '{}', is_active ? 1 : 0, callback_url || '', id).run()
+    
+    return c.json({ success: true, message: '외부 API 설정이 업데이트되었습니다.' })
+  } catch (e: any) {
+    return c.json({ success: false, error: e.message }, 500)
+  }
+})
+
+// 70. Test external API connection
+api.post('/admin/external-apis/test', async (c) => {
+  try {
+    const db = c.env.DB
+    const body = await c.req.json()
+    const { api_type } = body
+    
+    const apiConfig = await db.prepare(
+      'SELECT * FROM external_apis WHERE api_type = ?'
+    ).bind(api_type).first() as any
+    
+    if (!apiConfig) {
+      return c.json({ success: false, error: 'API 설정을 찾을 수 없습니다.' }, 404)
+    }
+    
+    let testResult = { success: false, message: '' }
+    
+    switch (api_type) {
+      case 'kakao_login':
+        testResult = { 
+          success: !!apiConfig.client_id, 
+          message: apiConfig.client_id ? 'REST API 키가 설정되어 있습니다.' : 'REST API 키가 필요합니다.'
+        }
+        break
+        
+      case 'naver_login':
+        testResult = { 
+          success: !!(apiConfig.client_id && apiConfig.client_secret), 
+          message: (apiConfig.client_id && apiConfig.client_secret) ? 'Client ID/Secret이 설정되어 있습니다.' : 'Client ID와 Secret이 필요합니다.'
+        }
+        break
+        
+      case 'google_login':
+        testResult = { 
+          success: !!(apiConfig.client_id && apiConfig.client_secret), 
+          message: (apiConfig.client_id && apiConfig.client_secret) ? 'Client ID/Secret이 설정되어 있습니다.' : 'Client ID와 Secret이 필요합니다.'
+        }
+        break
+        
+      default:
+        testResult = { success: !!apiConfig.api_key, message: apiConfig.api_key ? 'API 키가 설정되어 있습니다.' : 'API 키가 필요합니다.' }
+    }
+    
+    return c.json({ success: true, test: testResult })
+  } catch (e: any) {
+    return c.json({ success: false, error: e.message }, 500)
+  }
+})
+
+// ==========================================
+// GENERAL SETTINGS APIs
+// ==========================================
+
+// 71. Get all settings by group
+api.get('/admin/settings/:group', async (c) => {
+  try {
+    const db = c.env.DB
+    const group = c.req.param('group')
+    
+    const result = await db.prepare(
+      'SELECT setting_key, setting_value FROM site_settings WHERE setting_group = ?'
+    ).bind(group).all()
+    
+    const settings: Record<string, string> = {}
+    for (const row of result.results as any[]) {
+      settings[row.setting_key] = row.setting_value
+    }
+    
+    return c.json({ success: true, settings })
+  } catch (e: any) {
+    return c.json({ success: false, error: e.message }, 500)
+  }
+})
+
+// 72. Save settings by group
+api.post('/admin/settings/:group', async (c) => {
+  try {
+    const db = c.env.DB
+    const group = c.req.param('group')
+    const body = await c.req.json()
+    
+    let updated = 0
+    for (const [key, value] of Object.entries(body)) {
+      await db.prepare(`
+        INSERT OR REPLACE INTO site_settings (setting_key, setting_value, setting_group, updated_at)
+        VALUES (?, ?, ?, datetime('now'))
+      `).bind(key, value as string, group).run()
+      updated++
+    }
+    
+    return c.json({ success: true, message: `${updated}개 설정이 저장되었습니다.`, updated })
+  } catch (e: any) {
+    return c.json({ success: false, error: e.message }, 500)
+  }
+})
+
 export default api

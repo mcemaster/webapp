@@ -1022,6 +1022,397 @@ export const Admin = (props: { user: any, tab?: string }) => {
                       </div>
                     </div>
                   </div>
+                  
+                  <!-- Terms Management (약관 관리) -->
+                  <div class="bg-white rounded-xl shadow-sm border border-slate-100">
+                    <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+                      <div class="flex items-center">
+                        <i class="fas fa-file-contract text-cyan-600 mr-3"></i>
+                        <h3 class="font-semibold text-slate-800">약관 관리</h3>
+                      </div>
+                      <button onclick="openTermModal()" class="px-4 py-2 bg-cyan-600 text-white text-sm font-medium rounded-lg hover:bg-cyan-700 transition">
+                        <i class="fas fa-plus mr-2"></i>새 약관
+                      </button>
+                    </div>
+                    <div class="p-5">
+                      <div id="terms-list" class="space-y-3">
+                        <div class="text-center text-slate-400 py-4">약관을 불러오는 중...</div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <!-- Popup/Banner Management (팝업/배너 관리) -->
+                  <div class="bg-white rounded-xl shadow-sm border border-slate-100">
+                    <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+                      <div class="flex items-center">
+                        <i class="fas fa-window-restore text-pink-600 mr-3"></i>
+                        <h3 class="font-semibold text-slate-800">팝업/배너 관리</h3>
+                      </div>
+                      <div class="flex space-x-2">
+                        <button onclick="openPopupModal()" class="px-3 py-2 bg-pink-600 text-white text-sm font-medium rounded-lg hover:bg-pink-700 transition">
+                          <i class="fas fa-plus mr-1"></i>팝업
+                        </button>
+                        <button onclick="openBannerModal()" class="px-3 py-2 bg-orange-500 text-white text-sm font-medium rounded-lg hover:bg-orange-600 transition">
+                          <i class="fas fa-plus mr-1"></i>배너
+                        </button>
+                      </div>
+                    </div>
+                    <div class="p-5">
+                      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                        <!-- Popups -->
+                        <div>
+                          <h4 class="font-medium text-slate-700 mb-3 flex items-center">
+                            <i class="fas fa-window-maximize text-pink-500 mr-2"></i>팝업 목록
+                          </h4>
+                          <div id="popups-list" class="space-y-2 max-h-64 overflow-y-auto">
+                            <div class="text-center text-slate-400 py-4 text-sm">팝업을 불러오는 중...</div>
+                          </div>
+                        </div>
+                        <!-- Banners -->
+                        <div>
+                          <h4 class="font-medium text-slate-700 mb-3 flex items-center">
+                            <i class="fas fa-image text-orange-500 mr-2"></i>배너 목록
+                          </h4>
+                          <div id="banners-list" class="space-y-2 max-h-64 overflow-y-auto">
+                            <div class="text-center text-slate-400 py-4 text-sm">배너를 불러오는 중...</div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <!-- Marketing Channels (마케팅 채널) -->
+                  <div class="bg-white rounded-xl shadow-sm border border-slate-100">
+                    <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+                      <div class="flex items-center">
+                        <i class="fas fa-chart-bar text-violet-600 mr-3"></i>
+                        <h3 class="font-semibold text-slate-800">마케팅 채널 관리</h3>
+                      </div>
+                      <button onclick="saveMarketingChannels()" class="px-4 py-2 bg-violet-600 text-white text-sm font-medium rounded-lg hover:bg-violet-700 transition">
+                        <i class="fas fa-save mr-2"></i>저장
+                      </button>
+                    </div>
+                    <div class="p-5">
+                      <div id="marketing-channels" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Google Analytics -->
+                        <div class="p-4 bg-slate-50 rounded-lg">
+                          <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center">
+                              <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center mr-3">
+                                <i class="fab fa-google text-orange-600"></i>
+                              </div>
+                              <div>
+                                <p class="font-medium text-slate-800">Google Analytics 4</p>
+                                <p class="text-xs text-slate-500">웹 트래픽 분석</p>
+                              </div>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                              <input type="checkbox" id="ga4-active" class="sr-only peer">
+                              <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-violet-600"></div>
+                            </label>
+                          </div>
+                          <input type="text" id="ga4-tracking-id" placeholder="G-XXXXXXXXXX" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-500" />
+                        </div>
+                        
+                        <!-- Facebook Pixel -->
+                        <div class="p-4 bg-slate-50 rounded-lg">
+                          <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center">
+                              <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+                                <i class="fab fa-facebook text-blue-600"></i>
+                              </div>
+                              <div>
+                                <p class="font-medium text-slate-800">Facebook Pixel</p>
+                                <p class="text-xs text-slate-500">광고 전환 추적</p>
+                              </div>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                              <input type="checkbox" id="fb-active" class="sr-only peer">
+                              <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                            </label>
+                          </div>
+                          <input type="text" id="fb-pixel-id" placeholder="Facebook Pixel ID" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                        </div>
+                        
+                        <!-- Naver Analytics -->
+                        <div class="p-4 bg-slate-50 rounded-lg">
+                          <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center">
+                              <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mr-3">
+                                <span class="font-bold text-green-600">N</span>
+                              </div>
+                              <div>
+                                <p class="font-medium text-slate-800">네이버 애널리틱스</p>
+                                <p class="text-xs text-slate-500">국내 트래픽 분석</p>
+                              </div>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                              <input type="checkbox" id="naver-active" class="sr-only peer">
+                              <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
+                            </label>
+                          </div>
+                          <input type="text" id="naver-analytics-id" placeholder="네이버 애널리틱스 ID" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500" />
+                        </div>
+                        
+                        <!-- Kakao Pixel -->
+                        <div class="p-4 bg-slate-50 rounded-lg">
+                          <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center">
+                              <div class="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center mr-3">
+                                <i class="fas fa-comment text-yellow-600"></i>
+                              </div>
+                              <div>
+                                <p class="font-medium text-slate-800">카카오 픽셀</p>
+                                <p class="text-xs text-slate-500">카카오 광고 전환 추적</p>
+                              </div>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                              <input type="checkbox" id="kakao-pixel-active" class="sr-only peer">
+                              <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-yellow-500"></div>
+                            </label>
+                          </div>
+                          <input type="text" id="kakao-pixel-id" placeholder="카카오 픽셀 ID" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500" />
+                        </div>
+                      </div>
+                      <div id="marketing-status" class="hidden mt-4 p-3 rounded-lg text-sm"></div>
+                    </div>
+                  </div>
+                  
+                  <!-- Chat Channels (상담 채널) -->
+                  <div class="bg-white rounded-xl shadow-sm border border-slate-100">
+                    <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+                      <div class="flex items-center">
+                        <i class="fas fa-comments text-teal-600 mr-3"></i>
+                        <h3 class="font-semibold text-slate-800">상담 채널 연동</h3>
+                      </div>
+                      <button onclick="saveChatChannels()" class="px-4 py-2 bg-teal-600 text-white text-sm font-medium rounded-lg hover:bg-teal-700 transition">
+                        <i class="fas fa-save mr-2"></i>저장
+                      </button>
+                    </div>
+                    <div class="p-5">
+                      <div id="chat-channels" class="space-y-4">
+                        <!-- Kakao Channel -->
+                        <div class="p-4 bg-yellow-50 rounded-lg border border-yellow-100">
+                          <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center">
+                              <div class="w-10 h-10 bg-yellow-200 rounded-lg flex items-center justify-center mr-3">
+                                <img src="https://developers.kakao.com/assets/img/about/logos/channel/consult_small_yellow_pc.png" class="w-8 h-8" />
+                              </div>
+                              <div>
+                                <p class="font-medium text-slate-800">카카오톡 채널</p>
+                                <p class="text-xs text-slate-500">카카오톡으로 실시간 상담</p>
+                              </div>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                              <input type="checkbox" id="kakao-chat-active" class="sr-only peer">
+                              <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-yellow-500"></div>
+                            </label>
+                          </div>
+                          <input type="text" id="kakao-channel-id" placeholder="카카오톡 채널 공개 ID (예: _xkxkNb)" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500" />
+                          <p class="text-xs text-slate-400 mt-2">
+                            <a href="https://business.kakao.com/dashboard/" target="_blank" class="text-blue-500 hover:underline">
+                              <i class="fas fa-external-link-alt mr-1"></i>카카오톡 채널 관리자센터에서 확인
+                            </a>
+                          </p>
+                        </div>
+                        
+                        <!-- Naver TalkTalk -->
+                        <div class="p-4 bg-green-50 rounded-lg border border-green-100">
+                          <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center">
+                              <div class="w-10 h-10 bg-green-200 rounded-lg flex items-center justify-center mr-3">
+                                <span class="font-bold text-green-700">N</span>
+                              </div>
+                              <div>
+                                <p class="font-medium text-slate-800">네이버 톡톡</p>
+                                <p class="text-xs text-slate-500">네이버 톡톡 실시간 상담</p>
+                              </div>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                              <input type="checkbox" id="naver-talk-active" class="sr-only peer">
+                              <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
+                            </label>
+                          </div>
+                          <input type="text" id="naver-talk-id" placeholder="네이버 톡톡 ID" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500" />
+                        </div>
+                        
+                        <!-- Channel Talk -->
+                        <div class="p-4 bg-indigo-50 rounded-lg border border-indigo-100">
+                          <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center">
+                              <div class="w-10 h-10 bg-indigo-200 rounded-lg flex items-center justify-center mr-3">
+                                <i class="fas fa-headset text-indigo-700"></i>
+                              </div>
+                              <div>
+                                <p class="font-medium text-slate-800">채널톡 (Channel.io)</p>
+                                <p class="text-xs text-slate-500">전문 고객상담 솔루션</p>
+                              </div>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                              <input type="checkbox" id="channel-talk-active" class="sr-only peer">
+                              <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                            </label>
+                          </div>
+                          <input type="text" id="channel-talk-key" placeholder="채널톡 Plugin Key" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                          <p class="text-xs text-slate-400 mt-2">
+                            <a href="https://channel.io" target="_blank" class="text-blue-500 hover:underline">
+                              <i class="fas fa-external-link-alt mr-1"></i>채널톡 가입하기
+                            </a>
+                          </p>
+                        </div>
+                        
+                        <!-- Tawk.to -->
+                        <div class="p-4 bg-emerald-50 rounded-lg border border-emerald-100">
+                          <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center">
+                              <div class="w-10 h-10 bg-emerald-200 rounded-lg flex items-center justify-center mr-3">
+                                <i class="fas fa-comments text-emerald-700"></i>
+                              </div>
+                              <div>
+                                <p class="font-medium text-slate-800">Tawk.to</p>
+                                <p class="text-xs text-slate-500">무료 실시간 채팅</p>
+                              </div>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                              <input type="checkbox" id="tawk-active" class="sr-only peer">
+                              <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
+                            </label>
+                          </div>
+                          <input type="text" id="tawk-id" placeholder="Tawk.to Property ID" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+                          <p class="text-xs text-slate-400 mt-2">
+                            <a href="https://www.tawk.to" target="_blank" class="text-blue-500 hover:underline">
+                              <i class="fas fa-external-link-alt mr-1"></i>Tawk.to 무료 가입
+                            </a>
+                          </p>
+                        </div>
+                      </div>
+                      <div id="chat-status" class="hidden mt-4 p-3 rounded-lg text-sm"></div>
+                    </div>
+                  </div>
+                  
+                  <!-- External API Integration (외부 서비스 연동) -->
+                  <div class="bg-white rounded-xl shadow-sm border border-slate-100">
+                    <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+                      <div class="flex items-center">
+                        <i class="fas fa-plug text-rose-600 mr-3"></i>
+                        <h3 class="font-semibold text-slate-800">외부 서비스 연동 (API)</h3>
+                      </div>
+                      <button onclick="saveExternalApis()" class="px-4 py-2 bg-rose-600 text-white text-sm font-medium rounded-lg hover:bg-rose-700 transition">
+                        <i class="fas fa-save mr-2"></i>저장
+                      </button>
+                    </div>
+                    <div class="p-5">
+                      <!-- Social Login -->
+                      <h4 class="font-medium text-slate-700 mb-3 flex items-center">
+                        <i class="fas fa-sign-in-alt text-slate-500 mr-2"></i>소셜 로그인
+                      </h4>
+                      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                        <!-- Kakao Login -->
+                        <div class="p-4 bg-yellow-50 rounded-lg">
+                          <div class="flex items-center justify-between mb-2">
+                            <span class="font-medium text-slate-700">카카오 로그인</span>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                              <input type="checkbox" id="kakao-login-active" class="sr-only peer">
+                              <div class="w-9 h-5 bg-gray-200 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-yellow-500"></div>
+                            </label>
+                          </div>
+                          <input type="text" id="kakao-rest-key" placeholder="REST API 키" class="w-full px-3 py-1.5 border border-slate-200 rounded text-xs mb-2" />
+                          <input type="password" id="kakao-secret" placeholder="Client Secret" class="w-full px-3 py-1.5 border border-slate-200 rounded text-xs" />
+                        </div>
+                        
+                        <!-- Naver Login -->
+                        <div class="p-4 bg-green-50 rounded-lg">
+                          <div class="flex items-center justify-between mb-2">
+                            <span class="font-medium text-slate-700">네이버 로그인</span>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                              <input type="checkbox" id="naver-login-active" class="sr-only peer">
+                              <div class="w-9 h-5 bg-gray-200 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-green-500"></div>
+                            </label>
+                          </div>
+                          <input type="text" id="naver-client-id" placeholder="Client ID" class="w-full px-3 py-1.5 border border-slate-200 rounded text-xs mb-2" />
+                          <input type="password" id="naver-client-secret" placeholder="Client Secret" class="w-full px-3 py-1.5 border border-slate-200 rounded text-xs" />
+                        </div>
+                        
+                        <!-- Google Login -->
+                        <div class="p-4 bg-red-50 rounded-lg">
+                          <div class="flex items-center justify-between mb-2">
+                            <span class="font-medium text-slate-700">구글 로그인</span>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                              <input type="checkbox" id="google-login-active" class="sr-only peer">
+                              <div class="w-9 h-5 bg-gray-200 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-red-500"></div>
+                            </label>
+                          </div>
+                          <input type="text" id="google-client-id" placeholder="Client ID" class="w-full px-3 py-1.5 border border-slate-200 rounded text-xs mb-2" />
+                          <input type="password" id="google-client-secret" placeholder="Client Secret" class="w-full px-3 py-1.5 border border-slate-200 rounded text-xs" />
+                        </div>
+                      </div>
+                      
+                      <!-- Notification Services -->
+                      <h4 class="font-medium text-slate-700 mb-3 flex items-center">
+                        <i class="fas fa-bell text-slate-500 mr-2"></i>알림 서비스
+                      </h4>
+                      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                        <!-- Kakao Alimtalk -->
+                        <div class="p-4 bg-yellow-50 rounded-lg">
+                          <div class="flex items-center justify-between mb-2">
+                            <span class="font-medium text-slate-700">카카오 알림톡</span>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                              <input type="checkbox" id="alimtalk-active" class="sr-only peer">
+                              <div class="w-9 h-5 bg-gray-200 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-yellow-500"></div>
+                            </label>
+                          </div>
+                          <input type="text" id="alimtalk-sender-key" placeholder="발신 프로필 키" class="w-full px-3 py-1.5 border border-slate-200 rounded text-xs mb-2" />
+                          <input type="password" id="alimtalk-api-key" placeholder="API Key" class="w-full px-3 py-1.5 border border-slate-200 rounded text-xs" />
+                        </div>
+                        
+                        <!-- NHN SMS -->
+                        <div class="p-4 bg-blue-50 rounded-lg">
+                          <div class="flex items-center justify-between mb-2">
+                            <span class="font-medium text-slate-700">NHN SMS</span>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                              <input type="checkbox" id="nhn-sms-active" class="sr-only peer">
+                              <div class="w-9 h-5 bg-gray-200 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-500"></div>
+                            </label>
+                          </div>
+                          <input type="text" id="nhn-app-key" placeholder="AppKey" class="w-full px-3 py-1.5 border border-slate-200 rounded text-xs mb-2" />
+                          <input type="password" id="nhn-secret-key" placeholder="SecretKey" class="w-full px-3 py-1.5 border border-slate-200 rounded text-xs" />
+                        </div>
+                      </div>
+                      
+                      <!-- Payment Services -->
+                      <h4 class="font-medium text-slate-700 mb-3 flex items-center">
+                        <i class="fas fa-credit-card text-slate-500 mr-2"></i>결제 서비스
+                      </h4>
+                      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Toss Payments -->
+                        <div class="p-4 bg-blue-50 rounded-lg">
+                          <div class="flex items-center justify-between mb-2">
+                            <span class="font-medium text-slate-700">토스페이먼츠</span>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                              <input type="checkbox" id="toss-active" class="sr-only peer">
+                              <div class="w-9 h-5 bg-gray-200 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-500"></div>
+                            </label>
+                          </div>
+                          <input type="text" id="toss-client-key" placeholder="Client Key" class="w-full px-3 py-1.5 border border-slate-200 rounded text-xs mb-2" />
+                          <input type="password" id="toss-secret-key" placeholder="Secret Key" class="w-full px-3 py-1.5 border border-slate-200 rounded text-xs" />
+                        </div>
+                        
+                        <!-- NicePay -->
+                        <div class="p-4 bg-green-50 rounded-lg">
+                          <div class="flex items-center justify-between mb-2">
+                            <span class="font-medium text-slate-700">나이스페이</span>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                              <input type="checkbox" id="nice-active" class="sr-only peer">
+                              <div class="w-9 h-5 bg-gray-200 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-green-500"></div>
+                            </label>
+                          </div>
+                          <input type="text" id="nice-merchant-id" placeholder="Merchant ID" class="w-full px-3 py-1.5 border border-slate-200 rounded text-xs mb-2" />
+                          <input type="password" id="nice-merchant-key" placeholder="Merchant Key" class="w-full px-3 py-1.5 border border-slate-200 rounded text-xs" />
+                        </div>
+                      </div>
+                      <div id="api-integration-status" class="hidden mt-4 p-3 rounded-lg text-sm"></div>
+                    </div>
+                  </div>
                 </div>
               ` : ''}
               
@@ -2211,6 +2602,567 @@ export const Admin = (props: { user: any, tab?: string }) => {
                 alert('캐시 초기화 오류');
               }
             }
+          }
+          
+          // ==========================================
+          // Terms Management Functions
+          // ==========================================
+          let termsData = [];
+          
+          async function loadTerms() {
+            try {
+              const res = await fetch('/api/admin/terms');
+              if (res.ok) {
+                const data = await res.json();
+                termsData = data.terms || [];
+                renderTermsList();
+              }
+            } catch(e) {
+              console.log('Terms load error:', e);
+            }
+          }
+          
+          function renderTermsList() {
+            const el = document.getElementById('terms-list');
+            if (!el) return;
+            
+            if (termsData.length === 0) {
+              el.innerHTML = '<div class="text-center text-slate-400 py-4">등록된 약관이 없습니다.</div>';
+              return;
+            }
+            
+            el.innerHTML = termsData.map(t => 
+              '<div class="flex items-center justify-between p-4 bg-slate-50 rounded-lg">' +
+              '<div class="flex items-center">' +
+              '<span class="px-2 py-1 text-xs rounded ' + 
+                (t.term_type === 'service' ? 'bg-blue-100 text-blue-700' : 
+                 t.term_type === 'privacy' ? 'bg-green-100 text-green-700' : 
+                 'bg-purple-100 text-purple-700') + '">' +
+                (t.term_type === 'service' ? '이용약관' : t.term_type === 'privacy' ? '개인정보' : '마케팅') + '</span>' +
+              '<span class="ml-3 font-medium text-slate-800">' + t.title + '</span>' +
+              '<span class="ml-2 text-xs text-slate-400">v' + t.version + '</span>' +
+              (t.is_active ? '<span class="ml-2 w-2 h-2 bg-green-500 rounded-full"></span>' : '') +
+              '</div>' +
+              '<div class="flex space-x-2">' +
+              '<button onclick="editTerm(' + t.id + ')" class="px-3 py-1.5 text-xs bg-slate-200 text-slate-700 rounded hover:bg-slate-300">수정</button>' +
+              '<button onclick="deleteTerm(' + t.id + ')" class="px-3 py-1.5 text-xs bg-red-100 text-red-700 rounded hover:bg-red-200">삭제</button>' +
+              '</div></div>'
+            ).join('');
+          }
+          
+          function openTermModal(term = null) {
+            const html = '<div id="term-modal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">' +
+              '<div class="bg-white rounded-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto m-4">' +
+              '<div class="p-5 border-b flex justify-between items-center">' +
+              '<h3 class="text-lg font-semibold">' + (term ? '약관 수정' : '새 약관 등록') + '</h3>' +
+              '<button onclick="closeTermModal()" class="p-2 hover:bg-slate-100 rounded-lg"><i class="fas fa-times"></i></button>' +
+              '</div>' +
+              '<div class="p-5 space-y-4">' +
+              '<input type="hidden" id="term-id" value="' + (term?.id || '') + '">' +
+              '<div class="grid grid-cols-2 gap-4">' +
+              '<div><label class="block text-sm font-medium mb-1">약관 유형</label>' +
+              '<select id="term-type" class="w-full px-3 py-2 border rounded-lg">' +
+              '<option value="service"' + (term?.term_type === 'service' ? ' selected' : '') + '>이용약관</option>' +
+              '<option value="privacy"' + (term?.term_type === 'privacy' ? ' selected' : '') + '>개인정보처리방침</option>' +
+              '<option value="marketing"' + (term?.term_type === 'marketing' ? ' selected' : '') + '>마케팅 동의</option>' +
+              '</select></div>' +
+              '<div><label class="block text-sm font-medium mb-1">버전</label>' +
+              '<input type="text" id="term-version" value="' + (term?.version || '1.0') + '" class="w-full px-3 py-2 border rounded-lg"></div>' +
+              '</div>' +
+              '<div><label class="block text-sm font-medium mb-1">제목</label>' +
+              '<input type="text" id="term-title" value="' + (term?.title || '') + '" class="w-full px-3 py-2 border rounded-lg"></div>' +
+              '<div><label class="block text-sm font-medium mb-1">내용 (HTML 지원)</label>' +
+              '<textarea id="term-content" rows="12" class="w-full px-3 py-2 border rounded-lg font-mono text-sm">' + (term?.content || '') + '</textarea></div>' +
+              '<div class="flex items-center space-x-4">' +
+              '<label class="flex items-center"><input type="checkbox" id="term-required"' + (term?.is_required ? ' checked' : '') + ' class="mr-2">필수 동의</label>' +
+              '<label class="flex items-center"><input type="checkbox" id="term-active"' + (term?.is_active !== 0 ? ' checked' : '') + ' class="mr-2">활성화</label>' +
+              '</div></div>' +
+              '<div class="p-5 border-t flex justify-end space-x-2">' +
+              '<button onclick="closeTermModal()" class="px-4 py-2 border rounded-lg hover:bg-slate-50">취소</button>' +
+              '<button onclick="saveTerm()" class="px-4 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700">저장</button>' +
+              '</div></div></div>';
+            
+            document.body.insertAdjacentHTML('beforeend', html);
+          }
+          
+          function closeTermModal() {
+            document.getElementById('term-modal')?.remove();
+          }
+          
+          function editTerm(id) {
+            const term = termsData.find(t => t.id === id);
+            if (term) openTermModal(term);
+          }
+          
+          async function saveTerm() {
+            const term = {
+              id: document.getElementById('term-id').value || null,
+              term_type: document.getElementById('term-type').value,
+              title: document.getElementById('term-title').value,
+              content: document.getElementById('term-content').value,
+              version: document.getElementById('term-version').value,
+              is_required: document.getElementById('term-required').checked,
+              is_active: document.getElementById('term-active').checked
+            };
+            
+            try {
+              const res = await fetch('/api/admin/terms', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(term)
+              });
+              
+              if (res.ok) {
+                closeTermModal();
+                loadTerms();
+                alert('약관이 저장되었습니다.');
+              }
+            } catch(e) {
+              alert('저장 실패: ' + e.message);
+            }
+          }
+          
+          async function deleteTerm(id) {
+            if (!confirm('이 약관을 삭제하시겠습니까?')) return;
+            
+            try {
+              const res = await fetch('/api/admin/terms/' + id, { method: 'DELETE' });
+              if (res.ok) {
+                loadTerms();
+                alert('삭제되었습니다.');
+              }
+            } catch(e) {
+              alert('삭제 실패');
+            }
+          }
+          
+          // ==========================================
+          // Popup/Banner Management Functions
+          // ==========================================
+          let popupsData = [];
+          let bannersData = [];
+          
+          async function loadPopups() {
+            try {
+              const res = await fetch('/api/admin/popups');
+              if (res.ok) {
+                const data = await res.json();
+                popupsData = data.popups || [];
+                renderPopupsList();
+              }
+            } catch(e) { console.log('Popups load error:', e); }
+          }
+          
+          async function loadBanners() {
+            try {
+              const res = await fetch('/api/admin/banners');
+              if (res.ok) {
+                const data = await res.json();
+                bannersData = data.banners || [];
+                renderBannersList();
+              }
+            } catch(e) { console.log('Banners load error:', e); }
+          }
+          
+          function renderPopupsList() {
+            const el = document.getElementById('popups-list');
+            if (!el) return;
+            if (popupsData.length === 0) {
+              el.innerHTML = '<div class="text-center text-slate-400 py-4 text-sm">등록된 팝업이 없습니다.</div>';
+              return;
+            }
+            el.innerHTML = popupsData.map(p => 
+              '<div class="flex items-center justify-between p-3 bg-slate-50 rounded-lg text-sm">' +
+              '<div>' +
+              '<span class="font-medium text-slate-800">' + p.title + '</span>' +
+              (p.is_active ? '<span class="ml-2 text-xs text-green-600">● 활성</span>' : '<span class="ml-2 text-xs text-slate-400">○ 비활성</span>') +
+              '</div>' +
+              '<div class="flex space-x-1">' +
+              '<button onclick="editPopup(' + p.id + ')" class="p-1.5 text-slate-500 hover:bg-slate-200 rounded"><i class="fas fa-edit"></i></button>' +
+              '<button onclick="deletePopup(' + p.id + ')" class="p-1.5 text-red-500 hover:bg-red-100 rounded"><i class="fas fa-trash"></i></button>' +
+              '</div></div>'
+            ).join('');
+          }
+          
+          function renderBannersList() {
+            const el = document.getElementById('banners-list');
+            if (!el) return;
+            if (bannersData.length === 0) {
+              el.innerHTML = '<div class="text-center text-slate-400 py-4 text-sm">등록된 배너가 없습니다.</div>';
+              return;
+            }
+            el.innerHTML = bannersData.map(b => 
+              '<div class="flex items-center justify-between p-3 bg-slate-50 rounded-lg text-sm">' +
+              '<div>' +
+              '<span class="font-medium text-slate-800">' + b.title + '</span>' +
+              '<span class="ml-2 text-xs text-slate-500">' + b.banner_type + '</span>' +
+              (b.is_active ? '<span class="ml-2 text-xs text-green-600">● 활성</span>' : '') +
+              '</div>' +
+              '<div class="flex space-x-1">' +
+              '<button onclick="editBanner(' + b.id + ')" class="p-1.5 text-slate-500 hover:bg-slate-200 rounded"><i class="fas fa-edit"></i></button>' +
+              '<button onclick="deleteBanner(' + b.id + ')" class="p-1.5 text-red-500 hover:bg-red-100 rounded"><i class="fas fa-trash"></i></button>' +
+              '</div></div>'
+            ).join('');
+          }
+          
+          function openPopupModal(popup = null) {
+            const html = '<div id="popup-modal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">' +
+              '<div class="bg-white rounded-xl w-full max-w-lg max-h-[90vh] overflow-y-auto m-4">' +
+              '<div class="p-5 border-b flex justify-between items-center">' +
+              '<h3 class="text-lg font-semibold">' + (popup ? '팝업 수정' : '새 팝업') + '</h3>' +
+              '<button onclick="closePopupModal()" class="p-2 hover:bg-slate-100 rounded-lg"><i class="fas fa-times"></i></button>' +
+              '</div>' +
+              '<div class="p-5 space-y-4">' +
+              '<input type="hidden" id="popup-id" value="' + (popup?.id || '') + '">' +
+              '<div><label class="block text-sm font-medium mb-1">제목</label>' +
+              '<input type="text" id="popup-title" value="' + (popup?.title || '') + '" class="w-full px-3 py-2 border rounded-lg"></div>' +
+              '<div><label class="block text-sm font-medium mb-1">내용</label>' +
+              '<textarea id="popup-content" rows="4" class="w-full px-3 py-2 border rounded-lg">' + (popup?.content || '') + '</textarea></div>' +
+              '<div class="grid grid-cols-2 gap-4">' +
+              '<div><label class="block text-sm font-medium mb-1">이미지 URL</label>' +
+              '<input type="text" id="popup-image" value="' + (popup?.image_url || '') + '" class="w-full px-3 py-2 border rounded-lg"></div>' +
+              '<div><label class="block text-sm font-medium mb-1">링크 URL</label>' +
+              '<input type="text" id="popup-link" value="' + (popup?.link_url || '') + '" class="w-full px-3 py-2 border rounded-lg"></div>' +
+              '</div>' +
+              '<div class="grid grid-cols-3 gap-4">' +
+              '<div><label class="block text-sm font-medium mb-1">너비(px)</label>' +
+              '<input type="number" id="popup-width" value="' + (popup?.width || 500) + '" class="w-full px-3 py-2 border rounded-lg"></div>' +
+              '<div><label class="block text-sm font-medium mb-1">높이(px)</label>' +
+              '<input type="number" id="popup-height" value="' + (popup?.height || 400) + '" class="w-full px-3 py-2 border rounded-lg"></div>' +
+              '<div><label class="block text-sm font-medium mb-1">위치</label>' +
+              '<select id="popup-position" class="w-full px-3 py-2 border rounded-lg">' +
+              '<option value="center"' + (popup?.position === 'center' ? ' selected' : '') + '>가운데</option>' +
+              '<option value="top"' + (popup?.position === 'top' ? ' selected' : '') + '>상단</option>' +
+              '<option value="bottom"' + (popup?.position === 'bottom' ? ' selected' : '') + '>하단</option>' +
+              '</select></div></div>' +
+              '<div class="grid grid-cols-2 gap-4">' +
+              '<div><label class="block text-sm font-medium mb-1">시작일</label>' +
+              '<input type="date" id="popup-start" value="' + (popup?.start_date || '') + '" class="w-full px-3 py-2 border rounded-lg"></div>' +
+              '<div><label class="block text-sm font-medium mb-1">종료일</label>' +
+              '<input type="date" id="popup-end" value="' + (popup?.end_date || '') + '" class="w-full px-3 py-2 border rounded-lg"></div>' +
+              '</div>' +
+              '<div class="flex items-center space-x-4">' +
+              '<label class="flex items-center"><input type="checkbox" id="popup-today-close"' + (popup?.show_today_close ? ' checked' : '') + ' class="mr-2">오늘 하루 안보기</label>' +
+              '<label class="flex items-center"><input type="checkbox" id="popup-active"' + (popup?.is_active !== 0 ? ' checked' : '') + ' class="mr-2">활성화</label>' +
+              '</div></div>' +
+              '<div class="p-5 border-t flex justify-end space-x-2">' +
+              '<button onclick="closePopupModal()" class="px-4 py-2 border rounded-lg hover:bg-slate-50">취소</button>' +
+              '<button onclick="savePopup()" class="px-4 py-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700">저장</button>' +
+              '</div></div></div>';
+            document.body.insertAdjacentHTML('beforeend', html);
+          }
+          
+          function closePopupModal() { document.getElementById('popup-modal')?.remove(); }
+          function editPopup(id) { const p = popupsData.find(x => x.id === id); if (p) openPopupModal(p); }
+          
+          async function savePopup() {
+            const popup = {
+              id: document.getElementById('popup-id').value || null,
+              title: document.getElementById('popup-title').value,
+              content: document.getElementById('popup-content').value,
+              image_url: document.getElementById('popup-image').value,
+              link_url: document.getElementById('popup-link').value,
+              width: parseInt(document.getElementById('popup-width').value),
+              height: parseInt(document.getElementById('popup-height').value),
+              position: document.getElementById('popup-position').value,
+              start_date: document.getElementById('popup-start').value,
+              end_date: document.getElementById('popup-end').value,
+              show_today_close: document.getElementById('popup-today-close').checked,
+              is_active: document.getElementById('popup-active').checked
+            };
+            
+            try {
+              const res = await fetch('/api/admin/popups', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(popup)
+              });
+              if (res.ok) { closePopupModal(); loadPopups(); alert('팝업이 저장되었습니다.'); }
+            } catch(e) { alert('저장 실패'); }
+          }
+          
+          async function deletePopup(id) {
+            if (!confirm('이 팝업을 삭제하시겠습니까?')) return;
+            try {
+              const res = await fetch('/api/admin/popups/' + id, { method: 'DELETE' });
+              if (res.ok) { loadPopups(); }
+            } catch(e) { alert('삭제 실패'); }
+          }
+          
+          function openBannerModal(banner = null) {
+            const html = '<div id="banner-modal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">' +
+              '<div class="bg-white rounded-xl w-full max-w-lg max-h-[90vh] overflow-y-auto m-4">' +
+              '<div class="p-5 border-b flex justify-between items-center">' +
+              '<h3 class="text-lg font-semibold">' + (banner ? '배너 수정' : '새 배너') + '</h3>' +
+              '<button onclick="closeBannerModal()" class="p-2 hover:bg-slate-100 rounded-lg"><i class="fas fa-times"></i></button>' +
+              '</div>' +
+              '<div class="p-5 space-y-4">' +
+              '<input type="hidden" id="banner-id" value="' + (banner?.id || '') + '">' +
+              '<div><label class="block text-sm font-medium mb-1">제목</label>' +
+              '<input type="text" id="banner-title" value="' + (banner?.title || '') + '" class="w-full px-3 py-2 border rounded-lg"></div>' +
+              '<div><label class="block text-sm font-medium mb-1">부제목</label>' +
+              '<input type="text" id="banner-subtitle" value="' + (banner?.subtitle || '') + '" class="w-full px-3 py-2 border rounded-lg"></div>' +
+              '<div class="grid grid-cols-2 gap-4">' +
+              '<div><label class="block text-sm font-medium mb-1">이미지 URL</label>' +
+              '<input type="text" id="banner-image" value="' + (banner?.image_url || '') + '" class="w-full px-3 py-2 border rounded-lg"></div>' +
+              '<div><label class="block text-sm font-medium mb-1">링크 URL</label>' +
+              '<input type="text" id="banner-link" value="' + (banner?.link_url || '') + '" class="w-full px-3 py-2 border rounded-lg"></div>' +
+              '</div>' +
+              '<div class="grid grid-cols-2 gap-4">' +
+              '<div><label class="block text-sm font-medium mb-1">배너 유형</label>' +
+              '<select id="banner-type" class="w-full px-3 py-2 border rounded-lg">' +
+              '<option value="main"' + (banner?.banner_type === 'main' ? ' selected' : '') + '>메인</option>' +
+              '<option value="sub"' + (banner?.banner_type === 'sub' ? ' selected' : '') + '>서브</option>' +
+              '<option value="sidebar"' + (banner?.banner_type === 'sidebar' ? ' selected' : '') + '>사이드바</option>' +
+              '</select></div>' +
+              '<div><label class="block text-sm font-medium mb-1">배경색</label>' +
+              '<input type="color" id="banner-bg-color" value="' + (banner?.background_color || '#3B82F6') + '" class="w-full h-10 border rounded-lg"></div>' +
+              '</div>' +
+              '<div class="flex items-center"><label class="flex items-center"><input type="checkbox" id="banner-active"' + (banner?.is_active !== 0 ? ' checked' : '') + ' class="mr-2">활성화</label></div>' +
+              '</div>' +
+              '<div class="p-5 border-t flex justify-end space-x-2">' +
+              '<button onclick="closeBannerModal()" class="px-4 py-2 border rounded-lg hover:bg-slate-50">취소</button>' +
+              '<button onclick="saveBanner()" class="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600">저장</button>' +
+              '</div></div></div>';
+            document.body.insertAdjacentHTML('beforeend', html);
+          }
+          
+          function closeBannerModal() { document.getElementById('banner-modal')?.remove(); }
+          function editBanner(id) { const b = bannersData.find(x => x.id === id); if (b) openBannerModal(b); }
+          
+          async function saveBanner() {
+            const banner = {
+              id: document.getElementById('banner-id').value || null,
+              title: document.getElementById('banner-title').value,
+              subtitle: document.getElementById('banner-subtitle').value,
+              image_url: document.getElementById('banner-image').value,
+              link_url: document.getElementById('banner-link').value,
+              banner_type: document.getElementById('banner-type').value,
+              background_color: document.getElementById('banner-bg-color').value,
+              is_active: document.getElementById('banner-active').checked
+            };
+            
+            try {
+              const res = await fetch('/api/admin/banners', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(banner)
+              });
+              if (res.ok) { closeBannerModal(); loadBanners(); alert('배너가 저장되었습니다.'); }
+            } catch(e) { alert('저장 실패'); }
+          }
+          
+          async function deleteBanner(id) {
+            if (!confirm('이 배너를 삭제하시겠습니까?')) return;
+            try {
+              const res = await fetch('/api/admin/banners/' + id, { method: 'DELETE' });
+              if (res.ok) { loadBanners(); }
+            } catch(e) { alert('삭제 실패'); }
+          }
+          
+          // ==========================================
+          // Marketing Channels Functions
+          // ==========================================
+          let marketingData = [];
+          
+          async function loadMarketingChannels() {
+            try {
+              const res = await fetch('/api/admin/marketing-channels');
+              if (res.ok) {
+                const data = await res.json();
+                marketingData = data.channels || [];
+                renderMarketingChannels();
+              }
+            } catch(e) { console.log('Marketing load error:', e); }
+          }
+          
+          function renderMarketingChannels() {
+            marketingData.forEach(ch => {
+              switch(ch.channel_type) {
+                case 'google_analytics':
+                  document.getElementById('ga4-tracking-id').value = ch.tracking_id || '';
+                  document.getElementById('ga4-active').checked = ch.is_active === 1;
+                  break;
+                case 'facebook_pixel':
+                  document.getElementById('fb-pixel-id').value = ch.tracking_id || '';
+                  document.getElementById('fb-active').checked = ch.is_active === 1;
+                  break;
+                case 'naver_analytics':
+                  document.getElementById('naver-analytics-id').value = ch.tracking_id || '';
+                  document.getElementById('naver-active').checked = ch.is_active === 1;
+                  break;
+                case 'kakao_pixel':
+                  document.getElementById('kakao-pixel-id').value = ch.tracking_id || '';
+                  document.getElementById('kakao-pixel-active').checked = ch.is_active === 1;
+                  break;
+              }
+            });
+          }
+          
+          async function saveMarketingChannels() {
+            const statusEl = document.getElementById('marketing-status');
+            statusEl.classList.remove('hidden');
+            statusEl.className = 'mt-4 p-3 rounded-lg text-sm bg-blue-50 text-blue-700';
+            statusEl.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>저장 중...';
+            
+            const channels = [
+              { type: 'google_analytics', tracking_id: document.getElementById('ga4-tracking-id').value, is_active: document.getElementById('ga4-active').checked },
+              { type: 'facebook_pixel', tracking_id: document.getElementById('fb-pixel-id').value, is_active: document.getElementById('fb-active').checked },
+              { type: 'naver_analytics', tracking_id: document.getElementById('naver-analytics-id').value, is_active: document.getElementById('naver-active').checked },
+              { type: 'kakao_pixel', tracking_id: document.getElementById('kakao-pixel-id').value, is_active: document.getElementById('kakao-pixel-active').checked }
+            ];
+            
+            try {
+              for (const ch of channels) {
+                const existing = marketingData.find(m => m.channel_type === ch.type);
+                if (existing) {
+                  await fetch('/api/admin/marketing-channels', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: existing.id, tracking_id: ch.tracking_id, is_active: ch.is_active })
+                  });
+                }
+              }
+              statusEl.className = 'mt-4 p-3 rounded-lg text-sm bg-green-50 text-green-700';
+              statusEl.innerHTML = '<i class="fas fa-check-circle mr-2"></i>마케팅 채널 설정이 저장되었습니다.';
+            } catch(e) {
+              statusEl.className = 'mt-4 p-3 rounded-lg text-sm bg-red-50 text-red-700';
+              statusEl.innerHTML = '<i class="fas fa-times-circle mr-2"></i>저장 실패';
+            }
+            setTimeout(() => { statusEl.classList.add('hidden'); }, 3000);
+          }
+          
+          // ==========================================
+          // Chat Channels Functions
+          // ==========================================
+          let chatData = [];
+          
+          async function loadChatChannels() {
+            try {
+              const res = await fetch('/api/admin/chat-channels');
+              if (res.ok) {
+                const data = await res.json();
+                chatData = data.channels || [];
+                renderChatChannels();
+              }
+            } catch(e) { console.log('Chat load error:', e); }
+          }
+          
+          function renderChatChannels() {
+            chatData.forEach(ch => {
+              switch(ch.channel_type) {
+                case 'kakao_channel':
+                  document.getElementById('kakao-channel-id').value = ch.channel_id || '';
+                  document.getElementById('kakao-chat-active').checked = ch.is_active === 1;
+                  break;
+                case 'naver_talktalk':
+                  document.getElementById('naver-talk-id').value = ch.channel_id || '';
+                  document.getElementById('naver-talk-active').checked = ch.is_active === 1;
+                  break;
+                case 'channel_talk':
+                  document.getElementById('channel-talk-key').value = ch.plugin_key || '';
+                  document.getElementById('channel-talk-active').checked = ch.is_active === 1;
+                  break;
+                case 'tawk_to':
+                  document.getElementById('tawk-id').value = ch.channel_id || '';
+                  document.getElementById('tawk-active').checked = ch.is_active === 1;
+                  break;
+              }
+            });
+          }
+          
+          async function saveChatChannels() {
+            const statusEl = document.getElementById('chat-status');
+            statusEl.classList.remove('hidden');
+            statusEl.className = 'mt-4 p-3 rounded-lg text-sm bg-blue-50 text-blue-700';
+            statusEl.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>저장 중...';
+            
+            const channels = [
+              { type: 'kakao_channel', channel_id: document.getElementById('kakao-channel-id').value, is_active: document.getElementById('kakao-chat-active').checked },
+              { type: 'naver_talktalk', channel_id: document.getElementById('naver-talk-id').value, is_active: document.getElementById('naver-talk-active').checked },
+              { type: 'channel_talk', plugin_key: document.getElementById('channel-talk-key').value, is_active: document.getElementById('channel-talk-active').checked },
+              { type: 'tawk_to', channel_id: document.getElementById('tawk-id').value, is_active: document.getElementById('tawk-active').checked }
+            ];
+            
+            try {
+              for (const ch of channels) {
+                const existing = chatData.find(m => m.channel_type === ch.type);
+                if (existing) {
+                  await fetch('/api/admin/chat-channels', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: existing.id, channel_id: ch.channel_id, plugin_key: ch.plugin_key, is_active: ch.is_active })
+                  });
+                }
+              }
+              statusEl.className = 'mt-4 p-3 rounded-lg text-sm bg-green-50 text-green-700';
+              statusEl.innerHTML = '<i class="fas fa-check-circle mr-2"></i>상담 채널 설정이 저장되었습니다.';
+            } catch(e) {
+              statusEl.className = 'mt-4 p-3 rounded-lg text-sm bg-red-50 text-red-700';
+              statusEl.innerHTML = '<i class="fas fa-times-circle mr-2"></i>저장 실패';
+            }
+            setTimeout(() => { statusEl.classList.add('hidden'); }, 3000);
+          }
+          
+          // ==========================================
+          // External APIs Functions
+          // ==========================================
+          let externalApisData = [];
+          
+          async function loadExternalApis() {
+            try {
+              const res = await fetch('/api/admin/external-apis');
+              if (res.ok) {
+                const data = await res.json();
+                externalApisData = data.apis || [];
+                // Render if needed
+              }
+            } catch(e) { console.log('External APIs load error:', e); }
+          }
+          
+          async function saveExternalApis() {
+            const statusEl = document.getElementById('api-integration-status');
+            statusEl.classList.remove('hidden');
+            statusEl.className = 'mt-4 p-3 rounded-lg text-sm bg-blue-50 text-blue-700';
+            statusEl.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>저장 중...';
+            
+            // Save each API config
+            const configs = [
+              { type: 'kakao_login', client_id: document.getElementById('kakao-rest-key')?.value, client_secret: document.getElementById('kakao-secret')?.value, is_active: document.getElementById('kakao-login-active')?.checked },
+              { type: 'naver_login', client_id: document.getElementById('naver-client-id')?.value, client_secret: document.getElementById('naver-client-secret')?.value, is_active: document.getElementById('naver-login-active')?.checked },
+              { type: 'google_login', client_id: document.getElementById('google-client-id')?.value, client_secret: document.getElementById('google-client-secret')?.value, is_active: document.getElementById('google-login-active')?.checked },
+              { type: 'kakao_alimtalk', client_id: document.getElementById('alimtalk-sender-key')?.value, api_key: document.getElementById('alimtalk-api-key')?.value, is_active: document.getElementById('alimtalk-active')?.checked },
+              { type: 'toss_payments', client_id: document.getElementById('toss-client-key')?.value, client_secret: document.getElementById('toss-secret-key')?.value, is_active: document.getElementById('toss-active')?.checked }
+            ];
+            
+            try {
+              for (const cfg of configs) {
+                const existing = externalApisData.find(a => a.api_type === cfg.type);
+                if (existing) {
+                  await fetch('/api/admin/external-apis', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: existing.id, ...cfg })
+                  });
+                }
+              }
+              statusEl.className = 'mt-4 p-3 rounded-lg text-sm bg-green-50 text-green-700';
+              statusEl.innerHTML = '<i class="fas fa-check-circle mr-2"></i>외부 API 설정이 저장되었습니다.';
+            } catch(e) {
+              statusEl.className = 'mt-4 p-3 rounded-lg text-sm bg-red-50 text-red-700';
+              statusEl.innerHTML = '<i class="fas fa-times-circle mr-2"></i>저장 실패';
+            }
+            setTimeout(() => { statusEl.classList.add('hidden'); }, 3000);
+          }
+          
+          // Load settings data when on settings tab
+          if ('${activeTab}' === 'settings') {
+            loadTerms();
+            loadPopups();
+            loadBanners();
+            loadMarketingChannels();
+            loadChatChannels();
+            loadExternalApis();
           }
           
           // Initialize on page load
