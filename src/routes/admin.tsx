@@ -2,14 +2,7 @@ import { Hono } from 'hono'
 import { getCookie } from 'hono/cookie'
 import { html } from 'hono/html'
 
-// Environment Bindings
-type Bindings = {
-  DB: D1Database;
-  DART_API_KEY: string;
-  DEPLOY_HOOK: string;
-}
-
-const admin = new Hono<{ Bindings: Bindings }>()
+const admin = new Hono()
 
 // --- Admin UI Component ---
 const AdminFinal = (props: { user: any, tab?: string }) => {
@@ -26,6 +19,7 @@ const AdminFinal = (props: { user: any, tab?: string }) => {
       </head>
       <body class="bg-slate-50 font-sans antialiased text-slate-800">
         <div class="min-h-screen flex">
+          {/* Sidebar */}
           <aside class="w-64 bg-white border-r border-slate-200 fixed h-full z-20 hidden md:flex flex-col">
             <div class="p-6 border-b border-slate-100 flex items-center justify-center"><img src="/static/logo-horizontal.png" alt="Logo" class="h-8" /></div>
             <div class="flex-1 overflow-y-auto p-4 space-y-6">
@@ -35,12 +29,14 @@ const AdminFinal = (props: { user: any, tab?: string }) => {
             </div>
             <div class="p-4 border-t border-slate-100"><a href="/" class="flex items-center justify-center w-full py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg text-xs font-bold transition-colors"><i class="fas fa-external-link-alt mr-2"></i> 사용자 페이지로 이동</a></div>
           </aside>
+          {/* Main */}
           <main class="flex-1 md:ml-64 p-8">
             <header class="flex justify-between items-center mb-8 bg-white p-6 rounded-2xl shadow-sm border-l-4 border-blue-600">
               <div><h1 class="text-2xl font-extrabold text-slate-900 flex items-center"><span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-lg text-xs mr-3">ADMIN V3.0</span> 통합 관리자 시스템</h1><p class="text-slate-500 text-sm mt-1 ml-14">기업 데이터, 공고 매칭, AI 분석 현황을 실시간으로 관리합니다.</p></div>
               <div class="flex items-center space-x-4"><div class="text-right mr-4 hidden sm:block"><p class="text-sm font-bold text-slate-800">{props.user.name}</p><p class="text-xs text-slate-500">최고 관리자</p></div><a href="/logout" class="bg-slate-100 hover:bg-slate-200 text-slate-600 px-4 py-2 rounded-lg text-sm font-bold transition-colors">로그아웃</a></div>
             </header>
             <div class="fade-in">
+              {/* Dynamic Content Placeholders */}
               {activeTab === 'overview' && (
                 <div class="space-y-6">
                   <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -77,47 +73,13 @@ const AdminFinal = (props: { user: any, tab?: string }) => {
   )
 }
 
-// --- Routes ---
-admin.get('/admin', (c) => {
+// --- Admin Page Route ---
+admin.get('/', (c) => {
   const userSession = getCookie(c, 'user_session')
   const user = userSession ? JSON.parse(userSession) : undefined
   if (!user || user.role !== 'admin') return c.redirect('/login')
   const tab = c.req.query('tab')
   return c.render(<AdminFinal user={user} tab={tab} />)
-})
-
-// --- API Routes ---
-admin.get('/api/dart/test', async (c) => {
-  const apiKey = c.env.DART_API_KEY
-  if (!apiKey) return c.json({ success: false, message: 'API Key Missing' })
-  try {
-    const url = `https://opendart.fss.or.kr/api/company.json?crtfc_key=${apiKey}&corp_code=00126380`
-    const res = await fetch(url)
-    const data: any = await res.json()
-    if (data.status === '000') return c.json({ success: true, company: data.corp_name })
-    return c.json({ success: false, message: data.message })
-  } catch (e: any) { return c.json({ success: false, message: e.message }) }
-})
-
-// Additional APIs needed for frontend
-admin.get('/api/admin/stats', (c) => c.json({ total_users: 1234, ai_usage: 56, crawler_usage: 890, pending_partners: 2, new_rfqs: 5 }))
-admin.get('/api/search/company', (c) => {
-  const q = c.req.query('q') || ''
-  if (q.length < 1) return c.json([])
-  const mockDB = [{ name: '삼성전자', code: '00126380', ceo: '한종희' }, { name: '태성정밀', code: '00123456', ceo: '김철수' }]
-  return c.json(mockDB.filter(x => x.name.includes(q)))
-})
-admin.get('/api/dart/data', async (c) => {
-  const code = c.req.query('code')
-  const apiKey = c.env.DART_API_KEY
-  if (!apiKey) return c.json({ error: 'Key Missing' })
-  try {
-    const url = `https://opendart.fss.or.kr/api/company.json?crtfc_key=${apiKey}&corp_code=${code}`
-    const res = await fetch(url)
-    const data: any = await res.json()
-    if (data.status === '000') return c.json({ success: true, data: { name: data.corp_name, ceo: data.ceo_nm, est_date: data.est_dt, address: data.adres, corp_cls: data.corp_cls } })
-    return c.json({ success: false, message: data.message })
-  } catch (e: any) { return c.json({ success: false, message: e.message }) }
 })
 
 export default admin
