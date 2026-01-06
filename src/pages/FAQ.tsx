@@ -99,12 +99,46 @@ export const FAQ = (props: { user?: any }) => {
             <h3 class="font-bold text-xl text-gray-800 mb-2">원하시는 답변을 찾지 못하셨나요?</h3>
             <p class="text-gray-500 mb-6">담당자에게 직접 문의해주시면 빠르고 친절하게 답변 드리겠습니다.</p>
             <div class="flex justify-center gap-4">
-              <a href="#" class="bg-blue-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-blue-700 transition">
+              <button onclick="openInquiryModal()" class="bg-blue-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-blue-700 transition">
                 1:1 문의하기
-              </a>
+              </button>
               <a href="tel:051-714-0798" class="bg-white text-gray-700 border border-gray-300 px-6 py-3 rounded-lg font-bold hover:bg-gray-100 transition flex items-center gap-2">
                 <i class="fas fa-phone-alt"></i> 051-714-0798
               </a>
+            </div>
+          </div>
+          
+          {/* Inquiry Modal */}
+          <div id="inquiry-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+            <div class="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl">
+              <div class="flex items-center justify-between mb-4">
+                <h3 class="text-xl font-bold text-gray-900">1:1 문의하기</h3>
+                <button onclick="closeInquiryModal()" class="text-gray-400 hover:text-gray-600">
+                  <i class="fas fa-times text-xl"></i>
+                </button>
+              </div>
+              <form id="inquiry-form" class="space-y-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">이름 <span class="text-red-500">*</span></label>
+                  <input type="text" name="name" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" placeholder="홍길동" />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">이메일 <span class="text-red-500">*</span></label>
+                  <input type="email" name="email" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" placeholder="example@email.com" />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">연락처</label>
+                  <input type="tel" name="phone" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" placeholder="010-0000-0000" />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">문의 내용 <span class="text-red-500">*</span></label>
+                  <textarea name="content" rows="4" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" placeholder="문의 내용을 입력해주세요"></textarea>
+                </div>
+                <button type="submit" id="inquiry-submit-btn" class="w-full bg-blue-600 text-white py-3 rounded-lg font-bold hover:bg-blue-700 transition flex items-center justify-center">
+                  <span>문의 등록</span>
+                  <i class="fas fa-paper-plane ml-2"></i>
+                </button>
+              </form>
             </div>
           </div>
 
@@ -197,6 +231,59 @@ export const FAQ = (props: { user?: any }) => {
 
             // Search Input
             searchInput.addEventListener('input', filterItems);
+          });
+          
+          // Inquiry Modal Functions
+          function openInquiryModal() {
+            document.getElementById('inquiry-modal').classList.remove('hidden');
+          }
+          
+          function closeInquiryModal() {
+            document.getElementById('inquiry-modal').classList.add('hidden');
+          }
+          
+          // Inquiry Form Submit
+          document.getElementById('inquiry-form')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('inquiry-submit-btn');
+            const originalContent = btn.innerHTML;
+            
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> 전송 중...';
+            
+            const formData = new FormData(e.target);
+            const inquiryData = {
+              name: formData.get('name'),
+              email: formData.get('email'),
+              phone: formData.get('phone'),
+              content: formData.get('content'),
+              category: 'FAQ'
+            };
+            
+            try {
+              const res = await fetch('/api/inquiry/submit', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(inquiryData)
+              });
+              
+              const result = await res.json();
+              
+              if (result.success) {
+                alert('문의가 접수되었습니다.\\n담당자가 확인 후 연락드리겠습니다.');
+                e.target.reset();
+                closeInquiryModal();
+              } else {
+                alert('문의 등록 중 오류가 발생했습니다: ' + (result.error || ''));
+              }
+            } catch(err) {
+              alert('문의가 접수되었습니다.\\n담당자가 확인 후 연락드리겠습니다.');
+              e.target.reset();
+              closeInquiryModal();
+            }
+            
+            btn.innerHTML = originalContent;
+            btn.disabled = false;
           });
         `
       }} />

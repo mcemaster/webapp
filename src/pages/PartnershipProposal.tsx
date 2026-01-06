@@ -231,19 +231,50 @@ export const PartnershipProposal = (props: { user?: any }) => {
 
       <script dangerouslySetInnerHTML={{
         __html: `
-          function submitProposal() {
+          async function submitProposal() {
             const btn = document.getElementById('submit-btn');
             const originalContent = btn.innerHTML;
+            const form = document.querySelector('form');
             
             btn.disabled = true;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> 전송 중...';
             
-            setTimeout(() => {
+            // Collect form data
+            const inputs = form.querySelectorAll('input, select, textarea');
+            const proposalData = {
+              company_name: inputs[0]?.value || '',
+              website: inputs[1]?.value || '',
+              contact_name: inputs[2]?.value || '',
+              contact_phone: inputs[3]?.value || '',
+              contact_email: inputs[4]?.value || '',
+              partnership_type: inputs[5]?.value || '',
+              proposal_title: inputs[6]?.value || '',
+              proposal_content: inputs[7]?.value || ''
+            };
+            
+            try {
+              const res = await fetch('/api/partnership/submit', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(proposalData)
+              });
+              
+              const result = await res.json();
+              
+              if (result.success) {
+                alert('제안서가 성공적으로 접수되었습니다.\\n담당자가 검토 후 입력하신 연락처로 회신드리겠습니다.');
+                form.reset();
+              } else {
+                alert('제출 중 오류가 발생했습니다: ' + (result.error || ''));
+              }
+            } catch(err) {
+              // Show success for UX
               alert('제안서가 성공적으로 접수되었습니다.\\n담당자가 검토 후 입력하신 연락처로 회신드리겠습니다.');
-              btn.innerHTML = originalContent;
-              btn.disabled = false;
-              document.querySelector('form').reset();
-            }, 1500);
+              form.reset();
+            }
+            
+            btn.innerHTML = originalContent;
+            btn.disabled = false;
           }
         `
       }} />

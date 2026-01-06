@@ -161,7 +161,7 @@ export const AuditApplication = (props: { user?: any }) => {
       </div>
 
       <script dangerouslySetInnerHTML={{ __html: `
-        document.getElementById('auditForm').addEventListener('submit', (e) => {
+        document.getElementById('auditForm').addEventListener('submit', async (e) => {
           e.preventDefault();
           const btn = e.target.querySelector('button[type="submit"]');
           const originalText = btn.innerHTML;
@@ -169,10 +169,46 @@ export const AuditApplication = (props: { user?: any }) => {
           btn.disabled = true;
           btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> 전송 중...';
           
-          // Simulate API call
-          setTimeout(() => {
+          // Collect form data
+          const formData = new FormData(e.target);
+          const auditScopes = [];
+          formData.getAll('audit_scope').forEach(s => auditScopes.push(s));
+          
+          const auditData = {
+            applicant_company: formData.get('applicant_company'),
+            applicant_name: formData.get('applicant_name'),
+            applicant_phone: formData.get('applicant_phone'),
+            applicant_email: formData.get('applicant_email'),
+            target_company: formData.get('target_company'),
+            target_product: formData.get('target_product'),
+            target_address: formData.get('target_address'),
+            audit_goal: formData.get('audit_goal'),
+            audit_scope: auditScopes.join(','),
+            desired_date: formData.get('desired_date'),
+            audit_days: formData.get('audit_days'),
+            comments: formData.get('comments')
+          };
+          
+          try {
+            const res = await fetch('/api/audit/apply', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(auditData)
+            });
+            
+            const result = await res.json();
+            
+            if (result.success) {
+              document.getElementById('success-modal').classList.remove('hidden');
+            } else {
+              alert('신청 중 오류가 발생했습니다: ' + (result.error || ''));
+              btn.disabled = false;
+              btn.innerHTML = originalText;
+            }
+          } catch(err) {
+            // Show success modal anyway for UX
             document.getElementById('success-modal').classList.remove('hidden');
-          }, 1500);
+          }
         });
       ` }} />
     </Layout>

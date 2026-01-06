@@ -207,6 +207,46 @@ export const Admin = (props: { user: any, tab?: string }) => {
               ${activeTab === 'companies' ? html`
                 <!-- Companies Table -->
                 <div class="space-y-4">
+                  <!-- DART API Import Section -->
+                  <div class="bg-white rounded-xl shadow-sm border border-blue-100 p-5">
+                    <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
+                      <div>
+                        <h3 class="font-semibold text-slate-800 flex items-center">
+                          <i class="fas fa-database text-blue-600 mr-2"></i>
+                          DART 기업 수집
+                        </h3>
+                        <p class="text-xs text-slate-500 mt-1">금융감독원 DART에서 기업 정보를 자동으로 가져옵니다</p>
+                      </div>
+                      <div class="flex flex-col space-y-2">
+                        <div class="flex items-center space-x-2">
+                          <input type="text" id="dart-corp-codes" placeholder="기업코드 (쉼표로 구분)" class="px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-64" />
+                          <button onclick="fetchFromDart()" class="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition flex items-center">
+                            <i class="fas fa-cloud-download-alt mr-2"></i> DART 수집
+                          </button>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                          <button onclick="showSampleCodes()" class="px-3 py-1 bg-slate-100 text-slate-600 text-xs font-medium rounded hover:bg-slate-200 transition">
+                            <i class="fas fa-lightbulb mr-1"></i> 샘플 코드 보기
+                          </button>
+                          <a href="https://dart.fss.or.kr" target="_blank" class="px-3 py-1 bg-slate-100 text-slate-600 text-xs font-medium rounded hover:bg-slate-200 transition flex items-center">
+                            <i class="fas fa-external-link-alt mr-1"></i> DART 사이트
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+                    <!-- DART Status -->
+                    <div id="dart-status" class="hidden mt-4 p-4 bg-blue-50 rounded-lg border border-blue-100">
+                      <div id="dart-message" class="text-sm text-blue-800"></div>
+                    </div>
+                    <!-- Sample Codes -->
+                    <div id="sample-codes" class="hidden mt-4 p-4 bg-slate-50 rounded-lg">
+                      <p class="text-xs font-medium text-slate-700 mb-2">주요 기업 코드 예시:</p>
+                      <div class="flex flex-wrap gap-2" id="sample-codes-list">
+                        <!-- JS will populate -->
+                      </div>
+                    </div>
+                  </div>
+                  
                   <!-- Excel Upload Section -->
                   <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-5">
                     <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
@@ -1360,6 +1400,109 @@ export const Admin = (props: { user: any, tab?: string }) => {
           if ('${activeTab}' === 'settings') {
             loadSeoSettings();
             loadApiKeys();
+          }
+          
+          // ==========================================
+          // DART API Integration Functions
+          // ==========================================
+          
+          async function fetchFromDart() {
+            const codesInput = document.getElementById('dart-corp-codes').value.trim();
+            if (!codesInput) {
+              alert('기업코드를 입력해주세요.\\n쉼표로 구분하여 여러 개 입력 가능합니다.');
+              return;
+            }
+            
+            const codes = codesInput.split(',').map(c => c.trim()).filter(c => c);
+            if (codes.length === 0) {
+              alert('유효한 기업코드를 입력해주세요.');
+              return;
+            }
+            
+            const statusEl = document.getElementById('dart-status');
+            statusEl.classList.remove('hidden');
+            document.getElementById('dart-message').innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>DART에서 기업 정보를 수집하는 중... (' + codes.length + '개 기업)';
+            
+            try {
+              const res = await fetch('/api/admin/dart/fetch-companies', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ corp_codes: codes })
+              });
+              
+              const result = await res.json();
+              
+              if (result.success) {
+                document.getElementById('dart-message').innerHTML = 
+                  '<i class="fas fa-check-circle text-green-600 mr-2"></i>' +
+                  '<span class="text-green-800">수집 완료! ' + result.inserted + '건 추가, ' + result.updated + '건 업데이트, ' + result.errors + '건 오류</span>';
+                
+                // Reload the company list
+                loadCompanies(1);
+              } else {
+                document.getElementById('dart-message').innerHTML = 
+                  '<i class="fas fa-exclamation-circle text-red-600 mr-2"></i>' +
+                  '<span class="text-red-800">수집 실패: ' + (result.error || '알 수 없는 오류') + '</span>';
+              }
+            } catch(e) {
+              document.getElementById('dart-message').innerHTML = 
+                '<i class="fas fa-exclamation-circle text-red-600 mr-2"></i>' +
+                '<span class="text-red-800">오류: ' + e.message + '</span>';
+            }
+          }
+          
+          async function showSampleCodes() {
+            const sampleDiv = document.getElementById('sample-codes');
+            const listDiv = document.getElementById('sample-codes-list');
+            
+            if (!sampleDiv.classList.contains('hidden')) {
+              sampleDiv.classList.add('hidden');
+              return;
+            }
+            
+            try {
+              const res = await fetch('/api/admin/dart/sample-codes');
+              const data = await res.json();
+              
+              if (data.codes && data.codes.length > 0) {
+                listDiv.innerHTML = data.codes.map(c => 
+                  '<button type="button" onclick="addDartCode(\\'' + c.code + '\\')" class="px-2 py-1 bg-white border border-slate-200 rounded text-xs hover:bg-blue-50 hover:border-blue-300 transition">' +
+                  '<span class="font-mono text-blue-600">' + c.code + '</span> ' + c.name +
+                  '</button>'
+                ).join('');
+              }
+              
+              sampleDiv.classList.remove('hidden');
+            } catch(e) {
+              console.log('Sample codes load error:', e);
+            }
+          }
+          
+          function addDartCode(code) {
+            const input = document.getElementById('dart-corp-codes');
+            const current = input.value.trim();
+            if (current) {
+              // Check if already exists
+              const existing = current.split(',').map(c => c.trim());
+              if (!existing.includes(code)) {
+                input.value = current + ',' + code;
+              }
+            } else {
+              input.value = code;
+            }
+          }
+          
+          // Clear cache function
+          async function clearCache() {
+            if(confirm('캐시를 초기화하시겠습니까?')) {
+              try {
+                const res = await fetch('/api/admin/cache/clear', { method: 'POST' });
+                const json = await res.json();
+                alert(json.success ? '캐시가 초기화되었습니다.' : '캐시 초기화 실패');
+              } catch(e) {
+                alert('캐시 초기화 오류');
+              }
+            }
           }
           
           // Initialize on page load
