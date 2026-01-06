@@ -113,41 +113,41 @@ export const Home = (props: { user?: any }) => {
           <div class="lg:grid lg:grid-cols-2 gap-16 items-center">
             <div>
               <span class="text-blue-600 font-bold tracking-widest uppercase text-sm mb-2 block">Advantage 01</span>
-              <h2 className="text-4xl font-extrabold text-slate-900 mb-6 leading-tight">
+              <h2 class="text-4xl font-extrabold text-slate-900 mb-6 leading-tight">
                 검증되지 않은 정보는<br/>
-                <span className="text-blue-600">취급하지 않습니다.</span>
+                <span class="text-blue-600">취급하지 않습니다.</span>
               </h2>
-              <div className="w-20 h-1 bg-blue-600 mb-8"></div>
+              <div class="w-20 h-1 bg-blue-600 mb-8"></div>
               
-              <p className="text-lg text-slate-600 leading-relaxed mb-8">
+              <p class="text-lg text-slate-600 leading-relaxed mb-8">
                 시중에는 검증되지 않은 기업 정보가 넘쳐납니다. 경영인증평가원은 국가 공인 데이터베이스와 직접 연동하여 
                 <strong>'가장 정확한 기업의 현재'</strong>를 진단합니다.
               </p>
 
-              <div className="space-y-6">
-                <div className="flex items-start">
-                  <div className="flex-shrink-0 w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600">
-                    <i className="fas fa-database text-xl"></i>
+              <div class="space-y-6">
+                <div class="flex items-start">
+                  <div class="flex-shrink-0 w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600">
+                    <i class="fas fa-database text-xl"></i>
                   </div>
-                  <div className="ml-5">
-                    <h4 className="text-xl font-bold text-slate-900">DART & NICE 데이터 연동</h4>
-                    <p className="mt-2 text-slate-600">금융감독원 전자공시시스템(DART)과 나이스평가정보의 신용 데이터를 실시간으로 동기화하여, 기업의 재무 건전성과 신용 등급을 100% 신뢰할 수 있는 수치로 제공합니다.</p>
+                  <div class="ml-5">
+                    <h4 class="text-xl font-bold text-slate-900">DART & NICE 데이터 연동</h4>
+                    <p class="mt-2 text-slate-600">금융감독원 전자공시시스템(DART)과 나이스평가정보의 신용 데이터를 실시간으로 동기화하여, 기업의 재무 건전성과 신용 등급을 100% 신뢰할 수 있는 수치로 제공합니다.</p>
                   </div>
                 </div>
-                <div className="flex items-start">
-                  <div className="flex-shrink-0 w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600">
-                    <i className="fas fa-search-dollar text-xl"></i>
+                <div class="flex items-start">
+                  <div class="flex-shrink-0 w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600">
+                    <i class="fas fa-search-dollar text-xl"></i>
                   </div>
-                  <div className="ml-5">
-                    <h4 className="text-xl font-bold text-slate-900">30,000건의 공공 데이터 분석</h4>
-                    <p className="mt-2 text-slate-600">100여 개 정부 부처 및 지자체의 지원사업 공고를 매일 크롤링하고 NLP(자연어 처리)로 분석합니다. 단순 검색으로는 찾을 수 없는 '숨겨진 1억 원'을 찾아내는 비결입니다.</p>
+                  <div class="ml-5">
+                    <h4 class="text-xl font-bold text-slate-900">30,000건의 공공 데이터 분석</h4>
+                    <p class="mt-2 text-slate-600">100여 개 정부 부처 및 지자체의 지원사업 공고를 매일 크롤링하고 NLP(자연어 처리)로 분석합니다. 단순 검색으로는 찾을 수 없는 '숨겨진 1억 원'을 찾아내는 비결입니다.</p>
                   </div>
                 </div>
               </div>
             </div>
-            <div className="relative mt-12 lg:mt-0">
-              <div className="absolute inset-0 bg-blue-600 rounded-3xl transform rotate-3 opacity-10"></div>
-              <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80" alt="Data Analytics" className="relative rounded-3xl shadow-2xl w-full object-cover transform -rotate-3 hover:rotate-0 transition-transform duration-500" />
+            <div class="relative mt-12 lg:mt-0">
+              <div class="absolute inset-0 bg-blue-600 rounded-3xl transform rotate-3 opacity-10"></div>
+              <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80" alt="Data Analytics" class="relative rounded-3xl shadow-2xl w-full object-cover transform -rotate-3 hover:rotate-0 transition-transform duration-500" />
             </div>
           </div>
         </div>
@@ -157,38 +157,38 @@ export const Home = (props: { user?: any }) => {
       <section class="py-24 bg-slate-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div class="lg:grid lg:grid-cols-2 gap-16 items-center">
-            <div className="order-2 lg:order-1 relative">
-              <div className="absolute inset-0 bg-indigo-600 rounded-3xl transform -rotate-3 opacity-10"></div>
-              <img src="https://images.unsplash.com/photo-1573164713714-d95e436ab8d6?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80" alt="Consulting" className="relative rounded-3xl shadow-2xl w-full object-cover transform rotate-3 hover:rotate-0 transition-transform duration-500" />
+            <div class="order-2 lg:order-1 relative">
+              <div class="absolute inset-0 bg-indigo-600 rounded-3xl transform -rotate-3 opacity-10"></div>
+              <img src="https://images.unsplash.com/photo-1573164713714-d95e436ab8d6?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80" alt="Consulting" class="relative rounded-3xl shadow-2xl w-full object-cover transform rotate-3 hover:rotate-0 transition-transform duration-500" />
             </div>
             
-            <div className="order-1 lg:order-2">
-              <span className="text-indigo-600 font-bold tracking-widest uppercase text-sm mb-2 block">Advantage 02</span>
-              <h2 className="text-4xl font-extrabold text-slate-900 mb-6 leading-tight">
+            <div class="order-1 lg:order-2">
+              <span class="text-indigo-600 font-bold tracking-widest uppercase text-sm mb-2 block">Advantage 02</span>
+              <h2 class="text-4xl font-extrabold text-slate-900 mb-6 leading-tight">
                 AI는 거들 뿐,<br/>
-                핵심은 <span className="text-indigo-600">현장 심사원의 눈</span>입니다.
+                핵심은 <span class="text-indigo-600">현장 심사원의 눈</span>입니다.
               </h2>
-              <div className="w-20 h-1 bg-indigo-600 mb-8"></div>
+              <div class="w-20 h-1 bg-indigo-600 mb-8"></div>
               
-              <p className="text-lg text-slate-600 leading-relaxed mb-8">
+              <p class="text-lg text-slate-600 leading-relaxed mb-8">
                 데이터가 아무리 완벽해도 현장의 실력은 서류만으로 알 수 없습니다. 
                 경영인증평가원은 20년 경력의 ISO 수석 심사원들이 직접 현장을 방문하여 검증합니다.
               </p>
 
-              <div className="grid grid-cols-1 gap-6">
-                <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
-                  <h4 className="text-lg font-bold text-slate-900 mb-2 flex items-center">
-                    <i className="fas fa-user-check text-indigo-500 mr-3"></i> 3자 검증 시스템 (3rd Party Verification)
+              <div class="grid grid-cols-1 gap-6">
+                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+                  <h4 class="text-lg font-bold text-slate-900 mb-2 flex items-center">
+                    <i class="fas fa-user-check text-indigo-500 mr-3"></i> 3자 검증 시스템 (3rd Party Verification)
                   </h4>
-                  <p className="text-slate-600 text-sm">
+                  <p class="text-slate-600 text-sm">
                     매칭 전, 경영인증평가원 전문 심사원이 공급 기업의 설비, 생산 능력, 품질 관리 상태를 직접 눈으로 확인하고 등급을 매깁니다. 발주사는 검증된 리포트만 받아보시면 됩니다.
                   </p>
                 </div>
-                <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
-                  <h4 className="text-lg font-bold text-slate-900 mb-2 flex items-center">
-                    <i className="fas fa-file-signature text-indigo-500 mr-3"></i> 전문 심사원 풀(Pool) 보유
+                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+                  <h4 class="text-lg font-bold text-slate-900 mb-2 flex items-center">
+                    <i class="fas fa-file-signature text-indigo-500 mr-3"></i> 전문 심사원 풀(Pool) 보유
                   </h4>
-                  <p className="text-slate-600 text-sm">
+                  <p class="text-slate-600 text-sm">
                     기계, 전기전자, 화학, SW 등 산업별 전문 자격을 갖춘 150여 명의 심사원 네트워크를 보유하고 있어, 해당 업종의 언어로 정확하게 소통하고 평가합니다.
                   </p>
                 </div>
@@ -200,48 +200,48 @@ export const Home = (props: { user?: any }) => {
 
       {/* ================= ADVANTAGE PART 3 ================= */}
       <section class="py-24 bg-slate-900 text-white relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-600 rounded-full filter blur-[150px] opacity-20"></div>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="text-center mb-16">
-            <span className="text-blue-400 font-bold tracking-widest uppercase text-sm mb-2 block">Advantage 03</span>
-            <h2 className="text-4xl md:text-5xl font-extrabold mb-6">
-              인증부터 매칭까지,<br/>기업 성장의 <span className="text-blue-400">A to Z</span>를 책임집니다.
+        <div class="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-600 rounded-full filter blur-[150px] opacity-20"></div>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div class="text-center mb-16">
+            <span class="text-blue-400 font-bold tracking-widest uppercase text-sm mb-2 block">Advantage 03</span>
+            <h2 class="text-4xl md:text-5xl font-extrabold mb-6">
+              인증부터 매칭까지,<br/>기업 성장의 <span class="text-blue-400">A to Z</span>를 책임집니다.
             </h2>
-            <p className="text-lg text-slate-400 max-w-3xl mx-auto">
+            <p class="text-lg text-slate-400 max-w-3xl mx-auto">
               필요할 때만 찾는 서비스가 아닙니다. 기업의 탄생부터 성장, 글로벌 진출까지<br/>
               전 생애주기(Lifecycle)에 필요한 솔루션을 원스톱으로 제공합니다.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8 text-center">
-            <div className="bg-slate-800 p-10 rounded-3xl border border-slate-700 hover:border-blue-500 transition-colors group">
-              <div className="w-20 h-20 bg-slate-700 rounded-full flex items-center justify-center mx-auto mb-8 text-3xl group-hover:scale-110 transition-transform text-blue-400">
-                <i className="fas fa-seedling"></i>
+          <div class="grid md:grid-cols-3 gap-8 text-center">
+            <div class="bg-slate-800 p-10 rounded-3xl border border-slate-700 hover:border-blue-500 transition-colors group">
+              <div class="w-20 h-20 bg-slate-700 rounded-full flex items-center justify-center mx-auto mb-8 text-3xl group-hover:scale-110 transition-transform text-blue-400">
+                <i class="fas fa-seedling"></i>
               </div>
-              <h3 className="text-2xl font-bold mb-4">1. 창업 & 기반 구축</h3>
-              <p className="text-slate-400 leading-relaxed">
+              <h3 class="text-2xl font-bold mb-4">1. 창업 & 기반 구축</h3>
+              <p class="text-slate-400 leading-relaxed">
                 법인 설립, 벤처/연구소 인증 지원,<br/>
                 초기 창업 패키지 자금 매칭으로<br/>
                 사업의 기초를 단단하게 다집니다.
               </p>
             </div>
-            <div className="bg-slate-800 p-10 rounded-3xl border border-slate-700 hover:border-blue-500 transition-colors group">
-              <div className="w-20 h-20 bg-slate-700 rounded-full flex items-center justify-center mx-auto mb-8 text-3xl group-hover:scale-110 transition-transform text-blue-400">
-                <i className="fas fa-rocket"></i>
+            <div class="bg-slate-800 p-10 rounded-3xl border border-slate-700 hover:border-blue-500 transition-colors group">
+              <div class="w-20 h-20 bg-slate-700 rounded-full flex items-center justify-center mx-auto mb-8 text-3xl group-hover:scale-110 transition-transform text-blue-400">
+                <i class="fas fa-rocket"></i>
               </div>
-              <h3 className="text-2xl font-bold mb-4">2. 성장 & 스케일업</h3>
-              <p className="text-slate-400 leading-relaxed">
+              <h3 class="text-2xl font-bold mb-4">2. 성장 & 스케일업</h3>
+              <p class="text-slate-400 leading-relaxed">
                 ISO/IATF 시스템 인증 심사,<br/>
                 R&D 기술개발 과제 수주,<br/>
                 신뢰성 있는 제조 파트너 연결.
               </p>
             </div>
-            <div className="bg-slate-800 p-10 rounded-3xl border border-slate-700 hover:border-blue-500 transition-colors group">
-              <div className="w-20 h-20 bg-slate-700 rounded-full flex items-center justify-center mx-auto mb-8 text-3xl group-hover:scale-110 transition-transform text-blue-400">
-                <i className="fas fa-globe"></i>
+            <div class="bg-slate-800 p-10 rounded-3xl border border-slate-700 hover:border-blue-500 transition-colors group">
+              <div class="w-20 h-20 bg-slate-700 rounded-full flex items-center justify-center mx-auto mb-8 text-3xl group-hover:scale-110 transition-transform text-blue-400">
+                <i class="fas fa-globe"></i>
               </div>
-              <h3 className="text-2xl font-bold mb-4">3. 글로벌 도약</h3>
-              <p className="text-slate-400 leading-relaxed">
+              <h3 class="text-2xl font-bold mb-4">3. 글로벌 도약</h3>
+              <p class="text-slate-400 leading-relaxed">
                 수출바우처 사업 매칭,<br/>
                 해외 규격 인증 지원,<br/>
                 ESG 경영 컨설팅 및 평가.
@@ -255,42 +255,42 @@ export const Home = (props: { user?: any }) => {
       <section class="py-24 bg-white">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div class="text-center mb-16">
-            <span className="text-blue-600 font-bold uppercase tracking-wider text-sm">System Process</span>
-            <h2 className="text-3xl font-bold text-slate-900 mt-2">경영인증평가원 인증 프로세스</h2>
-            <p className="mt-4 text-slate-600">국제 표준 인증은 체계적이고 엄격한 절차를 통해 진행됩니다.</p>
+            <span class="text-blue-600 font-bold uppercase tracking-wider text-sm">System Process</span>
+            <h2 class="text-3xl font-bold text-slate-900 mt-2">경영인증평가원 인증 프로세스</h2>
+            <p class="mt-4 text-slate-600">국제 표준 인증은 체계적이고 엄격한 절차를 통해 진행됩니다.</p>
           </div>
 
           <div class="relative">
-            <div className="hidden md:block absolute top-1/2 left-0 w-full h-1 bg-slate-100 -z-10 transform -translate-y-1/2"></div>
+            <div class="hidden md:block absolute top-1/2 left-0 w-full h-1 bg-slate-100 -z-10 transform -translate-y-1/2"></div>
             
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-              <div className="bg-white p-6 rounded-2xl border border-slate-200 text-center shadow-sm relative group hover:-translate-y-2 transition-transform duration-300">
-                <div className="w-16 h-16 mx-auto bg-blue-50 rounded-full flex items-center justify-center text-blue-600 text-2xl mb-6 ring-4 ring-white group-hover:bg-blue-600 group-hover:text-white transition-colors">
-                  <i className="fas fa-file-contract"></i>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+              <div class="bg-white p-6 rounded-2xl border border-slate-200 text-center shadow-sm relative group hover:-translate-y-2 transition-transform duration-300">
+                <div class="w-16 h-16 mx-auto bg-blue-50 rounded-full flex items-center justify-center text-blue-600 text-2xl mb-6 ring-4 ring-white group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                  <i class="fas fa-file-contract"></i>
                 </div>
-                <h3 className="text-lg font-bold text-slate-900 mb-2">1. 신청 및 접수</h3>
-                <p className="text-sm text-slate-500">인증 문의 및 상담 후<br/>정식 신청서를 제출합니다.</p>
+                <h3 class="text-lg font-bold text-slate-900 mb-2">1. 신청 및 접수</h3>
+                <p class="text-sm text-slate-500">인증 문의 및 상담 후<br/>정식 신청서를 제출합니다.</p>
               </div>
-              <div className="bg-white p-6 rounded-2xl border border-slate-200 text-center shadow-sm relative group hover:-translate-y-2 transition-transform duration-300">
-                <div className="w-16 h-16 mx-auto bg-blue-50 rounded-full flex items-center justify-center text-blue-600 text-2xl mb-6 ring-4 ring-white group-hover:bg-blue-600 group-hover:text-white transition-colors">
-                  <i className="fas fa-search-plus"></i>
+              <div class="bg-white p-6 rounded-2xl border border-slate-200 text-center shadow-sm relative group hover:-translate-y-2 transition-transform duration-300">
+                <div class="w-16 h-16 mx-auto bg-blue-50 rounded-full flex items-center justify-center text-blue-600 text-2xl mb-6 ring-4 ring-white group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                  <i class="fas fa-search-plus"></i>
                 </div>
-                <h3 className="text-lg font-bold text-slate-900 mb-2">2. 1단계 문서심사</h3>
-                <p className="text-sm text-slate-500">경영시스템 문서가 규격 요구사항에<br/>적합한지 검토합니다.</p>
+                <h3 class="text-lg font-bold text-slate-900 mb-2">2. 1단계 문서심사</h3>
+                <p class="text-sm text-slate-500">경영시스템 문서가 규격 요구사항에<br/>적합한지 검토합니다.</p>
               </div>
-              <div className="bg-white p-6 rounded-2xl border border-slate-200 text-center shadow-sm relative group hover:-translate-y-2 transition-transform duration-300">
-                <div className="w-16 h-16 mx-auto bg-blue-50 rounded-full flex items-center justify-center text-blue-600 text-2xl mb-6 ring-4 ring-white group-hover:bg-blue-600 group-hover:text-white transition-colors">
-                  <i className="fas fa-industry"></i>
+              <div class="bg-white p-6 rounded-2xl border border-slate-200 text-center shadow-sm relative group hover:-translate-y-2 transition-transform duration-300">
+                <div class="w-16 h-16 mx-auto bg-blue-50 rounded-full flex items-center justify-center text-blue-600 text-2xl mb-6 ring-4 ring-white group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                  <i class="fas fa-industry"></i>
                 </div>
-                <h3 className="text-lg font-bold text-slate-900 mb-2">3. 2단계 현장심사</h3>
-                <p className="text-sm text-slate-500">사업장을 방문하여 시스템의<br/>실제 이행 여부를 확인합니다.</p>
+                <h3 class="text-lg font-bold text-slate-900 mb-2">3. 2단계 현장심사</h3>
+                <p class="text-sm text-slate-500">사업장을 방문하여 시스템의<br/>실제 이행 여부를 확인합니다.</p>
               </div>
-              <div className="bg-white p-6 rounded-2xl border border-slate-200 text-center shadow-sm relative group hover:-translate-y-2 transition-transform duration-300">
-                <div className="w-16 h-16 mx-auto bg-blue-50 rounded-full flex items-center justify-center text-blue-600 text-2xl mb-6 ring-4 ring-white group-hover:bg-blue-600 group-hover:text-white transition-colors">
-                  <i className="fas fa-award"></i>
+              <div class="bg-white p-6 rounded-2xl border border-slate-200 text-center shadow-sm relative group hover:-translate-y-2 transition-transform duration-300">
+                <div class="w-16 h-16 mx-auto bg-blue-50 rounded-full flex items-center justify-center text-blue-600 text-2xl mb-6 ring-4 ring-white group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                  <i class="fas fa-award"></i>
                 </div>
-                <h3 className="text-lg font-bold text-slate-900 mb-2">4. 인증서 발급</h3>
-                <p className="text-sm text-slate-500">심의위원회 승인을 거쳐<br/>최종 인증서를 발급합니다.</p>
+                <h3 class="text-lg font-bold text-slate-900 mb-2">4. 인증서 발급</h3>
+                <p class="text-sm text-slate-500">심의위원회 승인을 거쳐<br/>최종 인증서를 발급합니다.</p>
               </div>
             </div>
           </div>
