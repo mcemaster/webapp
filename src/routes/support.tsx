@@ -16,59 +16,82 @@ support.get('/', (c) => {
   return c.render(<SupportMatching user={user} />)
 })
 
-// 2. API: Real AI Analysis (OpenAI GPT-4o)
+// 2. API: Deep AI Analysis
 support.post('/analyze', async (c) => {
   try {
     const { companyData } = await c.req.json();
     const apiKey = c.env.OPENAI_API_KEY;
 
-    // API 키 확인
     if (!apiKey) {
-      throw new Error("OpenAI API Key가 설정되지 않았습니다. 클라우드플레어 설정을 확인해주세요.");
+      throw new Error("OpenAI API Key Missing");
     }
 
-    // 프롬프트 구성 (Strict JSON Output)
+    // Advanced Prompt with Deep Data
     const systemPrompt = `
-      당신은 대한민국 최고의 정부지원사업 매칭 전문가 AI입니다.
-      현재 시점은 2026년입니다.
+      당신은 대한민국 최고의 정부지원사업 매칭 컨설턴트 AI입니다.
+      기업이 제공한 '정밀 진단 데이터'를 바탕으로 2026년도 최적의 지원사업 Top 20을 추천해야 합니다.
       
-      입력된 기업 데이터를 정밀 분석하여, 합격 가능성이 높은 '2026년 정부지원사업' 20개를 추천해야 합니다.
-      반드시 다음 JSON 스키마를 준수하여 응답하세요.
+      [분석 원칙]
+      1. 재무 안정성: 부채비율과 영업이익을 고려하여 금융 지원 vs R&D 지원 여부를 판단하세요.
+      2. 기술 역량: 연구소 보유 여부와 R&D 투자비율이 높다면 '기술개발(R&D)' 사업을 최우선 추천하세요.
+      3. 수출 역량: 수출 실적이 있다면 '글로벌/수출바우처' 사업을 반드시 포함하세요.
+      4. 고용 창출: 청년 고용이나 인력 증가가 보이면 '고용장려금'이나 '일자리사업'을 매칭하세요.
       
       Output JSON Format:
       {
+        "diagnosis": {
+          "techScore": "기술성 점수(S/A/B/C)",
+          "bizScore": "사업성 점수(S/A/B/C)",
+          "marketScore": "시장성 점수(S/A/B/C)",
+          "comment": "기업의 강점과 약점에 대한 한 줄 총평"
+        },
         "data": [
           {
             "rank": 1,
-            "title": "공고명 (예: 2026년 초기창업패키지)",
-            "agency": "주관기관 (예: 중소벤처기업부)",
-            "category": "분야 (R&D, 사업화, 인력, 수출, 자금 중 택1)",
+            "title": "공고명",
+            "agency": "주관기관",
+            "category": "분야(R&D/사업화/수출/인력/자금)",
             "matchScore": 98,
-            "amount": "지원금액 (예: 최대 1억원)",
-            "deadline": "마감일 (예: 2026-03-15)",
-            "aiReason": "기업의 상황(매출, 업종 등)과 공고의 특성을 연결한 구체적인 추천 사유 (2문장 이상)"
+            "amount": "최대 지원금",
+            "deadline": "마감일",
+            "aiReason": "이 사업을 추천하는 구체적인 이유 (기업 데이터 인용 필수)"
           }
-          // ... 총 20개 항목
+          // ... 20 items
         ]
       }
     `;
 
     const userPrompt = `
-      [분석 대상 기업 정보]
-      - 기업명: ${companyData.name}
-      - 대표자: ${companyData.ceo || '미입력'}
-      - 업종(KSIC): ${companyData.ksic}
-      - 주요사업: ${companyData.desc || '정보 없음'}
-      - 매출액: ${companyData.rev_2024} 백만원
-      - 직원수: ${companyData.employees} 명
-      - 보유인증: ${companyData.certs ? companyData.certs.join(', ') : '없음'}
-      
-      위 기업에게 가장 적합한 2026년도 정부지원사업 20개를 선정하고, 각 사업별로 선정이유를 논리적으로 작성해주세요.
-      매출액 규모와 업력을 고려하여 '창업기', '도약기', '성장기'에 맞는 사업을 매칭해야 합니다.
-      특히 '보유인증'이 가점이 되는 사업을 우선순위에 두세요.
+      [기업 정밀 데이터]
+      1. 기업 개요
+         - 기업명: ${companyData.basic.name}
+         - 업종: ${companyData.basic.industry}
+         - 설립일: ${companyData.basic.estDate}
+         - 규모: ${companyData.basic.scale}
+         - 주소: ${companyData.basic.address}
+
+      2. 재무 현황 (단위: 백만원)
+         - 매출액: ${companyData.finance.revenue}
+         - 영업이익: ${companyData.finance.profit}
+         - 자본총계: ${companyData.finance.capital}
+         - 부채비율: ${companyData.finance.debtRatio}%
+
+      3. 기술 및 R&D
+         - 연구소 보유: ${companyData.tech.hasLab ? '보유' : '미보유'}
+         - R&D 투자액: ${companyData.tech.rndSpend} 백만원
+         - 지식재산권: ${companyData.tech.ipCount} 건
+         - 주력 제품/기술: ${companyData.tech.description}
+
+      4. 인력 현황
+         - 총 직원: ${companyData.hr.total} 명
+         - 연구 인력: ${companyData.hr.researchers} 명
+         - 청년 고용: ${companyData.hr.youth} 명
+
+      5. 수출 및 인증
+         - 직수출 실적: ${companyData.export.amount} USD
+         - 보유 인증: ${companyData.cert.list.join(', ')}
     `;
 
-    // OpenAI API 호출
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -76,43 +99,28 @@ support.post('/analyze', async (c) => {
         'Authorization': `Bearer ${apiKey}`
       },
       body: JSON.stringify({
-        model: "gpt-4o", // 속도와 성능 균형
+        model: "gpt-4o",
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt }
         ],
-        temperature: 0.7,
+        temperature: 0.6,
         response_format: { type: "json_object" }
       })
     });
 
-    if (!response.ok) {
-      const err = await response.json() as any;
-      throw new Error(`OpenAI API Error: ${err.error?.message || response.statusText}`);
-    }
+    if (!response.ok) throw new Error("AI Server Error");
 
     const aiData: any = await response.json();
-    const content = aiData.choices[0].message.content;
-    const parsedData = JSON.parse(content);
+    const result = JSON.parse(aiData.choices[0].message.content);
 
-    // 데이터 검증 및 가공 (ID 부여)
-    const results = parsedData.data.map((item: any, index: number) => ({
-      ...item,
-      id: index + 1,
-      rank: index + 1
-    }));
-
-    return c.json({ success: true, data: results });
+    return c.json({ success: true, ...result });
 
   } catch (e: any) {
-    console.error("AI Analysis Failed:", e);
-    
-    // 실패 시 Fallback (사용자 경험을 위해 정적 데이터 반환하되, 에러 메시지 포함 가능)
-    // 여기서는 명시적으로 에러를 리턴하여 클라이언트가 알게 함
     return c.json({ 
       success: false, 
-      error: e.message,
-      message: "AI 분석 중 오류가 발생했습니다. API Key를 확인하거나 잠시 후 다시 시도해주세요."
+      message: "AI 분석 중 오류가 발생했습니다. (API Key 확인 필요)",
+      error: e.message 
     });
   }
 })
