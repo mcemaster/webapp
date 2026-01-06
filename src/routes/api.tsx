@@ -2264,6 +2264,147 @@ api.get('/admin/companies/:id/detail', async (c) => {
 })
 
 // ==========================================
+// AI 기업-지원사업 매칭 API
+// ==========================================
+
+// AI 기반 기업 맞춤 지원사업 매칭
+api.post('/support/ai-match', async (c) => {
+  try {
+    const db = c.env.DB
+    const body = await c.req.json()
+    const { companyId, companyInfo } = body
+    
+    if (!companyInfo) {
+      return c.json({ success: false, error: '기업 정보가 필요합니다.' }, 400)
+    }
+    
+    // 지원사업 목록 가져오기
+    const grants = await db.prepare(`
+      SELECT id, title, agency, type, max_amount, target_age_min, target_age_max, description, deadline
+      FROM grants
+      WHERE deadline >= date('now') OR deadline IS NULL
+      ORDER BY deadline ASC
+      LIMIT 50
+    `).all()
+    
+    const grantList = grants.results || []
+    
+    if (grantList.length === 0) {
+      // 지원사업이 없으면 샘플 데이터로 테스트
+      return c.json({
+        success: true,
+        matches: [
+          {
+            title: '중소기업 R&D 지원사업',
+            agency: '중소벤처기업부',
+            score: 92,
+            reason: companyInfo.name + '의 업종과 규모에 적합한 R&D 지원사업입니다.',
+            description: '중소기업의 기술개발을 지원하는 정부 R&D 사업'
+          },
+          {
+            title: '스마트공장 구축 지원',
+            agency: '중소벤처기업부',
+            score: 85,
+            reason: '제조업 분야 기업에 적합한 스마트공장 구축 지원사업입니다.',
+            description: '스마트공장 도입을 통한 생산성 향상 지원'
+          },
+          {
+            title: '일자리 안정자금',
+            agency: '고용노동부',
+            score: 78,
+            reason: companyInfo.employeeCount + '명 규모의 기업에 적용 가능한 지원금입니다.',
+            description: '최저임금 인상에 따른 중소기업 지원'
+          }
+        ],
+        message: '샘플 매칭 결과 (실제 지원사업 데이터 추가 필요)'
+      })
+    }
+    
+    // 간단한 매칭 로직 (실제로는 AI/ML 사용 가능)
+    const matches = grantList.map((g: any) => {
+      let score = 50 // 기본 점수
+      const reasons: string[] = []
+      
+      // 업종 매칭
+      if (g.description && companyInfo.industry) {
+        if (g.description.includes(companyInfo.industry) || 
+            g.description.includes('제조') || 
+            g.description.includes('중소기업')) {
+          score += 20
+          reasons.push('업종 적합')
+        }
+      }
+      
+      // 직원수 매칭
+      if (companyInfo.employeeCount) {
+        const emp = parseInt(companyInfo.employeeCount)
+        if (emp < 50) {
+          score += 15
+          reasons.push('소기업 우대')
+        } else if (emp < 300) {
+          score += 10
+          reasons.push('중기업 대상')
+        }
+      }
+      
+      // 매출액 매칭
+      if (companyInfo.revenue) {
+        const rev = parseInt(companyInfo.revenue)
+        if (rev < 10000000000) { // 100억 미만
+          score += 10
+          reasons.push('매출 규모 적합')
+        }
+      }
+      
+      // 업력 매칭 (창업지원)
+      if (companyInfo.foundingDate) {
+        const founding = new Date(companyInfo.foundingDate)
+        const years = (Date.now() - founding.getTime()) / (365 * 24 * 60 * 60 * 1000)
+        if (years < 7 && g.title && g.title.includes('창업')) {
+          score += 15
+          reasons.push('창업 7년 이내')
+        }
+      }
+      
+      return {
+        id: g.id,
+        title: g.title,
+        agency: g.agency,
+        description: g.description,
+        deadline: g.deadline,
+        maxAmount: g.max_amount,
+        score: Math.min(score, 100),
+        reason: reasons.length > 0 ? reasons.join(', ') : '기본 추천'
+      }
+    })
+    
+    // 점수순 정렬
+    matches.sort((a: any, b: any) => b.score - a.score)
+    
+    // 분석 로그 저장
+    try {
+      await db.prepare(`
+        INSERT INTO analysis_logs (company_id, result_json, created_at)
+        VALUES (?, ?, datetime('now'))
+      `).bind(
+        companyId || null,
+        JSON.stringify({ matches: matches.slice(0, 5) })
+      ).run()
+    } catch (e) {
+      // 로그 저장 실패해도 계속
+    }
+    
+    return c.json({
+      success: true,
+      matches: matches.slice(0, 5),
+      total: grantList.length
+    })
+  } catch (e: any) {
+    return c.json({ success: false, error: e.message }, 500)
+  }
+})
+
+// ==========================================
 // 대규모 기업 데이터 수집 시스템
 // ==========================================
 

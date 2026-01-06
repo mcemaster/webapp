@@ -520,6 +520,103 @@ export const Admin = (props: { user: any, tab?: string }) => {
                     </div>
                   </div>
                   
+                  <!-- Company Detail Modal -->
+                  <div id="company-detail-modal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center overflow-y-auto py-8">
+                    <div class="bg-white rounded-xl shadow-2xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+                      <div class="sticky top-0 bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-6 rounded-t-xl">
+                        <div class="flex items-center justify-between">
+                          <div>
+                            <h3 id="modal-company-name" class="font-bold text-xl">기업명</h3>
+                            <p id="modal-company-code" class="text-blue-200 text-sm mt-1">종목코드: -</p>
+                          </div>
+                          <button onclick="closeCompanyModal()" class="p-2 hover:bg-white/20 rounded-lg transition">
+                            <i class="fas fa-times text-xl"></i>
+                          </button>
+                        </div>
+                      </div>
+                      
+                      <div class="p-6 space-y-6">
+                        <!-- 기본 정보 -->
+                        <div class="bg-slate-50 rounded-xl p-5">
+                          <h4 class="font-semibold text-slate-800 mb-4 flex items-center">
+                            <i class="fas fa-building text-blue-600 mr-2"></i> 기본 정보
+                          </h4>
+                          <div class="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+                            <div><span class="text-slate-500">대표이사</span><p id="modal-ceo" class="font-medium text-slate-800 mt-1">-</p></div>
+                            <div><span class="text-slate-500">설립일</span><p id="modal-founding" class="font-medium text-slate-800 mt-1">-</p></div>
+                            <div><span class="text-slate-500">업종</span><p id="modal-industry" class="font-medium text-slate-800 mt-1">-</p></div>
+                            <div><span class="text-slate-500">주소</span><p id="modal-address" class="font-medium text-slate-800 mt-1">-</p></div>
+                            <div><span class="text-slate-500">전화번호</span><p id="modal-phone" class="font-medium text-slate-800 mt-1">-</p></div>
+                            <div><span class="text-slate-500">홈페이지</span><p id="modal-website" class="font-medium text-slate-800 mt-1">-</p></div>
+                          </div>
+                        </div>
+                        
+                        <!-- 재무 정보 -->
+                        <div class="bg-emerald-50 rounded-xl p-5">
+                          <h4 class="font-semibold text-slate-800 mb-4 flex items-center">
+                            <i class="fas fa-chart-line text-emerald-600 mr-2"></i> 재무 정보
+                          </h4>
+                          <div class="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+                            <div><span class="text-slate-500">매출액</span><p id="modal-revenue" class="font-medium text-emerald-700 mt-1 text-lg">-</p></div>
+                            <div><span class="text-slate-500">영업이익</span><p id="modal-operating" class="font-medium text-emerald-700 mt-1 text-lg">-</p></div>
+                            <div><span class="text-slate-500">당기순이익</span><p id="modal-net-income" class="font-medium text-emerald-700 mt-1 text-lg">-</p></div>
+                            <div><span class="text-slate-500">자산총계</span><p id="modal-assets" class="font-medium text-slate-800 mt-1">-</p></div>
+                            <div><span class="text-slate-500">부채총계</span><p id="modal-liabilities" class="font-medium text-slate-800 mt-1">-</p></div>
+                            <div><span class="text-slate-500">자본총계</span><p id="modal-equity" class="font-medium text-slate-800 mt-1">-</p></div>
+                          </div>
+                        </div>
+                        
+                        <!-- 직원 정보 -->
+                        <div class="bg-purple-50 rounded-xl p-5">
+                          <h4 class="font-semibold text-slate-800 mb-4 flex items-center">
+                            <i class="fas fa-users text-purple-600 mr-2"></i> 직원 정보
+                          </h4>
+                          <div class="grid grid-cols-2 gap-4 text-sm">
+                            <div><span class="text-slate-500">직원수</span><p id="modal-employees" class="font-medium text-purple-700 mt-1 text-lg">-</p></div>
+                            <div><span class="text-slate-500">평균급여</span><p id="modal-avg-salary" class="font-medium text-purple-700 mt-1 text-lg">-</p></div>
+                          </div>
+                        </div>
+                        
+                        <!-- 임원 정보 -->
+                        <div class="bg-amber-50 rounded-xl p-5">
+                          <h4 class="font-semibold text-slate-800 mb-4 flex items-center">
+                            <i class="fas fa-user-tie text-amber-600 mr-2"></i> 임원 정보
+                          </h4>
+                          <div id="modal-executives" class="space-y-2 text-sm">
+                            <p class="text-slate-400">임원 정보 없음</p>
+                          </div>
+                        </div>
+                        
+                        <!-- 주주 정보 -->
+                        <div class="bg-cyan-50 rounded-xl p-5">
+                          <h4 class="font-semibold text-slate-800 mb-4 flex items-center">
+                            <i class="fas fa-hand-holding-usd text-cyan-600 mr-2"></i> 주요 주주
+                          </h4>
+                          <div id="modal-shareholders" class="space-y-2 text-sm">
+                            <p class="text-slate-400">주주 정보 없음</p>
+                          </div>
+                        </div>
+                        
+                        <!-- AI 매칭 버튼 -->
+                        <div class="flex justify-center pt-4">
+                          <button onclick="runAIMatching()" id="ai-match-btn" class="px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold rounded-xl hover:from-indigo-700 hover:to-purple-700 transition shadow-lg flex items-center">
+                            <i class="fas fa-robot mr-2"></i> AI 지원사업 매칭 실행
+                          </button>
+                        </div>
+                        
+                        <!-- AI 매칭 결과 -->
+                        <div id="ai-match-result" class="hidden bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl p-5 border border-indigo-200">
+                          <h4 class="font-semibold text-indigo-800 mb-4 flex items-center">
+                            <i class="fas fa-magic text-indigo-600 mr-2"></i> AI 추천 지원사업
+                          </h4>
+                          <div id="ai-match-content" class="space-y-3">
+                            <!-- AI 결과가 여기에 표시됨 -->
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
                   <!-- AI Generation Modal -->
                   <div id="ai-gen-modal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
                     <div class="bg-white rounded-xl shadow-2xl max-w-md w-full mx-4 p-6">
@@ -664,10 +761,11 @@ export const Admin = (props: { user: any, tab?: string }) => {
                             <th class="px-5 py-3 text-left font-semibold">매출액</th>
                             <th class="px-5 py-3 text-left font-semibold">인증</th>
                             <th class="px-5 py-3 text-left font-semibold">등록일</th>
+                            <th class="px-5 py-3 text-center font-semibold">액션</th>
                           </tr>
                         </thead>
                         <tbody id="company-table" class="divide-y divide-slate-100">
-                          <tr><td colspan="8" class="px-5 py-8 text-center text-slate-400">데이터를 불러오는 중...</td></tr>
+                          <tr><td colspan="9" class="px-5 py-8 text-center text-slate-400">데이터를 불러오는 중...</td></tr>
                         </tbody>
                       </table>
                     </div>
@@ -1800,7 +1898,7 @@ export const Admin = (props: { user: any, tab?: string }) => {
                 
                 if (data.companies && data.companies.length > 0) {
                   tbody.innerHTML = data.companies.map(c => 
-                    '<tr class="hover:bg-slate-50">' +
+                    '<tr class="hover:bg-slate-50 cursor-pointer" onclick="openCompanyDetail(' + c.id + ')">' +
                     '<td class="px-5 py-3 font-medium text-slate-800">' + (c.name || '-') + '</td>' +
                     '<td class="px-5 py-3 text-slate-600 font-mono text-xs">' + (c.biz_num || '-') + '</td>' +
                     '<td class="px-5 py-3 text-slate-600">' + (c.ceo || '-') + '</td>' +
@@ -1809,10 +1907,14 @@ export const Admin = (props: { user: any, tab?: string }) => {
                     '<td class="px-5 py-3 text-slate-600">' + (c.revenue || '-') + '</td>' +
                     '<td class="px-5 py-3"><span class="px-2 py-0.5 text-xs bg-blue-50 text-blue-700 rounded">' + (c.certifications || '-') + '</span></td>' +
                     '<td class="px-5 py-3 text-slate-500 text-xs">' + (c.created_at || '-') + '</td>' +
+                    '<td class="px-5 py-3 text-center" onclick="event.stopPropagation()">' +
+                    '<button onclick="openCompanyDetail(' + c.id + ')" class="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded hover:bg-blue-200 mr-1" title="상세보기"><i class="fas fa-eye"></i></button>' +
+                    '<button onclick="quickAIMatch(' + c.id + ')" class="px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded hover:bg-purple-200" title="AI 매칭"><i class="fas fa-robot"></i></button>' +
+                    '</td>' +
                     '</tr>'
                   ).join('');
                 } else {
-                  tbody.innerHTML = '<tr><td colspan="8" class="px-5 py-8 text-center text-slate-400">등록된 기업이 없습니다.</td></tr>';
+                  tbody.innerHTML = '<tr><td colspan="9" class="px-5 py-8 text-center text-slate-400">등록된 기업이 없습니다.</td></tr>';
                 }
               }
             } catch(e) {
@@ -2193,6 +2295,181 @@ export const Admin = (props: { user: any, tab?: string }) => {
           function searchUsers() {
             const q = document.getElementById('user-search').value;
             console.log('Search users:', q);
+          }
+          
+          // ==========================================
+          // Company Detail Modal & AI Matching
+          // ==========================================
+          
+          let currentCompanyId = null;
+          let currentCompanyData = null;
+          
+          async function openCompanyDetail(id) {
+            currentCompanyId = id;
+            const modal = document.getElementById('company-detail-modal');
+            modal.classList.remove('hidden');
+            
+            // Reset UI
+            document.getElementById('ai-match-result').classList.add('hidden');
+            document.getElementById('ai-match-btn').disabled = false;
+            document.getElementById('ai-match-btn').innerHTML = '<i class="fas fa-robot mr-2"></i> AI 지원사업 매칭 실행';
+            
+            try {
+              const res = await fetch('/api/admin/companies/' + id + '/detail');
+              if (res.ok) {
+                const data = await res.json();
+                if (data.success && data.company) {
+                  currentCompanyData = data.company;
+                  renderCompanyDetail(data.company);
+                }
+              }
+            } catch (e) {
+              console.error('Company detail error:', e);
+            }
+          }
+          
+          function closeCompanyModal() {
+            document.getElementById('company-detail-modal').classList.add('hidden');
+            currentCompanyId = null;
+            currentCompanyData = null;
+          }
+          
+          function formatNumber(num) {
+            if (!num) return '-';
+            const n = parseInt(num);
+            if (isNaN(n)) return num;
+            if (n >= 100000000) return (n / 100000000).toFixed(1) + '억원';
+            if (n >= 10000) return (n / 10000).toFixed(0) + '만원';
+            return n.toLocaleString() + '원';
+          }
+          
+          function renderCompanyDetail(c) {
+            // 기본 정보
+            document.getElementById('modal-company-name').textContent = c.name || '-';
+            document.getElementById('modal-company-code').textContent = '종목코드: ' + (c.biz_num || '-');
+            document.getElementById('modal-ceo').textContent = c.ceo_name || '-';
+            document.getElementById('modal-founding').textContent = c.founding_date || '-';
+            document.getElementById('modal-industry').textContent = c.industry_code || '-';
+            
+            // 상세 정보
+            const detail = c.detail || {};
+            document.getElementById('modal-address').textContent = detail.adres || '-';
+            document.getElementById('modal-phone').textContent = detail.phn_no || '-';
+            const website = detail.hm_url;
+            if (website && website !== '-') {
+              document.getElementById('modal-website').innerHTML = '<a href="' + (website.startsWith('http') ? website : 'http://' + website) + '" target="_blank" class="text-blue-600 hover:underline">' + website + '</a>';
+            } else {
+              document.getElementById('modal-website').textContent = '-';
+            }
+            
+            // 재무 정보
+            const fin = c.financial || {};
+            document.getElementById('modal-revenue').textContent = formatNumber(fin.revenue);
+            document.getElementById('modal-operating').textContent = formatNumber(fin.operating_profit);
+            document.getElementById('modal-net-income').textContent = formatNumber(fin.net_income);
+            document.getElementById('modal-assets').textContent = formatNumber(fin.total_assets);
+            document.getElementById('modal-liabilities').textContent = formatNumber(fin.total_liabilities);
+            document.getElementById('modal-equity').textContent = formatNumber(fin.total_equity);
+            
+            // 직원 정보
+            document.getElementById('modal-employees').textContent = c.employee_count ? c.employee_count.toLocaleString() + '명' : '-';
+            document.getElementById('modal-avg-salary').textContent = detail.avg_salary ? formatNumber(detail.avg_salary) : '-';
+            
+            // 임원 정보
+            const execs = c.executives || [];
+            if (execs.length > 0) {
+              document.getElementById('modal-executives').innerHTML = execs.map(e => 
+                '<div class="flex items-center justify-between p-2 bg-white rounded-lg">' +
+                '<span class="font-medium text-slate-800">' + (e.name || '-') + '</span>' +
+                '<span class="text-slate-500">' + (e.position || '-') + ' / ' + (e.role || '-') + '</span>' +
+                '</div>'
+              ).join('');
+            } else {
+              document.getElementById('modal-executives').innerHTML = '<p class="text-slate-400">임원 정보 없음</p>';
+            }
+            
+            // 주주 정보
+            const shareholders = c.shareholders || [];
+            if (shareholders.length > 0) {
+              document.getElementById('modal-shareholders').innerHTML = shareholders.map(s => 
+                '<div class="flex items-center justify-between p-2 bg-white rounded-lg">' +
+                '<span class="font-medium text-slate-800">' + (s.name || '-') + '</span>' +
+                '<span class="text-cyan-700">' + (s.ratio || '-') + '%</span>' +
+                '</div>'
+              ).join('');
+            } else {
+              document.getElementById('modal-shareholders').innerHTML = '<p class="text-slate-400">주주 정보 없음</p>';
+            }
+          }
+          
+          async function runAIMatching() {
+            if (!currentCompanyData) return;
+            
+            const btn = document.getElementById('ai-match-btn');
+            const resultDiv = document.getElementById('ai-match-result');
+            const contentDiv = document.getElementById('ai-match-content');
+            
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> AI 분석 중...';
+            
+            try {
+              const res = await fetch('/api/support/ai-match', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  companyId: currentCompanyId,
+                  companyInfo: {
+                    name: currentCompanyData.name,
+                    industry: currentCompanyData.industry_code,
+                    employeeCount: currentCompanyData.employee_count,
+                    revenue: currentCompanyData.financial?.revenue,
+                    foundingDate: currentCompanyData.founding_date,
+                    certifications: currentCompanyData.certifications
+                  }
+                })
+              });
+              
+              const data = await res.json();
+              
+              if (data.success && data.matches) {
+                resultDiv.classList.remove('hidden');
+                contentDiv.innerHTML = data.matches.map((m, i) => 
+                  '<div class="p-4 bg-white rounded-lg border border-indigo-100 hover:border-indigo-300 transition">' +
+                  '<div class="flex items-start justify-between">' +
+                  '<div class="flex-1">' +
+                  '<h5 class="font-semibold text-slate-800">' + (i+1) + '. ' + m.title + '</h5>' +
+                  '<p class="text-sm text-slate-600 mt-1">' + (m.agency || '-') + '</p>' +
+                  '<p class="text-sm text-slate-500 mt-2">' + (m.description || '').substring(0, 100) + '...</p>' +
+                  '</div>' +
+                  '<div class="ml-4 text-right">' +
+                  '<span class="px-3 py-1 bg-indigo-100 text-indigo-700 font-bold rounded-full">' + m.score + '%</span>' +
+                  '<p class="text-xs text-slate-500 mt-2">매칭 점수</p>' +
+                  '</div>' +
+                  '</div>' +
+                  '<p class="text-sm text-indigo-600 mt-3"><i class="fas fa-lightbulb mr-1"></i> ' + (m.reason || 'AI 추천 이유') + '</p>' +
+                  '</div>'
+                ).join('');
+              } else {
+                resultDiv.classList.remove('hidden');
+                contentDiv.innerHTML = '<p class="text-slate-500 text-center py-4">매칭 결과가 없습니다. 지원사업 데이터를 추가해주세요.</p>';
+              }
+            } catch (e) {
+              resultDiv.classList.remove('hidden');
+              contentDiv.innerHTML = '<p class="text-red-500 text-center py-4">AI 매칭 오류: ' + e.message + '</p>';
+            }
+            
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-robot mr-2"></i> AI 지원사업 매칭 실행';
+          }
+          
+          async function quickAIMatch(id) {
+            openCompanyDetail(id);
+            // 모달이 열리고 데이터 로드 후 자동 매칭
+            setTimeout(() => {
+              if (currentCompanyData) {
+                runAIMatching();
+              }
+            }, 1000);
           }
           
           // ==========================================
