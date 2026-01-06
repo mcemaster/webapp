@@ -1,370 +1,226 @@
 import { Layout } from '../components/Layout'
 
-interface SupportMatchingProps {
-  user?: any;
-}
-
-export const SupportMatching = ({ user }: SupportMatchingProps) => {
+export const SupportMatching = (props: { user: any }) => {
   return (
-    <Layout user={user}>
-      {/* Top Banner */}
-      <div className="bg-slate-900 text-white py-16 relative overflow-hidden">
-        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/circuit-board.png')] opacity-10"></div>
-        <div className="max-w-7xl mx-auto px-4 text-center relative z-10">
-          <span className="inline-block py-1 px-3 rounded-full bg-blue-500/20 border border-blue-400 text-blue-300 text-sm font-bold mb-6 animate-pulse">
-            <i className="fas fa-database mr-2"></i>공공/민간 데이터 12종 통합 연동
+    <Layout user={props.user}>
+      {/* Hero Section */}
+      <div class="bg-gradient-to-r from-slate-900 to-slate-800 text-white py-20 relative overflow-hidden">
+        <div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2072&auto=format&fit=crop')] bg-cover bg-center opacity-10"></div>
+        <div class="max-w-7xl mx-auto px-4 relative z-10 text-center">
+          <span class="inline-block py-1 px-3 rounded-full bg-indigo-500/30 border border-indigo-400 text-indigo-300 text-xs font-bold mb-4">
+            AI-Powered Matching
           </span>
-          <h1 className="text-4xl md:text-5xl font-extrabold mb-6 leading-tight">
-            대표님, 기업명만 입력하세요.<br/>
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-300">모든 서류 데이터</span>는 AI가 찾아옵니다.
+          <h1 class="text-4xl md:text-5xl font-extrabold mb-4 leading-tight">
+            AI 정부지원사업 매칭 리포트
           </h1>
-          <p className="text-lg text-slate-300 max-w-2xl mx-auto">
-            DART(재무), 고용보험(인력), 이노비즈(인증) 등 흩어진 기업 정보를<br/>
-            <strong>원클릭으로 수집(Scraping)</strong>하여 최적의 지원금을 매칭합니다.
+          <p class="text-slate-300 text-lg max-w-2xl mx-auto">
+            우리 기업의 데이터를 분석하여 <span class="text-white font-bold">합격 가능성이 가장 높은 공고</span>를 찾아드립니다.
           </p>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div class="max-w-5xl mx-auto px-4 -mt-10 relative z-20 pb-20">
         
-        {/* Main Tool */}
-        <div className="bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden mb-24 relative transform -translate-y-10">
-          <div className="bg-gradient-to-r from-white to-slate-50 px-8 py-5 border-b border-slate-200 flex justify-between items-center">
-            <div className="flex items-center">
-              <div className="w-3 h-3 rounded-full bg-green-500 animate-pulse mr-2"></div>
-              <span className="text-sm font-bold text-slate-800">통합 데이터 수집 시스템 대기 중</span>
+        {/* 1. Input Form Section */}
+        <div id="input-section" class="bg-white rounded-2xl shadow-xl border border-slate-200 p-8 md:p-10 animate-fade-in-up">
+          <div class="flex items-center mb-8">
+            <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold mr-4">1</div>
+            <h2 class="text-xl font-bold text-slate-800">기업 정보를 입력해주세요</h2>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <div>
+              <label class="block text-sm font-bold text-slate-700 mb-2">기업명</label>
+              <input type="text" id="company-name" placeholder="(주)경영인증평가원" class="w-full px-4 py-3 rounded-lg border border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition" />
             </div>
-            <div className="flex items-center space-x-3">
-               <button id="btn-fill-demo" type="button" className="text-xs bg-slate-100 text-slate-600 px-3 py-1 rounded hover:bg-slate-200 transition-colors">
-                 <i className="fas fa-magic mr-1"></i>데모(태성정밀)
-               </button>
-               <div className="text-xs font-mono text-slate-500 bg-white border border-slate-200 px-2 py-1 rounded">
-                 Live API Status: OK
-               </div>
+            <div>
+              <label class="block text-sm font-bold text-slate-700 mb-2">주요 업종 (표준산업분류)</label>
+              <input type="text" id="company-industry" placeholder="예: 소프트웨어 개발, 자동차 부품 제조" class="w-full px-4 py-3 rounded-lg border border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition" />
+            </div>
+            <div>
+              <label class="block text-sm font-bold text-slate-700 mb-2">작년 매출액 (백만원)</label>
+              <input type="number" id="company-revenue" placeholder="500" class="w-full px-4 py-3 rounded-lg border border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition" />
+            </div>
+            <div>
+              <label class="block text-sm font-bold text-slate-700 mb-2">직원 수</label>
+              <input type="number" id="company-employees" placeholder="10" class="w-full px-4 py-3 rounded-lg border border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition" />
             </div>
           </div>
 
-          <div className="p-8 md:p-12">
-            {/* Wizard Steps */}
-            <div id="step-wizard" className="mb-12 max-w-4xl mx-auto">
-              <div className="flex items-center justify-between relative">
-                <div className="absolute left-0 top-1/2 transform -translate-y-1/2 w-full h-1 bg-slate-100 -z-10"></div>
-                <div className="step-dot w-12 h-12 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-lg relative z-10 ring-4 ring-white shadow-lg transition-all">1</div>
-                <div className="step-dot w-12 h-12 rounded-full bg-slate-200 text-slate-500 flex items-center justify-center font-bold text-lg relative z-10 ring-4 ring-white transition-all">2</div>
-                <div className="step-dot w-12 h-12 rounded-full bg-slate-200 text-slate-500 flex items-center justify-center font-bold text-lg relative z-10 ring-4 ring-white transition-all">3</div>
-                <div className="step-dot w-12 h-12 rounded-full bg-slate-200 text-slate-500 flex items-center justify-center font-bold text-lg relative z-10 ring-4 ring-white transition-all">4</div>
-              </div>
-              <div className="flex justify-between mt-3 text-sm font-bold text-slate-500 px-1">
-                <span>기업식별/인력</span>
-                <span>정밀재무</span>
-                <span>기술/인증</span>
-                <span>사업전략</span>
-              </div>
+          <div class="bg-blue-50 p-6 rounded-xl border border-blue-100 mb-8">
+            <h3 class="font-bold text-blue-800 mb-3 text-sm">보유 인증 및 특허 (선택)</h3>
+            <div class="flex flex-wrap gap-3">
+              <label class="inline-flex items-center bg-white px-4 py-2 rounded-lg border border-blue-200 cursor-pointer hover:bg-blue-50 transition">
+                <input type="checkbox" class="form-checkbox text-blue-600 rounded" value="기업부설연구소" />
+                <span class="ml-2 text-sm text-slate-700">기업부설연구소</span>
+              </label>
+              <label class="inline-flex items-center bg-white px-4 py-2 rounded-lg border border-blue-200 cursor-pointer hover:bg-blue-50 transition">
+                <input type="checkbox" class="form-checkbox text-blue-600 rounded" value="벤처기업" />
+                <span class="ml-2 text-sm text-slate-700">벤처기업</span>
+              </label>
+              <label class="inline-flex items-center bg-white px-4 py-2 rounded-lg border border-blue-200 cursor-pointer hover:bg-blue-50 transition">
+                <input type="checkbox" class="form-checkbox text-blue-600 rounded" value="ISO인증" />
+                <span class="ml-2 text-sm text-slate-700">ISO 인증</span>
+              </label>
+              <label class="inline-flex items-center bg-white px-4 py-2 rounded-lg border border-blue-200 cursor-pointer hover:bg-blue-50 transition">
+                <input type="checkbox" class="form-checkbox text-blue-600 rounded" value="이노비즈" />
+                <span class="ml-2 text-sm text-slate-700">이노비즈</span>
+              </label>
             </div>
+          </div>
 
-            <form id="matching-form" onsubmit="event.preventDefault();">
-              
-              {/* Step 1: Integrated Data Collection */}
-              <div id="form-step-1" className="step-content space-y-8 animate-fade-in-up">
-                <div className="text-center mb-8">
-                  <h3 className="text-2xl font-bold text-slate-900">원클릭 기업 데이터 수집</h3>
-                  <p className="text-slate-500 mt-2">기업명만 입력하면 <strong>DART, 고용부, 인증협회</strong> 데이터를 자동으로 연동합니다.</p>
-                </div>
-                
-                {/* Search Bar */}
-                <div className="max-w-3xl mx-auto bg-slate-800 p-2 rounded-2xl shadow-lg flex mb-6 relative z-20">
-                  <input type="text" id="company-search-input" placeholder="기업명을 입력하세요 (예: 태성정밀, 삼성전자)" className="flex-1 bg-white border-none rounded-xl px-6 text-lg focus:ring-2 focus:ring-blue-500" />
-                  <button type="button" id="btn-auto-fetch" className="bg-blue-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-blue-500 transition-colors ml-2 flex items-center whitespace-nowrap">
-                    <i className="fas fa-search mr-2"></i> 데이터 연동
-                  </button>
-                </div>
-
-                {/* Source Badges */}
-                <div className="flex justify-center flex-wrap gap-2 mb-10 text-[10px] font-bold text-slate-400 uppercase">
-                  <span className="flex items-center bg-slate-100 px-2 py-1 rounded"><i className="fas fa-check-circle text-green-500 mr-1"></i>DART (재무)</span>
-                  <span className="flex items-center bg-slate-100 px-2 py-1 rounded"><i className="fas fa-check-circle text-green-500 mr-1"></i>고용보험 (인력)</span>
-                  <span className="flex items-center bg-slate-100 px-2 py-1 rounded"><i className="fas fa-check-circle text-green-500 mr-1"></i>벤처인 (인증)</span>
-                  <span className="flex items-center bg-slate-100 px-2 py-1 rounded"><i className="fas fa-check-circle text-green-500 mr-1"></i>KED (신용)</span>
-                </div>
-
-                {/* Status Badges Area (Initially Hidden) */}
-                <div id="data-status-area" className="hidden max-w-5xl mx-auto mb-6">
-                   <div className="flex flex-wrap gap-2 justify-center">
-                      <span id="badge-dart" className="hidden bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-bold border border-blue-200 animate-pulse">
-                        <i className="fas fa-file-invoice-dollar mr-1"></i>DART 재무 연동됨
-                      </span>
-                      <span id="badge-nps" className="hidden bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-bold border border-green-200 animate-pulse">
-                        <i className="fas fa-users mr-1"></i>고용보험 인력 연동됨
-                      </span>
-                      <span id="badge-cert" className="hidden bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-xs font-bold border border-purple-200 animate-pulse">
-                        <i className="fas fa-certificate mr-1"></i>인증정보 연동됨
-                      </span>
-                   </div>
-                </div>
-
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-5xl mx-auto">
-                  
-                  {/* Card 1: Basic Info & Status */}
-                  <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200 relative overflow-hidden group">
-                    <div className="absolute top-0 right-0 bg-slate-200 text-slate-500 text-[10px] font-bold px-2 py-1 rounded-bl-lg">DART + 등기소 + NICE</div>
-                    <h4 className="font-bold text-slate-800 mb-4 border-b border-slate-200 pb-2 flex items-center"><i className="fas fa-building text-blue-600 mr-2"></i> 기업 개요 및 신용</h4>
-                    <div className="space-y-4">
-                      <div className="grid grid-cols-2 gap-4">
-                        <div><label className="block text-xs font-bold text-slate-600 mb-1">기업명</label><input type="text" id="companyName" className="w-full rounded-lg border-slate-300 text-sm bg-white" /></div>
-                        <div><label className="block text-xs font-bold text-slate-600 mb-1">대표자</label><input type="text" id="ceoName" className="w-full rounded-lg border-slate-300 text-sm bg-white" /></div>
-                      </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div><label className="block text-xs font-bold text-slate-600 mb-1">설립일 (업력)</label><input type="text" id="foundingDate" className="w-full rounded-lg border-slate-300 text-sm bg-white" /></div>
-                        <div><label className="block text-xs font-bold text-slate-600 mb-1">기업규모/형태</label><input type="text" id="companyType" className="w-full rounded-lg border-slate-300 text-sm bg-white" placeholder="예: 중소/외부감사" /></div>
-                      </div>
-                      <div className="grid grid-cols-2 gap-4">
-                         <div><label className="block text-xs font-bold text-slate-600 mb-1">주거래은행</label><input type="text" id="mainBank" className="w-full rounded-lg border-slate-300 text-sm bg-white" /></div>
-                         <div><label className="block text-xs font-bold text-slate-600 mb-1">신용등급 (공공)</label><input type="text" id="creditRating" className="w-full rounded-lg border-slate-300 text-sm font-bold text-blue-600 bg-blue-50" /></div>
-                      </div>
-                      <div><label className="block text-xs font-bold text-slate-600 mb-1">본점 주소</label><input type="text" id="address" className="w-full rounded-lg border-slate-300 text-sm bg-white" /></div>
-                    </div>
-                  </div>
-
-                  {/* Card 2: HR Info (NPS/Employment Insurance) */}
-                  <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200 relative overflow-hidden group">
-                    <div className="absolute top-0 right-0 bg-green-100 text-green-700 text-[10px] font-bold px-2 py-1 rounded-bl-lg">고용노동부 (고용보험)</div>
-                    <h4 className="font-bold text-slate-800 mb-4 border-b border-slate-200 pb-2 flex items-center"><i className="fas fa-user-friends text-green-600 mr-2"></i> 고용 및 인력 변동 (최근 1년)</h4>
-                    <div className="space-y-4">
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-xs font-bold text-slate-600 mb-1">총 근로자 수</label>
-                          <div className="relative">
-                            <input type="number" id="employees" className="w-full rounded-lg border-slate-300 text-sm bg-white font-bold text-slate-800" />
-                            <span className="absolute right-3 top-2 text-xs text-slate-400">명</span>
-                          </div>
-                        </div>
-                        <div>
-                          <label className="block text-xs font-bold text-slate-600 mb-1">청년 (만 34세↓)</label>
-                          <div className="relative">
-                            <input type="number" id="youthEmp" className="w-full rounded-lg border-slate-300 text-sm bg-white" />
-                            <span className="absolute right-3 top-2 text-xs text-slate-400">명</span>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      {/* Expanded HR Data */}
-                      <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
-                        <div className="grid grid-cols-3 gap-2 text-center">
-                           <div>
-                             <p className="text-[10px] text-slate-500">최근 1년 입사</p>
-                             <p className="text-sm font-bold text-blue-600"><span id="entry1yr">0</span>명</p>
-                           </div>
-                           <div className="border-l border-slate-100">
-                             <p className="text-[10px] text-slate-500">최근 1년 퇴사</p>
-                             <p className="text-sm font-bold text-red-500"><span id="exit1yr">0</span>명</p>
-                           </div>
-                           <div className="border-l border-slate-100">
-                             <p className="text-[10px] text-slate-500">퇴사율</p>
-                             <p className="text-sm font-bold text-slate-700"><span id="turnoverRate">0</span>%</p>
-                           </div>
-                        </div>
-                      </div>
-
-                      <div className="bg-yellow-50 p-3 rounded-lg border border-yellow-100">
-                        <p className="text-[11px] text-yellow-800 font-bold"><i className="fas fa-lightbulb mr-1"></i> 고용 유지율 우수 기업</p>
-                        <p className="text-[10px] text-yellow-700">일자리 창출 및 고용 안정 자금 추천 대상입니다.</p>
-                      </div>
-                    </div>
-                  </div>
-
-                </div>
-              </div>
-
-              {/* Step 2: Financials (DART) */}
-              <div id="form-step-2" className="step-content hidden space-y-8 animate-fade-in-up">
-                <div className="text-center mb-8"><h3 className="text-2xl font-bold text-slate-900">재무제표 정밀 분석 (DART)</h3><p className="text-slate-500 mt-2">금융감독원에 공시된 표준 재무제표 데이터를 불러왔습니다.</p></div>
-                
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-5xl mx-auto">
-                  <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200 relative">
-                    <div className="absolute top-0 right-0 bg-blue-100 text-blue-700 text-[10px] font-bold px-2 py-1 rounded-bl-lg">DART 표준재무제표</div>
-                    <h4 className="font-bold text-slate-800 mb-4 border-b border-slate-200 pb-2 flex items-center"><i className="fas fa-chart-line text-blue-600 mr-2"></i> 손익계산서 (단위: 백만원)</h4>
-                    <div className="space-y-4">
-                      <div className="grid grid-cols-3 gap-2 text-center text-xs font-bold text-slate-500 mb-1"><span>항목</span><span>2024년</span><span>2025년</span></div>
-                      <div className="grid grid-cols-3 gap-2 items-center"><label className="text-xs font-bold text-slate-700">매출액</label><input type="number" id="rev_2024" className="rounded border-slate-300 text-xs py-1 bg-white" /><input type="number" id="rev_2025" className="rounded border-slate-300 text-xs py-1 bg-white font-bold" /></div>
-                      <div className="grid grid-cols-3 gap-2 items-center"><label className="text-xs font-bold text-slate-700">영업이익</label><input type="number" id="op_2024" className="rounded border-slate-300 text-xs py-1 bg-white" /><input type="number" id="op_2025" className="rounded border-slate-300 text-xs py-1 bg-white" /></div>
-                      <div className="grid grid-cols-3 gap-2 items-center"><label className="text-xs font-bold text-slate-700">당기순이익</label><input type="number" id="net_2024" className="rounded border-slate-300 text-xs py-1 bg-white" /><input type="number" id="net_2025" className="rounded border-slate-300 text-xs py-1 bg-white" /></div>
-                    </div>
-                  </div>
-                  <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200 relative">
-                    <div className="absolute top-0 right-0 bg-blue-100 text-blue-700 text-[10px] font-bold px-2 py-1 rounded-bl-lg">DART 재무상태표</div>
-                    <h4 className="font-bold text-slate-800 mb-4 border-b border-slate-200 pb-2 flex items-center"><i className="fas fa-balance-scale text-indigo-600 mr-2"></i> 재무상태표</h4>
-                    <div className="space-y-4">
-                      <div className="grid grid-cols-2 gap-4"><div><label className="block text-xs font-bold text-slate-600 mb-1">자산총계</label><input type="number" id="assets" className="w-full rounded-lg border-slate-300 text-sm bg-white" /></div><div><label className="block text-xs font-bold text-slate-600 mb-1">부채총계</label><input type="number" id="liabilities" className="w-full rounded-lg border-slate-300 text-sm bg-white" /></div></div>
-                      <div className="grid grid-cols-2 gap-4"><div><label className="block text-xs font-bold text-slate-600 mb-1">자본금</label><input type="number" id="capital" className="w-full rounded-lg border-slate-300 text-sm bg-white" /></div><div><label className="block text-xs font-bold text-slate-600 mb-1">부채비율</label><input type="text" id="debtRatio" className="w-full rounded-lg border-slate-300 bg-slate-100 text-sm text-right font-bold text-blue-600" /></div></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Step 3: Technology & Certification */}
-              <div id="form-step-3" className="step-content hidden space-y-8 animate-fade-in-up">
-                <div className="text-center mb-8"><h3 className="text-2xl font-bold text-slate-900">기술력 및 인증 현황</h3><p className="text-slate-500 mt-2">벤처인, 이노비즈협회, 특허청 데이터를 연동했습니다.</p></div>
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-5xl mx-auto">
-                  <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200 relative">
-                    <div className="absolute top-0 right-0 bg-purple-100 text-purple-700 text-[10px] font-bold px-2 py-1 rounded-bl-lg">KOITA (산기협)</div>
-                    <h4 className="font-bold text-slate-800 mb-4 border-b border-slate-200 pb-2 flex items-center"><i className="fas fa-microscope text-purple-600 mr-2"></i> 연구개발(R&D) 현황</h4>
-                    <div className="space-y-4">
-                      <div><label className="block text-xs font-bold text-slate-600 mb-1">연구소 보유</label><input type="text" id="labStatus" className="w-full rounded-lg border-slate-300 text-sm bg-white font-bold" /></div>
-                      <div className="grid grid-cols-2 gap-4"><div><label className="block text-xs font-bold text-slate-600 mb-1">연구전담요원</label><input type="number" id="researchers" className="w-full rounded-lg border-slate-300 text-sm bg-white" /></div><div><label className="block text-xs font-bold text-slate-600 mb-1">R&D 투자액</label><input type="number" id="rndSpend" className="w-full rounded-lg border-slate-300 text-sm bg-white" /></div></div>
-                    </div>
-                  </div>
-                  <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200 relative">
-                    <div className="absolute top-0 right-0 bg-orange-100 text-orange-700 text-[10px] font-bold px-2 py-1 rounded-bl-lg">KIPRIS (특허청)</div>
-                    <h4 className="font-bold text-slate-800 mb-4 border-b border-slate-200 pb-2 flex items-center"><i className="fas fa-lightbulb text-orange-500 mr-2"></i> 지식재산권(IP) 보유</h4>
-                    <div className="space-y-4">
-                      <div className="flex justify-between items-center bg-white p-3 rounded-lg border border-slate-200">
-                        <span className="text-sm font-bold text-slate-700">특허 (등록)</span>
-                        <span className="text-lg font-bold text-orange-600">3 건</span>
-                      </div>
-                      <div className="flex justify-between items-center bg-white p-3 rounded-lg border border-slate-200">
-                        <span className="text-sm font-bold text-slate-700">상표/디자인</span>
-                        <span className="text-lg font-bold text-slate-600">5 건</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                
-                {/* Certifications Grid (Auto-checked) */}
-                <div className="max-w-5xl mx-auto mt-8 bg-white p-6 rounded-2xl border border-slate-200">
-                  <h4 className="font-bold text-slate-800 mb-4 flex items-center"><i className="fas fa-award text-yellow-500 mr-2"></i> 보유 인증 (자동 확인됨)</h4>
-                  <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3" id="cert-grid">
-                    {/* Checkboxes will be auto-checked by JS */}
-                    {['벤처기업', '이노비즈', '메인비즈', '녹색인증', '기업부설연구소', 'ISO9001', 'ISO14001', '뿌리기업', '여성기업', '소부장전문'].map(cert => (
-                      <label key={cert} className="flex items-center space-x-2 bg-slate-50 p-2.5 rounded-lg border border-slate-100 cursor-pointer hover:border-blue-500 hover:bg-blue-50">
-                        <input type="checkbox" name="certs" value={cert} className="rounded text-blue-600 focus:ring-blue-500" id={`cert-${cert}`} />
-                        <span className="text-xs font-medium text-slate-700">{cert}</span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              <div id="form-step-4" className="step-content hidden space-y-8 animate-fade-in-up">
-                <div className="text-center mb-8"><h3 className="text-2xl font-bold text-slate-900">최종 목표를 선택해주세요.</h3><p className="text-slate-500 mt-2">입력하신 데이터를 바탕으로 가장 적합한 사업군을 우선 매칭합니다.</p></div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
-                  {['funding|창업/사업화|예비/초기 창업 자금, 시제품 제작비', 'rnd|기술개발 (R&D)|신기술 개발, 공정 개선, 산학연 협력', 'loan|정책자금/융자|운전/시설 자금 융자, 보증서 발급', 'export|수출/판로|해외 마케팅, 전시회, 통번역 지원', 'hiring|인력/고용|청년/중장년 채용 지원금, 교육비', 'smart|스마트공장|자동화 설비, ERP/MES/PLM 구축'].map(opt => {
-                    const [val, title, desc] = opt.split('|');
-                    return (
-                      <label key={val} className="p-6 border-2 border-slate-200 rounded-2xl cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-all peer-checked:bg-blue-100 flex flex-col h-full relative group">
-                        <input type="radio" name="interest" value={val} className="absolute top-6 right-6 w-5 h-5 text-blue-600" />
-                        <div className="mb-4 w-12 h-12 bg-white rounded-full flex items-center justify-center text-blue-600 text-xl border border-slate-100 group-hover:scale-110 transition-transform">
-                          <i className={`fas fa-${val === 'funding' ? 'seedling' : val === 'rnd' ? 'flask' : val === 'loan' ? 'university' : val === 'export' ? 'plane' : val === 'hiring' ? 'user-plus' : 'robot'}`}></i>
-                        </div>
-                        <span className="font-bold text-lg text-slate-800 mb-2">{title}</span>
-                        <p className="text-sm text-slate-500 leading-relaxed">{desc}</p>
-                      </label>
-                    )
-                  })}
-                </div>
-              </div>
-
-              {/* Navigation */}
-              <div className="mt-16 flex justify-between max-w-4xl mx-auto px-4">
-                <button type="button" id="prev-btn" className="hidden px-8 py-4 bg-white text-slate-600 border border-slate-300 rounded-xl font-bold hover:bg-slate-50 transition-colors shadow-sm"><i className="fas fa-arrow-left mr-2"></i> 이전</button>
-                <button type="button" id="next-btn" className="ml-auto px-10 py-4 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 shadow-xl transition-all transform hover:-translate-y-1 text-lg">다음 단계 <i className="fas fa-arrow-right ml-2"></i></button>
-                <button type="button" id="submit-btn" className="hidden ml-auto px-12 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-bold shadow-xl transition-all transform hover:-translate-y-1 animate-pulse text-lg"><i className="fas fa-search mr-2"></i> 정밀 분석 시작</button>
-              </div>
-            </form>
+          <div class="text-center">
+            <button id="btn-analyze" class="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-lg px-10 py-4 rounded-xl shadow-lg transform transition hover:-translate-y-1 active:scale-95 flex items-center justify-center mx-auto w-full md:w-auto">
+              <i class="fas fa-magic mr-2"></i> AI 무료 진단 시작하기
+            </button>
+            <p class="text-xs text-slate-400 mt-4">* 입력하신 정보는 분석 목적으로만 사용되며 저장되지 않습니다.</p>
           </div>
         </div>
 
-        {/* Loading Overlay */}
-        <div id="loading-overlay" className="hidden fixed inset-0 bg-slate-900/95 backdrop-blur-md z-50 flex flex-col items-center justify-center">
-          <div className="relative w-64 h-64 mb-10">
-            <div className="absolute inset-0 border-4 border-blue-500/30 rounded-full animate-[spin_3s_linear_infinite]"></div>
-            <div className="absolute inset-4 border-4 border-t-indigo-500 border-r-transparent border-b-transparent border-l-transparent rounded-full animate-[spin_2s_linear_infinite]"></div>
-            <div className="absolute inset-0 flex items-center justify-center">
-              <img src="/static/mce-symbol.png" alt="경영인증평가원 로고" className="w-20 h-20 object-contain animate-pulse" />
+        {/* 2. Loading Section (Hidden by default) */}
+        <div id="loading-section" class="hidden text-center py-20 bg-white rounded-2xl shadow-xl border border-slate-200 p-10">
+          <div class="relative w-24 h-24 mx-auto mb-8">
+            <div class="absolute inset-0 border-4 border-slate-100 rounded-full"></div>
+            <div class="absolute inset-0 border-4 border-blue-600 rounded-full border-t-transparent animate-spin"></div>
+            <i class="fas fa-brain absolute inset-0 flex items-center justify-center text-3xl text-blue-600 animate-pulse"></i>
+          </div>
+          <h2 class="text-2xl font-bold text-slate-800 mb-2">AI가 기업 데이터를 분석 중입니다...</h2>
+          <p class="text-slate-500 animate-pulse">적합한 공고 매칭 중 • 가점 요소 계산 중 • 전략 수립 중</p>
+        </div>
+
+        {/* 3. Result Section (Hidden by default) */}
+        <div id="result-section" class="hidden space-y-8">
+          
+          <div class="bg-indigo-900 text-white rounded-2xl shadow-xl p-8 flex flex-col md:flex-row items-center justify-between">
+            <div>
+              <span class="text-indigo-300 font-bold text-sm uppercase">Analysis Complete</span>
+              <h2 class="text-2xl font-bold mt-1">분석 결과: <span class="text-yellow-400">매우 적합</span> 공고가 3건 발견되었습니다.</h2>
             </div>
-          </div>
-          <h3 className="text-3xl font-extrabold text-white mb-2 tracking-tight text-center"><span className="text-blue-400">경영인증평가원 AI</span>가<br/>매칭중입니다</h3>
-          <p className="text-slate-400 text-lg mb-8">대표님 기업에 딱 맞는 지원사업을 찾고 있습니다.</p>
-          <div className="w-96 h-2 bg-slate-800 rounded-full overflow-hidden relative">
-            <div id="loading-bar" className="absolute left-0 top-0 h-full bg-gradient-to-r from-blue-500 to-indigo-500 transition-all duration-300 w-0"></div>
-          </div>
-          <div className="mt-4 text-sm text-slate-500 font-mono">
-            Scanning 30,241 items...
-          </div>
-        </div>
-
-        {/* Results Area */}
-        <div id="matching-results" className="hidden mt-12 space-y-8 animate-fade-in-up">
-           <div className="text-center mb-10">
-             <h2 className="text-3xl font-bold text-slate-900 mb-2">🎉 정밀 진단이 완료되었습니다.</h2>
-             <p className="text-slate-600">입력된 데이터를 기반으로 <span className="text-blue-600 font-bold">전체 추천 결과</span>를 표시합니다.</p>
-           </div>
-           
-           <div id="results-list" className="space-y-6 max-w-5xl mx-auto">
-             {/* Results will be injected here */}
-           </div>
-
-           <div className="text-center mt-12 bg-slate-50 p-8 rounded-2xl border border-slate-200 max-w-3xl mx-auto">
-             <p className="font-bold text-slate-700 mb-4">원하는 결과를 찾지 못하셨나요?</p>
-             <a href="https://search.naver.com/search.naver?query=2026년+정부지원사업+통합공고" target="_blank" className="inline-flex items-center text-blue-600 hover:text-blue-800 font-bold transition-colors">
-               <i className="fas fa-external-link-alt mr-2"></i> 네이버에서 전체 공고 검색하기
-             </a>
-           </div>
-        </div>
-        
-        {/* Data Fetching Loading Modal */}
-        <div id="data-loading-modal" className="hidden fixed inset-0 z-[70] flex items-center justify-center bg-black/60 backdrop-blur-sm">
-           <div className="bg-white rounded-2xl p-8 max-w-sm w-full text-center shadow-2xl border border-slate-100">
-              <div className="mb-6 flex justify-center">
-                 <div className="w-16 h-16 border-4 border-blue-100 border-t-blue-600 rounded-full animate-spin"></div>
-              </div>
-              <h3 className="text-lg font-bold text-slate-900 mb-2">통합 데이터 수집 중...</h3>
-              <div className="text-left space-y-2 text-xs text-slate-500 bg-slate-50 p-4 rounded-xl">
-                 <p id="log-dart" className="flex items-center"><i className="fas fa-circle-notch fa-spin text-blue-500 mr-2"></i> 금융감독원 (DART) 접속...</p>
-                 <p id="log-nps" className="flex items-center hidden"><i className="fas fa-circle-notch fa-spin text-green-500 mr-2"></i> 고용노동부 DB 조회...</p>
-                 <p id="log-cert" className="flex items-center hidden"><i className="fas fa-circle-notch fa-spin text-purple-500 mr-2"></i> 벤처/이노비즈 인증 확인...</p>
-              </div>
-           </div>
-        </div>
-
-        {/* Success Modal */}
-        <div id="custom-success-modal" className="hidden fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm transition-opacity">
-          <div className="bg-white rounded-2xl p-8 max-w-sm w-full text-center shadow-2xl transform scale-100 animate-fade-in-up border border-slate-100">
-            <div className="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
-              <i className="fas fa-database text-3xl text-green-600"></i>
-            </div>
-            <h3 className="text-xl font-bold text-slate-900 mb-2">12종 데이터 연동 완료</h3>
-            <p className="text-slate-600 mb-8 leading-relaxed text-sm">
-              <span className="font-bold text-blue-600">DART, 고용부, 인증협회</span>의<br/>
-              모든 데이터를 성공적으로 불러왔습니다.
-            </p>
-            <button id="btn-close-success" className="w-full bg-blue-600 text-white py-3 rounded-xl font-bold hover:bg-blue-700 transition-colors shadow-lg">
-              확인
+            <button onclick="location.reload()" class="mt-4 md:mt-0 bg-white/10 hover:bg-white/20 text-white px-6 py-2 rounded-lg text-sm font-bold backdrop-blur">
+              다시 분석하기
             </button>
           </div>
-        </div>
 
-        {/* Not Found Modal (Manual Input Guide) */}
-        <div id="not-found-modal" className="hidden fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm transition-opacity">
-          <div className="bg-white rounded-2xl p-8 max-w-sm w-full text-center shadow-2xl transform scale-100 animate-fade-in-up border border-slate-100">
-            <div className="w-20 h-20 bg-amber-50 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
-              <i className="fas fa-edit text-3xl text-amber-600"></i>
-            </div>
-            <h3 className="text-xl font-bold text-slate-900 mb-2">등록된 데이터가 없습니다.</h3>
-            <p className="text-slate-600 mb-8 leading-relaxed text-sm">
-              아직 공시 데이터가 없는 기업입니다.<br/>
-              <span className="font-bold text-amber-600">직접 정보를 입력</span>해주시면<br/>
-              AI가 정확하게 분석해드립니다.
-            </p>
-            <button id="btn-manual-input" className="w-full bg-amber-500 text-white py-3 rounded-xl font-bold hover:bg-amber-600 transition-colors shadow-lg">
-              수기 입력 시작하기
-            </button>
+          <div id="results-container" class="grid grid-cols-1 gap-6">
+            {/* Results will be injected here via JS */}
           </div>
+
         </div>
 
       </div>
 
-      <script src="/static/js/core.js"></script>
-      <script src="/static/js/matching.js"></script>
+      <script>{`
+        const btnAnalyze = document.getElementById('btn-analyze');
+        const inputSection = document.getElementById('input-section');
+        const loadingSection = document.getElementById('loading-section');
+        const resultSection = document.getElementById('result-section');
+        const resultsContainer = document.getElementById('results-container');
+
+        btnAnalyze.addEventListener('click', async () => {
+          // 1. Validate
+          const name = document.getElementById('company-name').value;
+          const industry = document.getElementById('company-industry').value;
+          const revenue = document.getElementById('company-revenue').value;
+          const employees = document.getElementById('company-employees').value;
+          
+          if(!name || !industry) {
+            alert('기업명과 업종은 필수 입력 사항입니다.');
+            return;
+          }
+
+          // 2. Collect Certs
+          const certs = [];
+          document.querySelectorAll('input[type="checkbox"]:checked').forEach(cb => certs.push(cb.value));
+
+          // 3. UI Transition
+          inputSection.classList.add('hidden');
+          loadingSection.classList.remove('hidden');
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+
+          try {
+            // 4. API Call
+            const response = await fetch('/api/analyze', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                companyData: {
+                  name, ksic: industry, rev_2024: revenue, employees, certs, 
+                  foundingDate: '20200101', hasLab: certs.includes('기업부설연구소')
+                }
+              })
+            });
+
+            const result = await response.json();
+
+            // 5. Render Results
+            setTimeout(() => {
+              loadingSection.classList.add('hidden');
+              resultSection.classList.remove('hidden');
+              renderResults(result.data || result.results); // Handle both real/mock structures
+            }, 1500); // Minimum loading time for UX
+
+          } catch (e) {
+            alert('분석 중 오류가 발생했습니다. 다시 시도해주세요.');
+            location.reload();
+          }
+        });
+
+        function renderResults(items) {
+          if (!items || items.length === 0) {
+            resultsContainer.innerHTML = '<div class="p-10 text-center bg-white rounded-xl">추천할 공고가 없습니다.</div>';
+            return;
+          }
+
+          resultsContainer.innerHTML = items.map((item, index) => {
+            const scoreColor = item.matchScore >= 90 ? 'text-blue-600' : (item.matchScore >= 80 ? 'text-green-600' : 'text-orange-500');
+            const barColor = item.matchScore >= 90 ? 'bg-blue-600' : (item.matchScore >= 80 ? 'bg-green-600' : 'bg-orange-500');
+            
+            return \`
+              <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-md transition">
+                <div class="p-6 md:p-8 flex flex-col md:flex-row gap-6">
+                  
+                  <div class="flex-shrink-0 flex flex-col items-center justify-center md:w-32 border-b md:border-b-0 md:border-r border-slate-100 pb-6 md:pb-0 md:pr-6">
+                    <div class="text-sm font-bold text-slate-400 mb-1">매칭 점수</div>
+                    <div class="text-4xl font-extrabold \${scoreColor}">\${item.matchScore}</div>
+                    <div class="text-xs text-slate-400 mt-1">100점 만점</div>
+                  </div>
+
+                  <div class="flex-grow">
+                    <div class="flex flex-wrap items-center gap-2 mb-3">
+                      <span class="px-2.5 py-1 rounded-md bg-slate-100 text-slate-600 text-xs font-bold">\${item.agency || '정부처'}</span>
+                      \${index === 0 ? '<span class="px-2.5 py-1 rounded-md bg-red-100 text-red-600 text-xs font-bold animate-pulse">강력 추천</span>' : ''}
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-900 mb-2">\${item.title}</h3>
+                    
+                    <div class="bg-slate-50 rounded-xl p-4 mt-4 border border-slate-100">
+                      <div class="flex items-start">
+                        <i class="fas fa-robot text-indigo-500 mt-1 mr-3"></i>
+                        <div>
+                          <h4 class="text-sm font-bold text-indigo-900 mb-1">AI 추천 사유</h4>
+                          <p class="text-sm text-slate-600 leading-relaxed">\${item.aiReason}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="mt-6 flex items-center justify-between">
+                      <div class="text-xs text-slate-400">
+                        <i class="far fa-clock mr-1"></i> 마감일: <span class="font-bold text-slate-600">\${item.deadline || '상시 접수'}</span>
+                      </div>
+                      <a href="\${item.link || '#'}" target="_blank" class="flex items-center text-sm font-bold text-blue-600 hover:underline">
+                        공고 원문 보기 <i class="fas fa-external-link-alt ml-2"></i>
+                      </a>
+                    </div>
+                  </div>
+
+                </div>
+                <div class="h-1.5 w-full bg-slate-100">
+                  <div class="h-full \${barColor}" style="width: \${item.matchScore}%"></div>
+                </div>
+              </div>
+            \`;
+          }).join('');
+        }
+      `}</script>
     </Layout>
   )
 }
