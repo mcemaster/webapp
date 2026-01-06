@@ -32,14 +32,52 @@ api.get('/dart/test', async (c) => {
   }
 })
 
-// 2. DART Data Fetch
+// 2. DART Data Fetch - DB 우선 조회 후 API Fallback
 api.get('/dart/data', async (c) => {
   const code = c.req.query('code')
-  const apiKey = c.env.DART_API_KEY
-  if (!apiKey) return c.json({ error: 'Key Missing' })
-  if (!code) return c.json({ error: 'Code Missing' })
+  if (!code) return c.json({ success: false, error: 'Code Missing' })
 
   try {
+    // 먼저 DB에서 조회
+    const db = c.env.DB
+    if (db) {
+      const company = await db.prepare(`
+        SELECT name, ceo_name, founding_date, industry_code, employee_count,
+               financial_json, detail_json, executives_json, shareholders_json,
+               corp_code, biz_num
+        FROM companies 
+        WHERE corp_code = ? OR biz_num = ?
+        LIMIT 1
+      `).bind(code, code).first<any>()
+      
+      if (company) {
+        const detail = company.detail_json ? JSON.parse(company.detail_json) : {}
+        const financial = company.financial_json ? JSON.parse(company.financial_json) : {}
+        
+        return c.json({
+          success: true,
+          source: 'db',
+          data: {
+            name: company.name,
+            ceo: company.ceo_name,
+            est_date: company.founding_date,
+            address: detail.adres || '',
+            corp_cls: detail.corp_cls || 'N',
+            industry: company.industry_code,
+            employee_count: company.employee_count,
+            revenue: financial.revenue,
+            assets: financial.total_assets
+          }
+        })
+      }
+    }
+
+    // DB에 없으면 DART API 직접 호출 (Fallback)
+    const apiKey = c.env.DART_API_KEY
+    if (!apiKey) {
+      return c.json({ success: false, message: 'DART API Key not configured and company not found in DB' })
+    }
+
     const url = `https://opendart.fss.or.kr/api/company.json?crtfc_key=${apiKey}&corp_code=${code}`
     const res = await fetch(url)
     const data: any = await res.json()
@@ -47,6 +85,7 @@ api.get('/dart/data', async (c) => {
     if (data.status === '000') {
       return c.json({
         success: true,
+        source: 'dart_api',
         data: {
           name: data.corp_name,
           ceo: data.ceo_nm,
@@ -56,7 +95,7 @@ api.get('/dart/data', async (c) => {
         }
       })
     }
-    return c.json({ success: false, message: data.message })
+    return c.json({ success: false, message: data.message || 'Company not found' })
   } catch (e: any) {
     return c.json({ success: false, message: e.message })
   }
@@ -72,9 +111,8 @@ api.get('/search/company', async (c) => {
     const db = c.env.DB
     if (db) {
       const result = await db.prepare(
-        `SELECT name, biz_num as code, 
-         (SELECT name FROM users WHERE users.id = companies.user_id) as ceo
-         FROM companies WHERE name LIKE ? LIMIT 10`
+        `SELECT name, COALESCE(corp_code, biz_num) as code, ceo_name as ceo
+         FROM companies WHERE name LIKE ? ORDER BY name LIMIT 15`
       ).bind(`%${q}%`).all()
       
       if (result.results && result.results.length > 0) {
@@ -82,10 +120,10 @@ api.get('/search/company', async (c) => {
       }
     }
   } catch (e) {
-    console.log('DB search failed, using mock')
+    console.log('DB search failed, using mock:', e)
   }
   
-  // Fallback to mock
+  // Fallback to mock (if DB search returns nothing)
   const mockDB = [
     { name: '삼성전자', code: '00126380', ceo: '한종희' },
     { name: '삼성에스디아이', code: '00126362', ceo: '최윤호' },
