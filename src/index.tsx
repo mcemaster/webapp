@@ -20,8 +20,9 @@ import { FAQ } from './pages/FAQ'
 import { Legal } from './pages/Legal'
 import { AuditApplication } from './pages/AuditApplication'
 import { Certification } from './pages/Certification'
+import puppeteer from '@cloudflare/puppeteer'
 
-// --- 2. Admin Final Component (All Features Included) ---
+// --- 2. Admin Final Component ---
 const AdminFinal = (props: { user: any, tab?: string }) => {
   const activeTab = props.tab || 'overview';
   
@@ -30,320 +31,202 @@ const AdminFinal = (props: { user: any, tab?: string }) => {
       <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>통합 관리자 - 경영인증평가원</title>
+        <title>관리자 - 경영인증평가원 (FINAL)</title>
         <script src="https://cdn.tailwindcss.com"></script>
         <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <style>{`
-          .fade-in { animation: fadeIn 0.5s ease-out; }
-          @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+          .scrollbar-hide::-webkit-scrollbar { display: none; }
+          .dropdown-shadow { box-shadow: 0 4px 20px rgba(0,0,0,0.15); }
         `}</style>
       </head>
-      <body class="bg-slate-50 font-sans antialiased text-slate-800">
+      <body class="bg-slate-50 font-sans antialiased">
         <div class="min-h-screen flex">
           
           {/* Sidebar */}
-          <aside class="w-64 bg-white border-r border-slate-200 fixed h-full z-20 hidden md:flex flex-col">
-            <div class="p-6 border-b border-slate-100 flex items-center justify-center">
+          <aside class="w-64 bg-white border-r border-slate-200 fixed h-full z-20 hidden md:block">
+            <div class="p-6 border-b border-slate-100 flex items-center">
                <img src="/static/logo-horizontal.png" alt="Logo" class="h-8" />
             </div>
-            
-            <div class="flex-1 overflow-y-auto p-4 space-y-6">
-              {/* Group 1: Dashboard */}
-              <div>
-                <p class="px-4 text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Overview</p>
-                <a href="/admin?tab=overview" class={`flex items-center px-4 py-2.5 text-sm font-bold rounded-xl transition-colors ${activeTab === 'overview' ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50'}`}>
-                  <i class="fas fa-chart-pie w-5 text-center mr-2"></i> 대시보드
-                </a>
-              </div>
-
-              {/* Group 2: Data */}
-              <div>
-                <p class="px-4 text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Data Center</p>
-                <div class="space-y-1">
-                  <a href="/admin?tab=companies" class={`flex items-center px-4 py-2.5 text-sm font-bold rounded-xl transition-colors ${activeTab === 'companies' ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50'}`}>
-                    <i class="fas fa-building w-5 text-center mr-2"></i> 기업 DB 관리
-                  </a>
-                  <a href="/admin?tab=grants" class={`flex items-center px-4 py-2.5 text-sm font-bold rounded-xl transition-colors ${activeTab === 'grants' ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50'}`}>
-                    <i class="fas fa-bullhorn w-5 text-center mr-2"></i> 지원사업 공고
-                  </a>
-                  <a href="/admin?tab=logs" class={`flex items-center px-4 py-2.5 text-sm font-bold rounded-xl transition-colors ${activeTab === 'logs' ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50'}`}>
-                    <i class="fas fa-history w-5 text-center mr-2"></i> AI 분석 내역
-                  </a>
-                </div>
-              </div>
-
-              {/* Group 3: Management */}
-              <div>
-                <p class="px-4 text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Management</p>
-                <div class="space-y-1">
-                  <a href="/admin?tab=partners" class={`flex items-center px-4 py-2.5 text-sm font-bold rounded-xl transition-colors ${activeTab === 'partners' ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50'}`}>
-                    <i class="fas fa-handshake w-5 text-center mr-2"></i> 파트너 승인
-                  </a>
-                  <a href="/admin?tab=rfq" class={`flex items-center px-4 py-2.5 text-sm font-bold rounded-xl transition-colors ${activeTab === 'rfq' ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50'}`}>
-                    <i class="fas fa-paper-plane w-5 text-center mr-2"></i> 공급사 매칭/발송
-                  </a>
-                </div>
-              </div>
-
-              {/* Group 4: Marketing & System */}
-              <div>
-                <p class="px-4 text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Configuration</p>
-                <div class="space-y-1">
-                  <a href="/admin?tab=banners" class={`flex items-center px-4 py-2.5 text-sm font-bold rounded-xl transition-colors ${activeTab === 'banners' ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50'}`}>
-                    <i class="fas fa-images w-5 text-center mr-2"></i> 배너/팝업 관리
-                  </a>
-                  <a href="/admin?tab=seo" class={`flex items-center px-4 py-2.5 text-sm font-bold rounded-xl transition-colors ${activeTab === 'seo' ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50'}`}>
-                    <i class="fab fa-google w-5 text-center mr-2"></i> SEO/마케팅
-                  </a>
-                  <a href="/admin?tab=settings" class={`flex items-center px-4 py-2.5 text-sm font-bold rounded-xl transition-colors ${activeTab === 'settings' ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50'}`}>
-                    <i class="fas fa-cog w-5 text-center mr-2"></i> 시스템 설정
-                  </a>
-                </div>
-              </div>
-            </div>
-
-            <div class="p-4 border-t border-slate-100">
-              <a href="/" class="flex items-center justify-center w-full py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg text-xs font-bold transition-colors">
-                <i class="fas fa-external-link-alt mr-2"></i> 사용자 페이지로 이동
+            <div class="p-4 space-y-1">
+              <a href="/admin?tab=overview" class={`flex items-center px-4 py-3 text-sm font-bold rounded-xl transition-colors ${activeTab === 'overview' ? 'bg-red-50 text-red-600' : 'text-slate-600 hover:bg-slate-50'}`}>
+                <i class="fas fa-chart-pie w-6"></i> 대시보드
+              </a>
+              <a href="/admin?tab=companies" class={`flex items-center px-4 py-3 text-sm font-bold rounded-xl transition-colors ${activeTab === 'companies' ? 'bg-red-50 text-red-600' : 'text-slate-600 hover:bg-slate-50'}`}>
+                <i class="fas fa-building w-6"></i> 기업 데이터 수집
+              </a>
+              <a href="/admin?tab=grants" class={`flex items-center px-4 py-3 text-sm font-bold rounded-xl transition-colors ${activeTab === 'grants' ? 'bg-red-50 text-red-600' : 'text-slate-600 hover:bg-slate-50'}`}>
+                <i class="fas fa-bullhorn w-6"></i> 지원사업 공고
+              </a>
+              <a href="/admin?tab=logs" class={`flex items-center px-4 py-3 text-sm font-bold rounded-xl transition-colors ${activeTab === 'logs' ? 'bg-red-50 text-red-600' : 'text-slate-600 hover:bg-slate-50'}`}>
+                <i class="fas fa-history w-6"></i> AI 분석 내역
+              </a>
+              <div class="border-t border-slate-100 my-4"></div>
+              <a href="/" class="flex items-center px-4 py-3 text-sm font-bold text-slate-500 hover:text-slate-800 transition-colors">
+                <i class="fas fa-home w-6"></i> 사이트로 돌아가기
               </a>
             </div>
           </aside>
 
           {/* Main Content */}
           <main class="flex-1 md:ml-64 p-8">
-            {/* Top Header */}
-            <header class="flex justify-between items-center mb-8">
+            <header class="flex justify-between items-center mb-8 bg-white p-6 rounded-2xl shadow-sm border-l-4 border-blue-600">
               <div>
-                <h1 class="text-2xl font-extrabold text-slate-900">
-                  {activeTab === 'overview' && '대시보드'}
-                  {activeTab === 'companies' && '기업 DB 관리'}
-                  {activeTab === 'grants' && '지원사업 공고 관리'}
-                  {activeTab === 'logs' && 'AI 분석 이력'}
-                  {activeTab === 'partners' && '파트너사 가입 승인'}
-                  {activeTab === 'rfq' && '공급사 매칭 및 알림'}
-                  {activeTab === 'banners' && '배너 및 팝업 관리'}
-                  {activeTab === 'seo' && 'SEO 및 마케팅 설정'}
-                  {activeTab === 'settings' && '시스템 설정 (DART/배포)'}
+                <h1 class="text-2xl font-extrabold text-slate-900 flex items-center">
+                  <span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-lg text-xs mr-3">ADMIN V3.0</span>
+                  통합 관리자 시스템
                 </h1>
-                <p class="text-slate-500 text-sm mt-1">경영인증평가원 통합 관리자 시스템 V3.0</p>
+                <p class="text-slate-500 text-sm mt-1 ml-14">기업 데이터, 공고 매칭, AI 분석 현황을 실시간으로 관리합니다.</p>
               </div>
-              <div class="flex items-center space-x-3">
-                 <div class="text-right hidden sm:block">
+              <div class="flex items-center space-x-4">
+                 <div class="text-right mr-4 hidden sm:block">
                    <p class="text-sm font-bold text-slate-800">{props.user.name}</p>
                    <p class="text-xs text-slate-500">최고 관리자</p>
                  </div>
-                 <div class="h-8 w-px bg-slate-200 mx-2"></div>
-                 <button onclick="location.reload()" class="p-2 text-slate-400 hover:text-blue-600 rounded-full hover:bg-blue-50 transition">
-                   <i class="fas fa-sync-alt"></i>
-                 </button>
-                 <a href="/logout" class="p-2 text-red-400 hover:text-red-600 rounded-full hover:bg-red-50 transition">
-                   <i class="fas fa-sign-out-alt"></i>
+                 <a href="/logout" class="bg-slate-100 hover:bg-slate-200 text-slate-600 px-4 py-2 rounded-lg text-sm font-bold transition-colors">
+                   로그아웃
                  </a>
               </div>
             </header>
 
-            {/* Content Area */}
             <div class="fade-in">
-              
-              {/* 1. Dashboard */}
-              {activeTab === 'overview' && (
-                <div class="space-y-6">
-                  {/* Action Center */}
-                  <div id="action-center" class="bg-indigo-600 rounded-2xl shadow-lg p-6 text-white flex items-center justify-between hidden">
-                    <div class="flex items-center space-x-4">
-                      <div class="p-3 bg-white/20 rounded-xl backdrop-blur-sm animate-pulse"><i class="fas fa-bell text-2xl"></i></div>
-                      <div>
-                        <h3 class="text-lg font-bold">확인 필요한 업무가 있습니다!</h3>
-                        <p class="text-indigo-100 text-sm">파트너 승인 대기 및 신규 견적 요청을 확인하세요.</p>
-                      </div>
-                    </div>
-                    <div class="flex space-x-3">
-                      <a href="/admin?tab=partners" class="px-4 py-2 bg-white text-indigo-700 rounded-lg font-bold text-sm flex items-center hover:bg-indigo-50">
-                        승인 대기 <span class="ml-2 bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full" id="count-pending-partners">0</span>
-                      </a>
-                    </div>
-                  </div>
-
-                  {/* Stats Cards */}
-                  <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-                     <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                        <p class="text-xs font-bold text-slate-400 uppercase">총 회원 수</p>
-                        <h3 id="stat-total-users" class="text-3xl font-extrabold text-slate-800 mt-2">-</h3>
-                     </div>
-                     <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                        <p class="text-xs font-bold text-slate-400 uppercase">AI 분석 횟수</p>
-                        <h3 id="stat-ai-usage" class="text-3xl font-extrabold text-indigo-600 mt-2">-</h3>
-                     </div>
-                     <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                        <p class="text-xs font-bold text-slate-400 uppercase">수집된 공고</p>
-                        <h3 id="stat-crawler-usage" class="text-3xl font-extrabold text-emerald-600 mt-2">-</h3>
-                     </div>
-                     <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                        <p class="text-xs font-bold text-slate-400 uppercase">파트너 신청</p>
-                        <h3 class="text-3xl font-extrabold text-orange-500 mt-2" id="stat-pending">0</h3>
-                     </div>
-                  </div>
-
-                  {/* Charts */}
-                  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                      <h3 class="font-bold text-lg text-slate-800 mb-4">주간 성장 지표</h3>
-                      <div class="h-64 relative"><canvas id="growthChart"></canvas></div>
-                    </div>
-                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                      <h3 class="font-bold text-lg text-slate-800 mb-4">AI 서비스 활용도</h3>
-                      <div class="h-64 relative"><canvas id="aiChart"></canvas></div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* 2. Tables (Companies, Grants, Logs) */}
+              {/* === Companies Tab (Data Collection) === */}
               {activeTab === 'companies' && (
-                <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
-                  <div class="overflow-x-auto"><table class="w-full text-sm text-left"><thead class="text-xs text-slate-400 uppercase bg-slate-50"><tr><th class="px-6 py-3">기업명</th><th class="px-6 py-3">대표자</th><th class="px-6 py-3">매출액</th><th class="px-6 py-3">구분</th></tr></thead><tbody id="company-list"><tr><td class="p-4 text-center">로딩중...</td></tr></tbody></table></div>
-                </div>
-              )}
-              {activeTab === 'grants' && (
-                <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
-                  <div class="overflow-x-auto"><table class="w-full text-sm text-left"><thead class="text-xs text-slate-400 uppercase bg-slate-50"><tr><th class="px-6 py-3">공고명</th><th class="px-6 py-3">기관</th><th class="px-6 py-3">마감일</th></tr></thead><tbody id="grant-list"><tr><td class="p-4 text-center">로딩중...</td></tr></tbody></table></div>
-                </div>
-              )}
-              {activeTab === 'logs' && (
-                <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
-                  <div class="overflow-x-auto"><table class="w-full text-sm text-left"><thead class="text-xs text-slate-400 uppercase bg-slate-50"><tr><th class="px-6 py-3">일시</th><th class="px-6 py-3">사용자</th><th class="px-6 py-3">점수</th><th class="px-6 py-3">AI 의견</th></tr></thead><tbody id="log-list"><tr><td class="p-4 text-center">로딩중...</td></tr></tbody></table></div>
-                </div>
-              )}
-
-              {/* 3. Partner Approval */}
-              {activeTab === 'partners' && (
-                <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
-                  <div class="overflow-x-auto">
-                    <table class="w-full text-sm text-left">
-                      <thead class="text-xs text-slate-400 uppercase bg-slate-50">
-                        <tr><th class="px-6 py-3">기업명</th><th class="px-6 py-3">대표자</th><th class="px-6 py-3">신청일</th><th class="px-6 py-3">상태</th><th class="px-6 py-3 text-right">관리</th></tr>
-                      </thead>
-                      <tbody id="partner-list">
-                        {/* Mock Data */}
-                        <tr class="border-b border-slate-100">
-                          <td class="px-6 py-4 font-bold">(주)미래테크</td><td class="px-6 py-4">김대표</td><td class="px-6 py-4">2026-01-05</td>
-                          <td class="px-6 py-4"><span class="bg-yellow-100 text-yellow-700 px-2 py-1 rounded text-xs font-bold">승인 대기</span></td>
-                          <td class="px-6 py-4 text-right"><button class="text-blue-600 font-bold hover:underline">승인</button></td>
-                        </tr>
-                        <tr class="border-b border-slate-100">
-                          <td class="px-6 py-4 font-bold">대영플라스틱</td><td class="px-6 py-4">이영희</td><td class="px-6 py-4">2026-01-04</td>
-                          <td class="px-6 py-4"><span class="bg-yellow-100 text-yellow-700 px-2 py-1 rounded text-xs font-bold">승인 대기</span></td>
-                          <td class="px-6 py-4 text-right"><button class="text-blue-600 font-bold hover:underline">승인</button></td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              )}
-
-              {/* 4. RFQ Management */}
-              {activeTab === 'rfq' && (
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                  <div class="col-span-1 bg-white rounded-2xl shadow-sm border border-slate-100 p-4">
-                    <h3 class="font-bold text-slate-800 mb-4 px-2">접수된 견적 요청</h3>
-                    <div class="space-y-3">
-                      <div class="p-4 bg-blue-50 border border-blue-100 rounded-xl cursor-pointer hover:bg-blue-100 transition">
-                        <div class="flex justify-between items-center mb-2"><span class="bg-blue-600 text-white text-[10px] px-2 py-0.5 rounded font-bold">NEW</span> <span class="text-xs text-slate-400">10분 전</span></div>
-                        <h4 class="font-bold text-slate-900 text-sm">전기차 배터리 케이스 가공</h4>
-                        <p class="text-xs text-slate-500 mt-1">발주사: (주)한화시스템 1차협력사</p>
+                <div class="space-y-8">
+                  {/* Step Indicator */}
+                  <div class="flex justify-center mb-10">
+                    <div class="flex items-center space-x-4">
+                      <div class="flex flex-col items-center">
+                        <div class="w-10 h-10 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold shadow-lg shadow-blue-200">1</div>
+                        <span class="text-xs font-bold mt-2 text-blue-700">기업식별/인력</span>
                       </div>
-                      <div class="p-4 bg-white border border-slate-100 rounded-xl cursor-pointer hover:bg-slate-50 transition">
-                        <div class="flex justify-between items-center mb-2"><span class="bg-slate-200 text-slate-600 text-[10px] px-2 py-0.5 rounded font-bold">대기</span> <span class="text-xs text-slate-400">어제</span></div>
-                        <h4 class="font-bold text-slate-900 text-sm">의료기기 임플란트 시제품</h4>
-                        <p class="text-xs text-slate-500 mt-1">발주사: 메디컬솔루션</p>
+                      <div class="w-20 h-1 bg-slate-200 rounded-full"></div>
+                      <div class="flex flex-col items-center opacity-50">
+                        <div class="w-10 h-10 bg-white border-2 border-slate-300 text-slate-400 rounded-full flex items-center justify-center font-bold">2</div>
+                        <span class="text-xs font-bold mt-2 text-slate-500">정밀재무</span>
+                      </div>
+                      <div class="w-20 h-1 bg-slate-200 rounded-full"></div>
+                      <div class="flex flex-col items-center opacity-50">
+                        <div class="w-10 h-10 bg-white border-2 border-slate-300 text-slate-400 rounded-full flex items-center justify-center font-bold">3</div>
+                        <span class="text-xs font-bold mt-2 text-slate-500">기술/인증</span>
                       </div>
                     </div>
                   </div>
-                  <div class="col-span-2 bg-white rounded-2xl shadow-sm border border-slate-100 p-6 flex flex-col justify-center items-center text-center">
-                    <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-4 text-slate-400"><i class="fas fa-mouse-pointer text-2xl"></i></div>
-                    <p class="text-slate-500 text-sm">좌측 목록에서 요청서를 선택하면<br/>매칭된 공급사와 발송 옵션이 표시됩니다.</p>
-                  </div>
-                </div>
-              )}
 
-              {/* 5. Banners & Marketing */}
-              {(activeTab === 'banners' || activeTab === 'seo') && (
-                <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-12 text-center">
-                  <div class="w-20 h-20 bg-purple-50 text-purple-500 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <i class="fas fa-paint-brush text-3xl"></i>
-                  </div>
-                  <h3 class="text-xl font-bold text-slate-800 mb-2">디자인 및 마케팅 설정</h3>
-                  <p class="text-slate-500">배너 이미지 교체 및 메타 태그 설정 기능이 곧 활성화됩니다.</p>
-                </div>
-              )}
+                  {/* Search Section */}
+                  <div class="text-center max-w-2xl mx-auto mb-12 relative z-30">
+                    <h2 class="text-2xl font-extrabold text-slate-900 mb-2">원클릭 기업 데이터 수집</h2>
+                    <p class="text-slate-500 mb-8">기업명만 입력하면 DART, 고용부, 인증협회 데이터를 자동으로 연동합니다.</p>
+                    
+                    <div class="relative">
+                      <div class="flex shadow-2xl rounded-2xl overflow-hidden border border-slate-200 bg-white">
+                        <input type="text" id="company-search-input" placeholder="기업명을 입력하세요 (예: 삼성전자, 태성정밀)" 
+                          class="w-full px-6 py-4 text-lg outline-none text-slate-700 placeholder-slate-300" autocomplete="off" />
+                        <button class="bg-blue-600 text-white px-8 py-4 font-bold text-lg hover:bg-blue-700 transition flex items-center">
+                          <i class="fas fa-search mr-2"></i> 데이터 연동
+                        </button>
+                      </div>
 
-              {/* 6. System Settings (DART & Deploy) */}
-              {activeTab === 'settings' && (
-                <div class="space-y-6">
-                  {/* DART */}
-                  <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                    <div class="flex justify-between items-center mb-4">
-                      <div class="flex items-center">
-                        <div class="w-10 h-10 bg-yellow-100 text-yellow-700 rounded-lg flex items-center justify-center font-bold mr-3">D</div>
+                      {/* Autocomplete Dropdown */}
+                      <div id="autocomplete-list" class="absolute top-full left-0 w-full bg-white rounded-xl shadow-2xl border border-slate-100 mt-2 overflow-hidden hidden dropdown-shadow text-left">
+                        {/* Items will be injected here via JS */}
+                        <div class="p-4 text-center text-slate-400 text-sm">검색어를 입력하세요...</div>
+                      </div>
+                    </div>
+
+                    <div class="flex justify-center space-x-4 mt-6 text-xs font-bold text-slate-400">
+                      <span class="flex items-center text-green-600"><i class="fas fa-check-circle mr-1"></i> DART (재무)</span>
+                      <span class="flex items-center text-green-600"><i class="fas fa-check-circle mr-1"></i> 고용보험 (인력)</span>
+                      <span class="flex items-center text-green-600"><i class="fas fa-check-circle mr-1"></i> 벤처인 (인증)</span>
+                    </div>
+                  </div>
+
+                  {/* Result Cards */}
+                  <div id="result-area" class="grid grid-cols-1 lg:grid-cols-2 gap-8 opacity-50 pointer-events-none transition-opacity duration-500">
+                    {/* Card 1: Overview */}
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 relative overflow-hidden">
+                      <div class="absolute top-0 right-0 bg-slate-100 px-3 py-1 rounded-bl-xl text-[10px] font-bold text-slate-500">DART + 등기소</div>
+                      <h3 class="text-lg font-bold text-slate-800 mb-6 flex items-center"><i class="fas fa-building text-blue-600 mr-2"></i> 기업 개요 및 신용</h3>
+                      
+                      <div class="space-y-6">
+                        <div class="grid grid-cols-2 gap-6">
+                          <div>
+                            <label class="block text-xs font-bold text-slate-400 mb-1">기업명</label>
+                            <div id="res-name" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2.5 text-sm font-bold text-slate-800">-</div>
+                          </div>
+                          <div>
+                            <label class="block text-xs font-bold text-slate-400 mb-1">대표자</label>
+                            <div id="res-ceo" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2.5 text-sm font-bold text-slate-800">-</div>
+                          </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-6">
+                          <div>
+                            <label class="block text-xs font-bold text-slate-400 mb-1">설립일</label>
+                            <div id="res-est" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2.5 text-sm text-slate-600">-</div>
+                          </div>
+                          <div>
+                            <label class="block text-xs font-bold text-slate-400 mb-1">기업규모</label>
+                            <div id="res-scale" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2.5 text-sm text-slate-600">-</div>
+                          </div>
+                        </div>
                         <div>
-                          <h4 class="font-bold text-slate-800">DART 전자공시시스템</h4>
-                          <p class="text-xs text-slate-500">기업 개요 및 재무정보 자동 동기화</p>
+                          <label class="block text-xs font-bold text-slate-400 mb-1">본점 주소</label>
+                          <div id="res-addr" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2.5 text-sm text-slate-600">-</div>
                         </div>
                       </div>
-                      <button onclick="testDartConnection()" class="bg-slate-800 text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-slate-900 transition">연동 테스트</button>
                     </div>
-                    <div class="bg-slate-50 p-3 rounded-lg text-xs text-slate-600 font-mono">Status: <span id="dart-status" class="text-slate-400">대기 중...</span></div>
-                  </div>
 
-                  {/* Deploy */}
-                  <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                    <div class="flex justify-between items-center">
-                      <div class="flex items-center">
-                        <div class="w-10 h-10 bg-indigo-100 text-indigo-700 rounded-lg flex items-center justify-center font-bold mr-3"><i class="fas fa-rocket"></i></div>
-                        <div>
-                          <h4 class="font-bold text-slate-800">시스템 배포 관리</h4>
-                          <p class="text-xs text-slate-500">최신 코드를 서버에 반영합니다.</p>
+                    {/* Card 2: Employment */}
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 relative overflow-hidden">
+                      <div class="absolute top-0 right-0 bg-green-50 px-3 py-1 rounded-bl-xl text-[10px] font-bold text-green-600">고용노동부 (고용보험)</div>
+                      <h3 class="text-lg font-bold text-slate-800 mb-6 flex items-center"><i class="fas fa-users text-green-600 mr-2"></i> 고용 및 인력 변동 (최근 1년)</h3>
+                      
+                      <div class="space-y-6">
+                        <div class="grid grid-cols-2 gap-6">
+                          <div class="text-center p-4 bg-slate-50 rounded-xl border border-slate-100">
+                            <span class="block text-xs text-slate-400 mb-1">총 근로자 수</span>
+                            <strong id="res-emp" class="text-2xl font-extrabold text-slate-800">-</strong> <span class="text-xs">명</span>
+                          </div>
+                          <div class="text-center p-4 bg-slate-50 rounded-xl border border-slate-100">
+                            <span class="block text-xs text-slate-400 mb-1">청년 (만 34세↓)</span>
+                            <strong id="res-youth" class="text-2xl font-extrabold text-slate-800">-</strong> <span class="text-xs">명</span>
+                          </div>
+                        </div>
+                        
+                        <div class="flex justify-between items-center p-4 border border-slate-100 rounded-xl">
+                          <div class="text-center flex-1 border-r border-slate-100">
+                            <span class="block text-[10px] text-slate-400">최근 1년 입사</span>
+                            <strong class="text-blue-600 text-lg">0명</strong>
+                          </div>
+                          <div class="text-center flex-1 border-r border-slate-100">
+                            <span class="block text-[10px] text-slate-400">최근 1년 퇴사</span>
+                            <strong class="text-red-500 text-lg">0명</strong>
+                          </div>
+                          <div class="text-center flex-1">
+                            <span class="block text-[10px] text-slate-400">퇴사율</span>
+                            <strong class="text-slate-700 text-lg">0%</strong>
+                          </div>
+                        </div>
+
+                        <div class="bg-yellow-50 p-4 rounded-xl border border-yellow-100 flex items-start">
+                          <i class="fas fa-lightbulb text-yellow-500 mt-1 mr-3"></i>
+                          <div>
+                            <h4 class="text-xs font-bold text-yellow-800 mb-1">고용 유지율 우수 기업</h4>
+                            <p class="text-[10px] text-yellow-700">일자리 창출 및 고용 안정 자금 추천 대상입니다.</p>
+                          </div>
                         </div>
                       </div>
-                      <button onclick="triggerDeploy()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-indigo-700 transition">배포 시작</button>
                     </div>
                   </div>
                 </div>
               )}
 
+              {/* Other Tabs (Placeholder) */}
+              {activeTab === 'overview' && <div class="text-center py-20 text-slate-400">대시보드 로딩 중... (admin_final.js)</div>}
+              {activeTab !== 'companies' && activeTab !== 'overview' && <div class="text-center py-20 text-slate-400">해당 기능 준비 중...</div>}
             </div>
           </main>
         </div>
-        
-        {/* Scripts */}
-        <script>{`
-          // DART Test Logic
-          async function testDartConnection() {
-            const status = document.getElementById('dart-status');
-            status.innerHTML = '<span class="text-blue-600">연결 시도 중...</span>';
-            try {
-              const res = await fetch('/api/dart/test');
-              const data = await res.json();
-              if (data.success) {
-                status.innerHTML = '<span class="text-green-600 font-bold">✅ 연결 성공!</span> (' + data.company + ')';
-              } else {
-                status.innerHTML = '<span class="text-red-600 font-bold">❌ 실패: ' + data.message + '</span>';
-              }
-            } catch (e) {
-              status.innerHTML = '<span class="text-red-600">오류 발생</span>';
-            }
-          }
-
-          // Deploy Logic
-          async function triggerDeploy() {
-            if(!confirm('최신 버전으로 배포하시겠습니까?')) return;
-            try {
-              const res = await fetch('/api/admin/deploy', { method: 'POST' });
-              alert('배포 요청이 전송되었습니다.');
-            } catch(e) { alert('배포 요청 실패'); }
-          }
-        `}</script>
         <script src="/static/js/core.js"></script>
         <script src="/static/js/admin_final.js"></script>
       </body>
@@ -366,121 +249,43 @@ app.use(renderer)
 app.use('/static/*', serveStatic({ root: './public' }))
 
 // --- 4. Public Routes ---
-app.get('/', (c) => {
-  const userSession = getCookie(c, 'user_session')
-  const user = userSession ? JSON.parse(userSession) : undefined
-  return c.render(<Home user={user} />)
-})
-
-app.get('/services/scm', (c) => {
-  const userSession = getCookie(c, 'user_session')
-  const user = userSession ? JSON.parse(userSession) : undefined
-  return c.render(<Services user={user} />)
-})
-
-app.get('/services/spec', (c) => {
-  const userSession = getCookie(c, 'user_session')
-  const user = userSession ? JSON.parse(userSession) : undefined
-  return c.render(<SpecEvaluation user={user} />)
-})
-
-app.get('/services/certification', (c) => {
-  const userSession = getCookie(c, 'user_session')
-  const user = userSession ? JSON.parse(userSession) : undefined
-  return c.render(<Certification user={user} />)
-})
-
-app.get('/rfq', (c) => {
-  const userSession = getCookie(c, 'user_session')
-  const user = userSession ? JSON.parse(userSession) : undefined
-  return c.render(<Rfq user={user} />)
-})
-
-app.get('/rfq/result', (c) => {
-  const userSession = getCookie(c, 'user_session')
-  const user = userSession ? JSON.parse(userSession) : undefined
-  return c.render(<RfqResult user={user} />)
-})
-
-app.get('/support-matching', (c) => {
-  const userSession = getCookie(c, 'user_session')
-  const user = userSession ? JSON.parse(userSession) : undefined
-  return c.render(<SupportMatching user={user} />)
-})
-
-app.get('/partners', (c) => {
-  const userSession = getCookie(c, 'user_session')
-  const user = userSession ? JSON.parse(userSession) : undefined
-  return c.render(<Partners user={user} />)
-})
-
-app.get('/faq', (c) => {
-  const userSession = getCookie(c, 'user_session')
-  const user = userSession ? JSON.parse(userSession) : undefined
-  return c.render(<FAQ user={user} />)
-})
-
-app.get('/partnership', (c) => {
-  const userSession = getCookie(c, 'user_session')
-  const user = userSession ? JSON.parse(userSession) : undefined
-  return c.render(<PartnershipProposal user={user} />)
-})
-
-app.get('/legal', (c) => {
-  const userSession = getCookie(c, 'user_session')
-  const user = userSession ? JSON.parse(userSession) : undefined
-  return c.render(<Legal user={user} />)
-})
-
-app.get('/audit/apply', (c) => {
-  const userSession = getCookie(c, 'user_session')
-  const user = userSession ? JSON.parse(userSession) : undefined
-  return c.render(<AuditApplication user={user} />)
-})
+app.get('/', (c) => c.render(<Home />))
+app.get('/services/scm', (c) => c.render(<Services />))
+app.get('/services/spec', (c) => c.render(<SpecEvaluation />))
+app.get('/services/certification', (c) => c.render(<Certification />))
+app.get('/rfq', (c) => c.render(<Rfq />))
+app.get('/rfq/result', (c) => c.render(<RfqResult />))
+app.get('/support-matching', (c) => c.render(<SupportMatching />))
+app.get('/partners', (c) => c.render(<Partners />))
+app.get('/faq', (c) => c.render(<FAQ />))
+app.get('/partnership', (c) => c.render(<PartnershipProposal />))
+app.get('/legal', (c) => c.render(<Legal />))
+app.get('/audit/apply', (c) => c.render(<AuditApplication />))
 
 // --- 5. Auth & Admin Routes ---
 app.get('/login', (c) => {
-  const userSession = getCookie(c, 'user_session')
-  if (userSession) return c.redirect('/')
-  
   return c.html(
     <html lang="ko">
       <head>
         <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>로그인</title>
         <script src="https://cdn.tailwindcss.com"></script>
       </head>
       <body class="bg-gray-50 flex items-center justify-center min-h-screen">
-        <div class="bg-white p-8 rounded-lg shadow-lg max-w-md w-full">
-          <div class="text-center mb-8">
-            <h1 class="text-2xl font-bold text-gray-800">로그인</h1>
-            <p class="text-gray-600 mt-2">서비스 이용을 위해 로그인해주세요</p>
-          </div>
+        <div class="bg-white p-8 rounded-lg shadow-lg w-96">
+          <h1 class="text-2xl font-bold mb-6 text-center">로그인</h1>
           <form action="/auth/login" method="post" class="space-y-4">
-            <div>
-              <label class="block text-gray-700 text-sm font-bold mb-2">이메일</label>
-              <input type="email" name="email" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-500" required />
-            </div>
-            <div>
-              <label class="block text-gray-700 text-sm font-bold mb-2">비밀번호</label>
-              <input type="password" name="password" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-500" required />
-            </div>
-            <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded-lg font-bold hover:bg-blue-700 transition">로그인</button>
+            <input type="email" name="email" placeholder="이메일" class="w-full p-2 border rounded" required />
+            <input type="password" name="password" placeholder="비밀번호" class="w-full p-2 border rounded" required />
+            <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded font-bold">로그인</button>
           </form>
-          <div class="mt-6 text-center">
-            <span class="text-gray-500 text-sm">계정이 없으신가요?</span>
-            <a href="/register" class="text-blue-600 font-bold text-sm ml-2 hover:underline">회원가입</a>
-          </div>
         </div>
       </body>
     </html>
   )
 })
 
-app.get('/register', (c) => {
-  return c.render(<Register />)
-})
+app.get('/register', (c) => c.render(<Register />))
 
 app.post('/auth/login', async (c) => {
   const body = await c.req.parseBody()
@@ -497,14 +302,7 @@ app.post('/auth/login', async (c) => {
     setCookie(c, 'user_session', JSON.stringify(adminData), { path: '/', httpOnly: true })
     return c.redirect('/admin')
   }
-
-  const userData = {
-    id: 'user1',
-    name: '김철수',
-    email: email,
-    role: 'user',
-    profileImage: 'https://ui-avatars.com/api/?name=User'
-  }
+  const userData = { id: 'user1', name: '김철수', email: email, role: 'user', profileImage: 'https://ui-avatars.com/api/?name=User' }
   setCookie(c, 'user_session', JSON.stringify(userData), { path: '/', httpOnly: true })
   return c.redirect('/')
 })
@@ -522,47 +320,61 @@ app.get('/admin', (c) => {
   return c.render(<AdminFinal user={user} tab={tab} />)
 })
 
-// --- 6. API Endpoints ---
-app.get('/api/admin/stats', async (c) => {
-  // Use DB in real app, mock for now to ensure rendering
-  return c.json({
-    ai_usage: 150,
-    crawler_usage: 320,
-    total_users: 1250,
-    pending_partners: 5,
-    new_rfqs: 3,
-    chart_data: { labels: [], users: [] }
-  })
+// --- 6. API Endpoints (DART & Autocomplete) ---
+
+// Autocomplete API (Mock for now, replacing DART Search due to complexity)
+app.get('/api/search/company', (c) => {
+  const q = c.req.query('q') || '';
+  if (q.length < 1) return c.json([]);
+
+  // Mock Database of popular companies
+  const mockDB = [
+    { name: '삼성전자', code: '00126380', ceo: '한종희, 경계현' },
+    { name: '삼성에스디아이', code: '00126362', ceo: '최윤호' },
+    { name: '삼성전기', code: '00126326', ceo: '장덕현' },
+    { name: '삼성바이오로직스', code: '00872870', ceo: '존림' },
+    { name: '태성정밀', code: '00123456', ceo: '김철수' },
+    { name: '현대자동차', code: '00164779', ceo: '정의선' },
+    { name: 'LG에너지솔루션', code: '01515337', ceo: '권영수' }
+  ];
+
+  const results = mockDB.filter(c => c.name.includes(q));
+  return c.json(results);
 })
 
-app.get('/api/admin/companies', (c) => c.json([{name:'(주)테스트기업', ceo:'김대표', revenue:100, source:'crawler'}]))
-app.get('/api/admin/grants', (c) => c.json([{title:'2026 AI 바우처 지원사업', agency:'NIPA', deadline:'2026-05-01'}]))
-app.get('/api/admin/logs', (c) => c.json([{created_at: new Date(), user_id:'user1', match_score:95, ai_reasoning:'적합함'}]))
-
-// DART API Endpoint
-app.get('/api/dart/test', async (c) => {
+// DART Data Proxy
+app.get('/api/dart/data', async (c) => {
+  const code = c.req.query('code'); // corp_code
   const apiKey = c.env.DART_API_KEY;
-  if (!apiKey) return c.json({ success: false, message: 'API 키가 설정되지 않았습니다.' });
+  
+  if (!apiKey) return c.json({ error: 'API Key Missing' });
+  if (!code) return c.json({ error: 'Company Code Missing' });
 
   try {
-    const testCorpCode = '00126380'; 
-    const url = `https://opendart.fss.or.kr/api/company.json?crtfc_key=${apiKey}&corp_code=${testCorpCode}`;
-    const response = await fetch(url);
-    const data: any = await response.json();
+    // Call OpenDART
+    const url = `https://opendart.fss.or.kr/api/company.json?crtfc_key=${apiKey}&corp_code=${code}`;
+    const res = await fetch(url);
+    const data: any = await res.json();
 
     if (data.status === '000') {
-      return c.json({ 
-        success: true, 
-        company: data.corp_name,
-        ceo: data.ceo_nm,
-        address: data.adres
+      return c.json({
+        success: true,
+        data: {
+          name: data.corp_name,
+          ceo: data.ceo_nm,
+          est_date: data.est_dt,
+          address: data.adres,
+          corp_cls: data.corp_cls // Y: 유가, K: 코스닥, N: 코넥스, E: 기타
+        }
       });
     } else {
-      return c.json({ success: false, message: data.message || 'DART API 오류' });
+      return c.json({ success: false, message: data.message });
     }
   } catch (e: any) {
     return c.json({ success: false, message: e.message });
   }
 })
+
+app.get('/api/admin/stats', (c) => c.json({ total_users: 1234, ai_usage: 56, crawler_usage: 890, pending_partners: 2, new_rfqs: 5 }))
 
 export default app
