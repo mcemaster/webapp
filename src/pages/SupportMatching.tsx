@@ -210,12 +210,11 @@ export const SupportMatching = (props: { user: any }) => {
             });
             const result = await response.json();
 
-            setTimeout(() => {
-              loading.classList.add('hidden');
-              loading.classList.remove('flex');
-              document.getElementById('view-result').classList.remove('hidden');
-              renderReport(result.data);
-            }, 6000); 
+            // Clear loading immediately after AI finishes
+            loading.classList.add('hidden');
+            loading.classList.remove('flex');
+            document.getElementById('view-result').classList.remove('hidden');
+            renderReport(result.data);
           } catch(e) { alert('분석 중 오류가 발생했습니다.'); location.reload(); }
         });
 

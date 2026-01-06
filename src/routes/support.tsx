@@ -19,11 +19,63 @@ support.post('/analyze', async (c) => {
   try {
     const { companyData } = await c.req.json();
     const apiKey = c.env.OPENAI_API_KEY;
-    const hasDocs = companyData.documents && companyData.documents.length > 0;
 
-    // --- Mock Data Generator (Enhanced with Document Context) ---
-    // In a real scenario, we'd use OpenAI. Here we simulate the AI's "reading" of the document.
-    
+    // --- Real OpenAI Integration ---
+    if (apiKey) {
+      const prompt = `
+        You are a professional consultant for Korean government grant programs (정부지원사업).
+        Analyze the provided company data and recommend the TOP 20 most suitable grant programs for 2026.
+        
+        [Company Data]
+        ${JSON.stringify(companyData, null, 2)}
+
+        [Constraints]
+        1. Even if data is missing (e.g., revenue, employee count), infer the company's stage based on available info (or assume Early-Stage SME).
+        2. If 'documents' are present, boost the score and mention it in the reason.
+        3. Return the result strictly in JSON format with this structure:
+        {
+          "data": [
+            {
+              "id": 1,
+              "title": "Program Name",
+              "agency": "Agency Name",
+              "category": "Category (R&D, Employment, Export, Startup, etc.)",
+              "matchScore": 95,
+              "amount": "최대 2억원",
+              "deadline": "2026-05-31",
+              "aiReason": "Detailed reason why this is a good match (Korean, HTML allowed for bolding key points)."
+            }
+          ]
+        }
+        4. The 'aiReason' must be detailed (3-5 sentences), explaining WHY this company fits this specific grant based on their industry, size, or missing capabilities that need support.
+        5. Provide exactly 20 items.
+      `;
+
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({
+          model: 'gpt-4o',
+          messages: [
+            { role: 'system', content: 'You are a helpful and precise government grant consultant.' },
+            { role: 'user', content: prompt }
+          ],
+          response_format: { type: "json_object" }
+        })
+      });
+
+      const openAiJson: any = await response.json();
+      
+      if (openAiJson.choices && openAiJson.choices[0].message.content) {
+        const content = JSON.parse(openAiJson.choices[0].message.content);
+        return c.json({ success: true, data: content.data });
+      }
+    }
+
+    // --- Fallback Mock Data (If API Key is missing or fails) ---
     const categories = ['R&D (기술개발)', '사업화/창업', '수출바우처', '고용지원', '정책자금'];
     const agencies = ['중소벤처기업부', '산업통상자원부', 'KOTRA', '기술보증기금', '정보통신산업진흥원'];
     
