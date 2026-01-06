@@ -96,7 +96,7 @@ export const Layout = (props: { children: any; title?: string; user?: any }) => 
                           <i class="fas fa-cog w-5"></i> 관리자 모드
                         </a>
                       )}
-                      <a href="/logout" class="block px-6 py-3 text-sm text-red-600 hover:bg-red-50 font-medium flex items-center">
+                      <a href="/auth/logout" class="block px-6 py-3 text-sm text-red-600 hover:bg-red-50 font-medium flex items-center">
                         <i class="fas fa-sign-out-alt w-5"></i> 로그아웃
                       </a>
                     </div>
@@ -105,7 +105,7 @@ export const Layout = (props: { children: any; title?: string; user?: any }) => 
               ) : (
                 /* Guest State - Clean Text Links */
                 <div class="flex items-center space-x-4 text-sm font-bold">
-                  <a href="/login" class="text-slate-500 hover:text-blue-600 transition-colors">로그인</a>
+                  <a href="/auth/login" class="text-slate-500 hover:text-blue-600 transition-colors">로그인</a>
                   <span class="text-slate-300">|</span>
                   <a href="/register" class="text-slate-700 hover:text-blue-600 transition-colors">회원가입</a>
                 </div>
@@ -135,11 +135,11 @@ export const Layout = (props: { children: any; title?: string; user?: any }) => 
             <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 pl-2 mt-4">Account</div>
             {!user ? (
               <div class="grid grid-cols-2 gap-3 mt-2">
-                <a href="/login" class="block text-center py-3 bg-slate-100 text-slate-700 rounded-xl font-bold hover:bg-slate-200">로그인</a>
+                <a href="/auth/login" class="block text-center py-3 bg-slate-100 text-slate-700 rounded-xl font-bold hover:bg-slate-200">로그인</a>
                 <a href="/register" class="block text-center py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700">회원가입</a>
               </div>
             ) : (
-              <a href="/logout" class="block text-center py-3 bg-red-50 text-red-600 rounded-xl font-bold mt-2">로그아웃</a>
+              <a href="/auth/logout" class="block text-center py-3 bg-red-50 text-red-600 rounded-xl font-bold mt-2">로그아웃</a>
             )}
           </div>
         </div>

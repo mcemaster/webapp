@@ -4,7 +4,7 @@ import { html } from 'hono/html'
 
 const auth = new Hono()
 
-// 1. Login Page UI
+// 1. Login Page UI - Mounted at /auth/login
 auth.get('/login', (c) => {
   const userSession = getCookie(c, 'user_session')
   if (userSession) return c.redirect('/')
@@ -87,8 +87,8 @@ auth.post('/login', async (c) => {
 
 // 3. Logout
 auth.get('/logout', (c) => {
-  deleteCookie(c, 'user_session')
-  return c.redirect('/login')
+  deleteCookie(c, 'user_session', { path: '/' })
+  return c.redirect('/auth/login')
 })
 
 export default auth

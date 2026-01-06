@@ -177,7 +177,7 @@ export const Register = () => {
           <div class="mt-6 border-t border-slate-200 pt-6">
             <div class="text-center">
               <span class="text-sm text-slate-600">이미 계정이 있으신가요? </span>
-              <a href="/login" class="font-medium text-blue-600 hover:text-blue-500 ml-1">
+              <a href="/auth/login" class="font-medium text-blue-600 hover:text-blue-500 ml-1">
                 로그인하기
               </a>
             </div>
@@ -291,7 +291,7 @@ export const Register = () => {
                 : '일반 회원가입이 완료되었습니다!\\n로그인 후 바로 견적 요청이 가능합니다.';
               
               alert(msg);
-              window.location.href = '/login';
+              window.location.href = '/auth/login';
             } else {
               alert('오류가 발생했습니다.');
             }

@@ -38,8 +38,8 @@ app.use('/static/*', serveStatic({ root: './public' }))
 // 1. Mount Feature Modules (The "Microservices")
 // ==========================================
 
-// 🔐 Authentication (Login, Register)
-app.route('/', authApp)
+// 🔐 Authentication (Login, Register, Logout)
+app.route('/auth', authApp)
 
 // 🖥️ Admin Dashboard (Central Control)
 app.route('/admin', adminApp)

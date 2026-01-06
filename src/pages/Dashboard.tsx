@@ -31,7 +31,7 @@ export const Dashboard = (props: { user: any }) => {
             </div>
             <div class="flex items-center space-x-4">
               <span class="text-sm text-gray-600">${props.user?.name || '게스트'}님 환영합니다</span>
-              <a href="/logout" class="text-sm text-gray-500 hover:text-gray-900">로그아웃</a>
+              <a href="/auth/logout" class="text-sm text-gray-500 hover:text-gray-900">로그아웃</a>
             </div>
           </div>
         </div>

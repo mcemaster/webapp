@@ -16,7 +16,7 @@ const admin = new Hono<{ Bindings: Bindings }>()
 admin.get('/', (c) => {
   const userSession = getCookie(c, 'user_session')
   const user = userSession ? JSON.parse(userSession) : undefined
-  if (!user || user.role !== 'admin') return c.redirect('/login')
+  if (!user || user.role !== 'admin') return c.redirect('/auth/login')
   const tab = c.req.query('tab')
   return c.render(<Admin user={user} tab={tab} />)
 })
