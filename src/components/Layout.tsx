@@ -227,9 +227,9 @@ export const Layout = (props: { children: any; title?: string; user?: any; page?
           </div>
 
           <div class="border-t border-slate-800 py-6 flex flex-wrap gap-x-6 gap-y-2 text-slate-300 font-medium text-xs">
-             <a href="/legal?tab=terms" class="hover:text-white transition-colors">서비스 이용약관</a>
+             <a href="/legal?tab=service" class="hover:text-white transition-colors">서비스 이용약관</a>
              <a href="/legal?tab=privacy" class="font-bold text-white hover:text-blue-400 transition-colors">개인정보처리방침</a>
-             <a href="/legal?tab=finance" class="hover:text-white transition-colors">전자금융거래약관</a>
+             <a href="/legal?tab=marketing" class="hover:text-white transition-colors">마케팅 정보 수신 동의</a>
              <a href="#" class="hover:text-white transition-colors">이메일무단수집거부</a>
           </div>
 
