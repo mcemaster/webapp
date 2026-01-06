@@ -1830,6 +1830,233 @@ api.post('/admin/companies/clear', async (c) => {
   }
 })
 
+// 35-1. Admin - 네이버 금융에서 실제 상장사 데이터 수집
+api.post('/admin/companies/collect-real', async (c) => {
+  try {
+    const db = c.env.DB
+    const body = await c.req.json().catch(() => ({}))
+    const market = body.market || 'all' // 'kospi', 'kosdaq', 'all'
+    const pages = Math.min(body.pages || 3, 10) // 최대 10페이지
+    
+    const headers = {
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+    }
+    
+    const collectFromMarket = async (marketId: number, marketName: string) => {
+      const companies: any[] = []
+      
+      for (let page = 1; page <= pages; page++) {
+        try {
+          const url = `https://finance.naver.com/sise/sise_market_sum.nhn?sosok=${marketId}&page=${page}`
+          const res = await fetch(url, { headers })
+          const html = await res.text()
+          
+          // 종목 코드와 이름 추출
+          const regex = /href="\/item\/main\.naver\?code=(\d+)"[^>]*>([^<]+)<\/a>/g
+          let match
+          
+          while ((match = regex.exec(html)) !== null) {
+            const code = match[1]
+            const name = match[2].trim()
+            
+            if (name && code && !companies.find(c => c.code === code)) {
+              companies.push({
+                code,
+                name,
+                market: marketName,
+                source: 'NAVER_FINANCE'
+              })
+            }
+          }
+          
+          // Rate limiting
+          await new Promise(r => setTimeout(r, 200))
+        } catch (e) {
+          console.error(`페이지 ${page} 수집 실패:`, e)
+        }
+      }
+      
+      return companies
+    }
+    
+    let allCompanies: any[] = []
+    
+    // 코스피 수집
+    if (market === 'all' || market === 'kospi') {
+      const kospi = await collectFromMarket(0, 'KOSPI')
+      allCompanies = [...allCompanies, ...kospi]
+    }
+    
+    // 코스닥 수집
+    if (market === 'all' || market === 'kosdaq') {
+      const kosdaq = await collectFromMarket(1, 'KOSDAQ')
+      allCompanies = [...allCompanies, ...kosdaq]
+    }
+    
+    // 상위 30개 기업에 대해 상세 정보 수집
+    const detailedCompanies: any[] = []
+    
+    for (let i = 0; i < Math.min(allCompanies.length, 30); i++) {
+      const company = allCompanies[i]
+      
+      try {
+        const detailUrl = `https://finance.naver.com/item/main.naver?code=${company.code}`
+        const detailRes = await fetch(detailUrl, { headers })
+        const detailHtml = await detailRes.text()
+        
+        // 업종 추출
+        const sectorMatch = detailHtml.match(/section trade_compare[^>]*>[\s\S]*?<a[^>]*>([^<]+)<\/a>/)
+        if (sectorMatch) {
+          company.sector = sectorMatch[1].trim()
+        }
+        
+        // 시가총액 추출 (억원)
+        const capMatch = detailHtml.match(/시가총액[\s\S]*?<em>([0-9,]+)<\/em>/)
+        if (capMatch) {
+          company.market_cap = capMatch[1].replace(/,/g, '')
+        }
+        
+        await new Promise(r => setTimeout(r, 300))
+      } catch (e) {
+        // 상세 정보 실패해도 기본 정보는 유지
+      }
+      
+      detailedCompanies.push(company)
+    }
+    
+    // 나머지는 기본 정보만
+    for (let i = 30; i < allCompanies.length; i++) {
+      detailedCompanies.push(allCompanies[i])
+    }
+    
+    // DB에 저장
+    let inserted = 0
+    let updated = 0
+    let errors = 0
+    
+    for (const company of detailedCompanies) {
+      try {
+        // 종목코드로 중복 체크
+        const existing = await db.prepare(
+          'SELECT id FROM companies WHERE biz_num = ? OR name = ?'
+        ).bind(company.code, company.name).first()
+        
+        const financialJson = JSON.stringify({
+          market_cap: company.market_cap || null,
+          stock_code: company.code
+        })
+        
+        if (existing) {
+          // 기존 데이터 업데이트
+          await db.prepare(`
+            UPDATE companies SET 
+              industry_code = COALESCE(?, industry_code),
+              financial_json = ?,
+              source = 'NAVER_FINANCE',
+              analyzed_at = datetime('now')
+            WHERE id = ?
+          `).bind(
+            company.sector || null,
+            financialJson,
+            (existing as any).id
+          ).run()
+          updated++
+        } else {
+          // 새로 추가
+          await db.prepare(`
+            INSERT INTO companies (name, biz_num, industry_code, financial_json, source, analyzed_at)
+            VALUES (?, ?, ?, ?, 'NAVER_FINANCE', datetime('now'))
+          `).bind(
+            company.name,
+            company.code,  // 종목코드를 biz_num으로 저장
+            company.sector || company.market,
+            financialJson
+          ).run()
+          inserted++
+        }
+      } catch (e) {
+        errors++
+      }
+    }
+    
+    return c.json({
+      success: true,
+      collected: detailedCompanies.length,
+      inserted,
+      updated,
+      errors,
+      message: `실제 상장사 ${detailedCompanies.length}개 수집 완료! ${inserted}건 추가, ${updated}건 업데이트, ${errors}건 오류`
+    })
+  } catch (e: any) {
+    console.error('Collect real companies error:', e)
+    return c.json({ success: false, error: e.message }, 500)
+  }
+})
+
+// 35-2. Admin - 수집된 실제 데이터를 JSON으로 한번에 업로드
+api.post('/admin/companies/import-json', async (c) => {
+  try {
+    const db = c.env.DB
+    const body = await c.req.json()
+    const { companies, clearExisting = false } = body
+    
+    if (!companies || !Array.isArray(companies)) {
+      return c.json({ success: false, error: 'companies 배열이 필요합니다.' }, 400)
+    }
+    
+    // 기존 데이터 삭제 옵션
+    if (clearExisting) {
+      await db.prepare('DELETE FROM companies').run()
+    }
+    
+    let inserted = 0
+    let errors = 0
+    
+    for (const company of companies) {
+      try {
+        const financialJson = JSON.stringify({
+          market_cap: company.market_cap || null,
+          stock_code: company.code || null,
+          current_price: company.current_price || null
+        })
+        
+        // 중복 체크
+        const existing = await db.prepare(
+          'SELECT id FROM companies WHERE biz_num = ? OR name = ?'
+        ).bind(company.code || company.biz_num || company.name, company.name).first()
+        
+        if (!existing) {
+          await db.prepare(`
+            INSERT INTO companies (name, biz_num, ceo_name, industry_code, employee_count, financial_json, source, analyzed_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'))
+          `).bind(
+            company.name,
+            company.code || company.biz_num || null,
+            company.ceo || null,
+            company.sector || company.industry || company.market || null,
+            company.employees ? parseInt(company.employees) : null,
+            financialJson,
+            company.source || 'IMPORT'
+          ).run()
+          inserted++
+        }
+      } catch (e) {
+        errors++
+      }
+    }
+    
+    return c.json({
+      success: true,
+      total: companies.length,
+      inserted,
+      errors,
+      message: `${inserted}개 기업 추가 완료 (${errors}건 오류/중복)`
+    })
+  } catch (e: any) {
+    return c.json({ success: false, error: e.message }, 500)
+  }
+})
+
 // ==========================================
 // 대규모 기업 데이터 수집 시스템
 // ==========================================
