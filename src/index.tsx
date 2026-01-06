@@ -173,6 +173,7 @@ const AdminFinal = (props: { user: any, tab?: string }) => {
 type Bindings = {
   DB: D1Database;
   OPENAI_API_KEY: string;
+  DART_API_KEY: string; // Added DART Key
   MYBROWSER: any;
   DEPLOY_HOOK: string;
 }
@@ -356,5 +357,40 @@ app.get('/api/admin/stats', async (c) => {
 app.get('/api/admin/companies', (c) => c.json([{name:'(주)테스트기업', ceo:'김대표', revenue:100, source:'crawler'}]))
 app.get('/api/admin/grants', (c) => c.json([{title:'2026 AI 바우처 지원사업', agency:'NIPA', deadline:'2026-05-01'}]))
 app.get('/api/admin/logs', (c) => c.json([{created_at: new Date(), user_id:'user1', match_score:95, ai_reasoning:'적합함'}]))
+
+// --- 7. DART API Integration ---
+app.get('/api/dart/test', async (c) => {
+  const apiKey = c.env.DART_API_KEY;
+  if (!apiKey) return c.json({ success: false, message: 'API 키가 설정되지 않았습니다.' });
+
+  try {
+    // Test with Samsung Electronics (005930) - DART Corp Code requires lookup, but let's try direct request if supported
+    // Open DART 'company.json' uses 'crtfc_key' and 'corp_code'. 
+    // Since we don't have the full corp_code list (it's a zip file), we will test connectivity using a known code if possible, 
+    // or just checking if the key is valid by calling a light endpoint.
+    
+    // For this test, we assume the user has a corp_code. 
+    // Let's use Samsung Electronics DART Code: '00126380' (This is public info)
+    
+    const testCorpCode = '00126380'; 
+    const url = `https://opendart.fss.or.kr/api/company.json?crtfc_key=${apiKey}&corp_code=${testCorpCode}`;
+    
+    const response = await fetch(url);
+    const data: any = await response.json();
+
+    if (data.status === '000') {
+      return c.json({ 
+        success: true, 
+        company: data.corp_name,
+        ceo: data.ceo_nm,
+        address: data.adres
+      });
+    } else {
+      return c.json({ success: false, message: data.message || 'DART API 오류' });
+    }
+  } catch (e: any) {
+    return c.json({ success: false, message: e.message });
+  }
+})
 
 export default app
