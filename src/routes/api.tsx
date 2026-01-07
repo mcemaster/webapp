@@ -171,7 +171,7 @@ api.post('/register', async (c) => {
       return c.json({ success: false, error: '필수 정보를 입력해주세요.' }, 400)
     }
     
-    // 테이블 생성
+    // 테이블 생성 (이미 존재하면 무시)
     await db.prepare(`
       CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -186,6 +186,13 @@ api.post('/register', async (c) => {
         created_at TEXT DEFAULT (datetime('now'))
       )
     `).run()
+    
+    // password 컬럼이 없으면 추가 (기존 테이블용 마이그레이션)
+    try {
+      await db.prepare(`ALTER TABLE users ADD COLUMN password TEXT`).run()
+    } catch (e) {
+      // 이미 존재하면 무시
+    }
     
     // 이메일 중복 체크
     const existing = await db.prepare('SELECT id FROM users WHERE email = ?').bind(email).first()
