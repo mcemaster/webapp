@@ -23,8 +23,8 @@ export const LandingPage = () => html`
             단순한 검색으로는 찾을 수 없는 <strong>히든 챔피언 공고</strong>를 찾아드립니다.<br/>
             DART 공시 정보와 기업의 내부 데이터를 결합하여, <strong>2026년 합격 확률이 높은 Top 20 사업</strong>을 AI가 직접 분석합니다.
           </p>
-          <button id="btn-start-landing" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 px-10 rounded-xl shadow-lg shadow-blue-900/50 transition transform hover:scale-105 flex items-center text-lg">
-            AI 무료 진단 시작하기 <i class="fas fa-arrow-right ml-3"></i>
+          <button id="btn-start-landing" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-5 px-12 rounded-xl shadow-2xl shadow-blue-900/50 transition transform hover:scale-105 flex items-center text-xl animate-pulse hover:animate-none">
+            <i class="fas fa-rocket mr-3"></i>AI 무료 진단 시작하기 <i class="fas fa-arrow-right ml-3"></i>
           </button>
         </div>
       </div>
@@ -121,8 +121,8 @@ export const LandingPage = () => html`
             </ul>
 
             <div class="mt-10">
-              <button id="btn-start-landing-2" class="text-indigo-600 font-bold hover:text-indigo-800 flex items-center transition">
-                솔루션 자세히 보기 <i class="fas fa-long-arrow-alt-right ml-2"></i>
+              <button id="btn-start-landing-2" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 px-8 rounded-xl shadow-lg transition transform hover:scale-105 flex items-center">
+                <i class="fas fa-play-circle mr-2"></i>지금 무료 진단 시작 <i class="fas fa-arrow-right ml-2"></i>
               </button>
             </div>
           </div>

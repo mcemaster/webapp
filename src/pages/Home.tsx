@@ -31,7 +31,7 @@ export const Home = (props: { user?: any }) => {
           </p>
           
           <div class="flex flex-col sm:flex-row justify-center gap-5">
-            <a href="/support-matching" class="px-10 py-4 bg-blue-600 hover:bg-blue-500 text-white text-lg font-bold rounded-xl shadow-lg hover:shadow-blue-500/30 transition-all transform hover:-translate-y-1">
+            <a href="/support-matching" class="px-10 py-4 bg-blue-600 hover:bg-blue-500 text-white text-lg font-bold rounded-xl shadow-lg hover:shadow-blue-500/30 transition-all transform hover:-translate-y-1 animate-pulse">
               <i class="fas fa-robot mr-2"></i>정부지원사업 AI 매칭 (무료)
             </a>
             <a href="/rfq" class="px-10 py-4 bg-white text-slate-900 text-lg font-bold rounded-xl shadow-lg hover:bg-slate-100 transition-all transform hover:-translate-y-1">
