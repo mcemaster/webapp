@@ -91,4 +91,9 @@ auth.get('/logout', (c) => {
   return c.redirect('/auth/login')
 })
 
+// 4. Register - redirect to main register page
+auth.get('/register', (c) => {
+  return c.redirect('/register')
+})
+
 export default auth

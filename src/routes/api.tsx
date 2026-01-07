@@ -159,6 +159,109 @@ api.get('/search/company', async (c) => {
 })
 
 // ==========================================
+// User Registration API
+// ==========================================
+api.post('/register', async (c) => {
+  try {
+    const db = c.env.DB
+    const body = await c.req.json()
+    const { email, password, companyName, name, phone, userType } = body
+    
+    if (!email || !password || !name) {
+      return c.json({ success: false, error: '필수 정보를 입력해주세요.' }, 400)
+    }
+    
+    // 테이블 생성
+    await db.prepare(`
+      CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        email TEXT UNIQUE NOT NULL,
+        password TEXT,
+        name TEXT,
+        company_name TEXT,
+        phone TEXT,
+        role TEXT DEFAULT 'user',
+        user_type TEXT DEFAULT 'buyer',
+        status TEXT DEFAULT 'active',
+        created_at TEXT DEFAULT (datetime('now'))
+      )
+    `).run()
+    
+    // 이메일 중복 체크
+    const existing = await db.prepare('SELECT id FROM users WHERE email = ?').bind(email).first()
+    if (existing) {
+      return c.json({ success: false, error: '이미 등록된 이메일입니다.' }, 400)
+    }
+    
+    // 사용자 등록
+    const role = userType === 'partner' ? 'partner' : 'user'
+    const status = userType === 'partner' ? 'pending' : 'active'
+    
+    await db.prepare(`
+      INSERT INTO users (email, password, name, company_name, phone, role, user_type, status)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    `).bind(email, password, name, companyName || '', phone || '', role, userType || 'buyer', status).run()
+    
+    // 파트너 가입인 경우 파트너 테이블에도 등록
+    if (userType === 'partner' && companyName) {
+      try {
+        await db.prepare(`
+          CREATE TABLE IF NOT EXISTS partners (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            company_name TEXT NOT NULL,
+            ceo_name TEXT,
+            email TEXT,
+            phone TEXT,
+            status TEXT DEFAULT 'pending',
+            applied_at TEXT DEFAULT (datetime('now'))
+          )
+        `).run()
+        
+        await db.prepare(`
+          INSERT INTO partners (company_name, ceo_name, email, phone, status)
+          VALUES (?, ?, ?, ?, 'pending')
+        `).bind(companyName, name, email, phone || '').run()
+      } catch (e) {
+        console.log('Partner registration note:', e)
+      }
+    }
+    
+    return c.json({ success: true, message: '회원가입이 완료되었습니다.' })
+  } catch (e: any) {
+    console.error('Registration error:', e)
+    return c.json({ success: false, error: e.message }, 500)
+  }
+})
+
+// ==========================================
+// Public SEO Meta API (for frontend)
+// ==========================================
+api.get('/seo/meta', async (c) => {
+  try {
+    const db = c.env.DB
+    const result = await db.prepare('SELECT key, value FROM settings WHERE key LIKE ?').bind('seo_%').all()
+    
+    const meta: Record<string, string> = {}
+    if (result.results) {
+      result.results.forEach((r: any) => {
+        const key = r.key.replace('seo_', '')
+        meta[key] = r.value
+      })
+    }
+    
+    return c.json(meta)
+  } catch (e: any) {
+    // Return default meta if DB fails
+    return c.json({
+      title: 'MCE 경영인증평가원',
+      description: 'AI 기반 기업 맞춤형 정부지원사업 매칭, ISO 인증, 공급사 찾기 서비스',
+      keywords: '정부지원사업, ISO인증, 기업평가, AI매칭',
+      url: 'https://www.mce.ai.kr'
+    })
+  }
+})
+
+// ==========================================
 // DB Migration - 스키마 업데이트
 // ==========================================
 api.post('/admin/db/migrate', async (c) => {
@@ -694,6 +797,97 @@ api.get('/admin/grants', async (c) => {
   } catch (e: any) {
     console.error('Admin grants error:', e)
     return c.json({ grants: [], error: e.message })
+  }
+})
+
+// 6-1. Admin - Grants Seed (초기 지원사업 데이터)
+api.post('/admin/grants/seed', async (c) => {
+  try {
+    const db = c.env.DB
+    
+    // 테이블 생성
+    await db.prepare(`
+      CREATE TABLE IF NOT EXISTS grants (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        title TEXT NOT NULL,
+        agency TEXT,
+        type TEXT,
+        description TEXT,
+        max_amount INTEGER,
+        deadline TEXT,
+        url TEXT,
+        requirements TEXT,
+        created_at TEXT DEFAULT (datetime('now'))
+      )
+    `).run()
+    
+    const sampleGrants = [
+      { title: '2026년 창업성장기술개발사업', agency: '중기부', type: 'R&D', desc: '기술개발 지원', amount: 120000, deadline: '2026-02-28' },
+      { title: '2026년 청년창업사관학교', agency: '중기부', type: '창업', desc: '청년 창업가 육성 프로그램', amount: 100000, deadline: '2026-03-15' },
+      { title: '스마트공장 구축지원사업', agency: '중기부', type: '스마트제조', desc: '스마트공장 도입 지원', amount: 150000, deadline: '2026-04-30' },
+      { title: '2026년 창업성장기술개발사업 디딤돌', agency: '중소벤처기업부', type: 'R&D', desc: '창업 7년 이하 기업을 위한 첫걸음 R&D 지원', amount: 120000, deadline: '2026-02-28' },
+      { title: '소부장 강소기업 100 육성사업', agency: '산업부', type: 'R&D', desc: '소재·부품·장비 강소기업 육성', amount: 200000, deadline: '2026-03-20' },
+      { title: '2026년 신성장동력 R&D사업', agency: '과기정통부', type: 'R&D', desc: '신성장 분야 핵심기술 개발', amount: 500000, deadline: '2026-05-15' },
+      { title: '글로벌 스타트업 육성사업', agency: 'KOTRA', type: '수출', desc: '글로벌 진출 스타트업 지원', amount: 50000, deadline: '2026-06-30' },
+      { title: '고용촉진장려금', agency: '고용노동부', type: '고용', desc: '신규 고용 기업 지원', amount: 30000, deadline: '2026-12-31' },
+      { title: '사회보험료 지원사업', agency: '근로복지공단', type: '고용', desc: '사회보험료 부담 완화', amount: 20000, deadline: '2026-12-31' },
+      { title: '청년 디지털 일자리 사업', agency: '고용노동부', type: '고용', desc: '청년 IT인력 채용 지원', amount: 40000, deadline: '2026-08-31' },
+      { title: '에너지 효율화 지원사업', agency: '에너지공단', type: '에너지', desc: '에너지 절감 설비 도입 지원', amount: 100000, deadline: '2026-07-31' },
+      { title: '탄소중립 기술개발 사업', agency: '환경부', type: 'R&D', desc: '탄소중립 실현을 위한 기술개발', amount: 300000, deadline: '2026-04-15' },
+      { title: '지역특화산업 육성사업', agency: '지자체', type: '지역', desc: '지역 특화 산업 육성 지원', amount: 80000, deadline: '2026-05-31' },
+      { title: '수출바우처 (내수기업 전용)', agency: 'KOTRA', type: '수출', desc: '수출 실적이 없지만 해외 진출을 희망하는 기업 지원', amount: 30000, deadline: '2026-01-31' },
+      { title: '품질경쟁력 강화사업', agency: '표준협회', type: '인증', desc: 'ISO 등 품질인증 취득 지원', amount: 15000, deadline: '2026-09-30' },
+      { title: '특허기술 사업화 지원사업', agency: '특허청', type: '사업화', desc: '보유 특허의 사업화 지원', amount: 100000, deadline: '2026-06-15' },
+      { title: '중소기업 디지털전환 지원사업', agency: '중기부', type: 'DX', desc: '디지털 전환 컨설팅 및 솔루션 도입 지원', amount: 50000, deadline: '2026-07-15' },
+      { title: 'AI·빅데이터 활용 지원사업', agency: 'NIA', type: 'DX', desc: 'AI/빅데이터 기술 도입 지원', amount: 80000, deadline: '2026-08-15' },
+      { title: '여성기업 창업지원사업', agency: '여성기업종합지원센터', type: '창업', desc: '여성 창업기업 지원', amount: 50000, deadline: '2026-04-30' },
+      { title: '사회적기업 육성사업', agency: '고용노동부', type: '사회적경제', desc: '사회적기업 인증 및 육성', amount: 70000, deadline: '2026-05-20' },
+      { title: '중소기업 R&D 기획지원 사업', agency: '중기부', type: 'R&D', desc: '사업계획서 작성 및 기획 지원', amount: 20000, deadline: '2026-03-31' },
+      { title: '수출기업화 지원사업', agency: '중진공', type: '수출', desc: '수출 초보기업 역량 강화', amount: 30000, deadline: '2026-06-30' },
+      { title: '제조혁신 바우처 지원사업', agency: '중기부', type: '스마트제조', desc: '제조 혁신을 위한 바우처 지원', amount: 40000, deadline: '2026-08-31' },
+      { title: '기업부설연구소 설립지원', agency: 'KOITA', type: 'R&D', desc: '연구소 설립 및 운영 지원', amount: 30000, deadline: '2026-12-31' },
+      { title: '초기창업패키지', agency: '창업진흥원', type: '창업', desc: '창업 3년 이내 기업 사업화 자금 및 멘토링', amount: 100000, deadline: '2026-02-28' },
+      { title: '데이터바우처 지원사업', agency: 'NIA', type: 'DX', desc: '데이터 구매 및 가공 바우처', amount: 50000, deadline: '2026-05-15' },
+      { title: '클라우드 서비스 이용지원', agency: '과기정통부', type: 'DX', desc: '클라우드 서비스 도입 비용 지원', amount: 30000, deadline: '2026-07-31' },
+      { title: '무역보험 지원사업', agency: '무역보험공사', type: '수출', desc: '수출 보험료 지원', amount: 10000, deadline: '2026-12-31' },
+      { title: '국가기술자격 취득지원', agency: '산업인력공단', type: '인력', desc: '기술자격 취득 비용 지원', amount: 5000, deadline: '2026-12-31' },
+      { title: '중소기업 정책자금', agency: '중진공', type: '금융', desc: '중소기업 대출 및 보증 지원', amount: 1000000, deadline: '2026-12-31' },
+      { title: '신기술 실증사업', agency: '과기정통부', type: 'R&D', desc: '신기술의 실증 및 검증 지원', amount: 200000, deadline: '2026-06-15' },
+      { title: '콘텐츠 제작지원사업', agency: '콘진원', type: '콘텐츠', desc: '게임, 애니메이션, 방송 등 콘텐츠 제작비 지원', amount: 200000, deadline: '2026-02-25' },
+      { title: '지식재산 경영인증 지원', agency: '특허청', type: '인증', desc: 'IP 경영 인증 취득 비용 지원', amount: 10000, deadline: '2026-09-15' }
+    ]
+    
+    let inserted = 0
+    let duplicates = 0
+    
+    for (const g of sampleGrants) {
+      try {
+        // 중복 체크
+        const exists = await db.prepare('SELECT id FROM grants WHERE title = ?').bind(g.title).first()
+        if (exists) {
+          duplicates++
+          continue
+        }
+        
+        await db.prepare(`
+          INSERT INTO grants (title, agency, type, description, max_amount, deadline)
+          VALUES (?, ?, ?, ?, ?, ?)
+        `).bind(g.title, g.agency, g.type, g.desc, g.amount, g.deadline).run()
+        inserted++
+      } catch (e) {
+        console.error('Grant insert error:', e)
+      }
+    }
+    
+    return c.json({ 
+      success: true, 
+      inserted, 
+      duplicates,
+      message: `지원사업 시드 완료! ${inserted}건 추가, ${duplicates}건 중복(스킵)` 
+    })
+  } catch (e: any) {
+    console.error('Grants seed error:', e)
+    return c.json({ success: false, error: e.message })
   }
 })
 
@@ -4328,6 +4522,574 @@ api.post('/admin/settings/:group', async (c) => {
     return c.json({ success: true, message: `${updated}개 설정이 저장되었습니다.`, updated })
   } catch (e: any) {
     return c.json({ success: false, error: e.message }, 500)
+  }
+})
+
+// ==========================================
+// Company Detail API
+// ==========================================
+
+// 73. Get Company Detail by ID
+api.get('/admin/companies/:id/detail', async (c) => {
+  try {
+    const db = c.env.DB
+    const id = c.req.param('id')
+    
+    const company = await db.prepare(`
+      SELECT * FROM companies WHERE id = ?
+    `).bind(id).first<any>()
+    
+    if (!company) {
+      return c.json({ success: false, error: '기업을 찾을 수 없습니다.' }, 404)
+    }
+    
+    // Parse JSON fields
+    let financial = {}
+    let detail = {}
+    let executives: any[] = []
+    let shareholders: any[] = []
+    
+    try { if (company.financial_json) financial = JSON.parse(company.financial_json) } catch {}
+    try { if (company.detail_json) detail = JSON.parse(company.detail_json) } catch {}
+    try { if (company.executives_json) executives = JSON.parse(company.executives_json) } catch {}
+    try { if (company.shareholders_json) shareholders = JSON.parse(company.shareholders_json) } catch {}
+    
+    return c.json({
+      success: true,
+      company: {
+        id: company.id,
+        name: company.name,
+        biz_num: company.biz_num,
+        ceo_name: company.ceo_name,
+        founding_date: company.founding_date,
+        industry_code: company.industry_code,
+        employee_count: company.employee_count,
+        certifications: company.certifications,
+        corp_code: company.corp_code,
+        source: company.source,
+        financial,
+        detail,
+        executives,
+        shareholders
+      }
+    })
+  } catch (e: any) {
+    return c.json({ success: false, error: e.message }, 500)
+  }
+})
+
+// ==========================================
+// AI Support Matching API
+// ==========================================
+
+// 74. AI Support Matching
+api.post('/support/ai-match', async (c) => {
+  try {
+    const db = c.env.DB
+    const body = await c.req.json()
+    const { companyId, companyInfo } = body
+    
+    // First try environment variable, then DB for API key
+    let apiKey = c.env.OPENAI_API_KEY
+    
+    if (!apiKey) {
+      const result = await db.prepare("SELECT value FROM settings WHERE key = 'api_openai_key'").first<{value: string}>()
+      apiKey = result?.value
+    }
+    
+    // Get available grants
+    const grantsResult = await db.prepare(`
+      SELECT id, title, agency, type, description, max_amount, deadline
+      FROM grants 
+      WHERE deadline >= date('now')
+      ORDER BY deadline ASC
+      LIMIT 50
+    `).all()
+    
+    const grants = grantsResult.results || []
+    
+    if (grants.length === 0) {
+      return c.json({
+        success: true,
+        matches: [],
+        message: '진행 중인 지원사업이 없습니다. 관리자에게 지원사업 데이터 추가를 요청하세요.',
+        aiPowered: false
+      })
+    }
+    
+    if (apiKey && companyInfo) {
+      // Use OpenAI for AI-powered matching
+      try {
+        const prompt = `다음 기업 정보를 바탕으로 가장 적합한 정부지원사업을 추천해주세요.
+
+기업 정보:
+- 기업명: ${companyInfo.name || '정보 없음'}
+- 업종: ${companyInfo.industry || '정보 없음'}
+- 직원수: ${companyInfo.employeeCount || '정보 없음'}
+- 매출: ${companyInfo.revenue ? (companyInfo.revenue / 100000000).toFixed(1) + '억원' : '정보 없음'}
+- 설립일: ${companyInfo.foundingDate || '정보 없음'}
+- 보유인증: ${companyInfo.certifications || '없음'}
+
+가용한 지원사업 목록:
+${grants.slice(0, 20).map((g: any, i: number) => `${i+1}. [ID:${g.id}] ${g.title} (${g.agency}) - ${g.type}, 최대 ${g.max_amount ? (g.max_amount/10000).toFixed(0) + '만원' : '-'}`).join('\n')}
+
+위 목록에서 기업에 가장 적합한 지원사업 5개를 선정하고, 각각에 대해 다음 형식의 JSON 배열로 응답해주세요:
+[{"id": 지원사업ID, "title": "사업명", "agency": "전담기관", "score": 매칭점수(1-100), "reason": "추천 이유 (1-2문장)"}]
+
+JSON 배열만 반환하세요.`
+
+        const openaiRes = await fetch('https://api.openai.com/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Authorization': 'Bearer ' + apiKey,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            model: 'gpt-4o-mini',
+            messages: [
+              { role: 'system', content: '당신은 한국 정부지원사업 전문 컨설턴트입니다. 기업 상황에 맞는 지원사업을 정확히 매칭합니다.' },
+              { role: 'user', content: prompt }
+            ],
+            temperature: 0.7,
+            max_tokens: 1500
+          })
+        })
+        
+        if (openaiRes.ok) {
+          const openaiData = await openaiRes.json() as any
+          const content = openaiData.choices?.[0]?.message?.content
+          
+          // Record API usage
+          const usage = openaiData.usage
+          if (usage) {
+            const inputTokens = usage.prompt_tokens || 0
+            const outputTokens = usage.completion_tokens || 0
+            const costUsd = (inputTokens * 0.00000015) + (outputTokens * 0.0000006)
+            
+            try {
+              await db.prepare(`
+                INSERT INTO api_usage (api_type, endpoint, tokens_input, tokens_output, cost_usd)
+                VALUES ('openai', 'support/ai-match', ?, ?, ?)
+              `).bind(inputTokens, outputTokens, costUsd).run()
+            } catch {}
+          }
+          
+          if (content) {
+            try {
+              const jsonMatch = content.match(/\[[\s\S]*\]/)
+              if (jsonMatch) {
+                const aiMatches = JSON.parse(jsonMatch[0])
+                
+                return c.json({
+                  success: true,
+                  matches: aiMatches.map((m: any) => ({
+                    id: m.id,
+                    title: m.title,
+                    agency: m.agency,
+                    score: m.score,
+                    reason: m.reason,
+                    description: grants.find((g: any) => g.id === m.id)?.description || ''
+                  })),
+                  aiPowered: true,
+                  tokensUsed: usage?.total_tokens || 0,
+                  analysis: '기업 정보를 분석하여 가장 적합한 지원사업을 선정했습니다.'
+                })
+              }
+            } catch {}
+          }
+        }
+      } catch (e) {
+        console.error('AI matching error:', e)
+      }
+    }
+    
+    // Fallback: Basic matching algorithm
+    const matches = grants.slice(0, 5).map((g: any, i: number) => ({
+      id: g.id,
+      title: g.title,
+      agency: g.agency,
+      score: 95 - (i * 5),
+      reason: `${g.type || '지원사업'} 분야의 기업에 적합합니다.`,
+      description: g.description
+    }))
+    
+    return c.json({
+      success: true,
+      matches,
+      aiPowered: false,
+      message: 'OpenAI API 키가 없어 기본 매칭을 사용했습니다.'
+    })
+  } catch (e: any) {
+    return c.json({ success: false, error: e.message }, 500)
+  }
+})
+
+// ==========================================
+// Collector Status API
+// ==========================================
+
+// 75. Get Collector Status
+api.get('/admin/collector/status', async (c) => {
+  try {
+    const db = c.env.DB
+    
+    // Get total companies
+    const totalResult = await db.prepare('SELECT COUNT(*) as count FROM companies').first<{count: number}>()
+    
+    // Get companies by source
+    const sourceResult = await db.prepare(`
+      SELECT source, COUNT(*) as count 
+      FROM companies 
+      GROUP BY source
+    `).all()
+    
+    const bySource: Record<string, number> = {}
+    for (const row of sourceResult.results as any[]) {
+      bySource[row.source?.toLowerCase() || 'unknown'] = row.count
+    }
+    
+    // Get DART companies (those with corp_code)
+    const dartResult = await db.prepare(`
+      SELECT COUNT(*) as count FROM companies WHERE corp_code IS NOT NULL
+    `).first<{count: number}>()
+    
+    // Get listed companies (KOSPI/KOSDAQ)
+    const listedResult = await db.prepare(`
+      SELECT COUNT(*) as count FROM companies 
+      WHERE industry_code IN ('KOSPI', 'KOSDAQ') OR source = 'NAVER_FINANCE'
+    `).first<{count: number}>()
+    
+    return c.json({
+      success: true,
+      companies: {
+        total: totalResult?.count || 0,
+        by_source: bySource
+      },
+      dart: {
+        total_corps: dartResult?.count || 0,
+        listed: listedResult?.count || 0,
+        progress: `${Math.round((dartResult?.count || 0) / 90000 * 100)}%`
+      }
+    })
+  } catch (e: any) {
+    return c.json({ success: false, error: e.message }, 500)
+  }
+})
+
+// 76. Batch Collect
+api.post('/admin/collector/batch-collect', async (c) => {
+  try {
+    const body = await c.req.json()
+    const { source, batchSize = 50 } = body
+    
+    // This is a placeholder - in production, you'd trigger a background job
+    return c.json({
+      success: true,
+      collected: 0,
+      message: `${source} 배치 수집은 별도 구현이 필요합니다. DART 수집기 또는 크롤러를 사용하세요.`
+    })
+  } catch (e: any) {
+    return c.json({ success: false, error: e.message }, 500)
+  }
+})
+
+// 77. DART All Corps Download (placeholder)
+api.post('/admin/collector/dart/all-corps', async (c) => {
+  return c.json({
+    success: false,
+    error: 'DART 전체 기업코드 다운로드는 DART API 키와 추가 구현이 필요합니다.',
+    tip: 'DART 웹사이트에서 corpCode.zip 파일을 다운로드하여 수동으로 업로드하세요.'
+  })
+})
+
+// 78. DART Collect Details
+api.post('/admin/collector/dart/collect-details', async (c) => {
+  return c.json({
+    success: false,
+    error: 'DART 상세정보 수집은 DART API 키와 추가 구현이 필요합니다.'
+  })
+})
+
+// 79-81. Job site crawlers (placeholders)
+api.post('/admin/collector/saramin/companies', async (c) => {
+  return c.json({ success: true, inserted: 0, message: '사람인 크롤링 기능은 별도 구현이 필요합니다.' })
+})
+
+api.post('/admin/collector/jobkorea/companies', async (c) => {
+  return c.json({ success: true, inserted: 0, message: '잡코리아 크롤링 기능은 별도 구현이 필요합니다.' })
+})
+
+api.post('/admin/collector/incruit/companies', async (c) => {
+  return c.json({ success: true, inserted: 0, message: '인크루트 크롤링 기능은 별도 구현이 필요합니다.' })
+})
+
+// ==========================================
+// Terms Management API
+// ==========================================
+
+// 82. Get Terms
+api.get('/admin/terms', async (c) => {
+  try {
+    const db = c.env.DB
+    
+    // Create table if not exists
+    await db.prepare(`
+      CREATE TABLE IF NOT EXISTS terms (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        term_type TEXT NOT NULL,
+        title TEXT NOT NULL,
+        content TEXT,
+        version TEXT DEFAULT '1.0',
+        is_required INTEGER DEFAULT 1,
+        is_active INTEGER DEFAULT 1,
+        created_at TEXT DEFAULT (datetime('now')),
+        updated_at TEXT DEFAULT (datetime('now'))
+      )
+    `).run()
+    
+    const result = await db.prepare('SELECT * FROM terms ORDER BY term_type, id DESC').all()
+    
+    return c.json({ success: true, terms: result.results || [] })
+  } catch (e: any) {
+    return c.json({ success: false, terms: [], error: e.message })
+  }
+})
+
+// 83. Save Term
+api.post('/admin/terms', async (c) => {
+  try {
+    const db = c.env.DB
+    const body = await c.req.json()
+    const { id, term_type, title, content, version, is_required, is_active } = body
+    
+    if (id) {
+      // Update
+      await db.prepare(`
+        UPDATE terms SET 
+          term_type = ?, title = ?, content = ?, version = ?, 
+          is_required = ?, is_active = ?, updated_at = datetime('now')
+        WHERE id = ?
+      `).bind(term_type, title, content, version, is_required ? 1 : 0, is_active ? 1 : 0, id).run()
+    } else {
+      // Insert
+      await db.prepare(`
+        INSERT INTO terms (term_type, title, content, version, is_required, is_active)
+        VALUES (?, ?, ?, ?, ?, ?)
+      `).bind(term_type, title, content, version || '1.0', is_required ? 1 : 0, is_active !== false ? 1 : 0).run()
+    }
+    
+    return c.json({ success: true })
+  } catch (e: any) {
+    return c.json({ success: false, error: e.message })
+  }
+})
+
+// 84. Delete Term
+api.delete('/admin/terms/:id', async (c) => {
+  try {
+    const db = c.env.DB
+    const id = c.req.param('id')
+    
+    await db.prepare('DELETE FROM terms WHERE id = ?').bind(id).run()
+    
+    return c.json({ success: true })
+  } catch (e: any) {
+    return c.json({ success: false, error: e.message })
+  }
+})
+
+// ==========================================
+// Popup/Banner Management API
+// ==========================================
+
+// 85. Get Popups
+api.get('/admin/popups', async (c) => {
+  try {
+    const db = c.env.DB
+    
+    // Create table if not exists
+    await db.prepare(`
+      CREATE TABLE IF NOT EXISTS popups (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        title TEXT NOT NULL,
+        content TEXT,
+        image_url TEXT,
+        link_url TEXT,
+        width INTEGER DEFAULT 500,
+        height INTEGER DEFAULT 400,
+        position TEXT DEFAULT 'center',
+        start_date TEXT,
+        end_date TEXT,
+        show_today_close INTEGER DEFAULT 1,
+        is_active INTEGER DEFAULT 1,
+        created_at TEXT DEFAULT (datetime('now'))
+      )
+    `).run()
+    
+    const result = await db.prepare('SELECT * FROM popups ORDER BY id DESC').all()
+    
+    return c.json({ success: true, popups: result.results || [] })
+  } catch (e: any) {
+    return c.json({ success: false, popups: [], error: e.message })
+  }
+})
+
+// 86. Save Popup
+api.post('/admin/popups', async (c) => {
+  try {
+    const db = c.env.DB
+    const body = await c.req.json()
+    const { id, title, content, image_url, link_url, width, height, position, start_date, end_date, show_today_close, is_active } = body
+    
+    if (id) {
+      await db.prepare(`
+        UPDATE popups SET 
+          title = ?, content = ?, image_url = ?, link_url = ?, 
+          width = ?, height = ?, position = ?, start_date = ?, end_date = ?,
+          show_today_close = ?, is_active = ?
+        WHERE id = ?
+      `).bind(title, content, image_url, link_url, width, height, position, start_date, end_date, show_today_close ? 1 : 0, is_active ? 1 : 0, id).run()
+    } else {
+      await db.prepare(`
+        INSERT INTO popups (title, content, image_url, link_url, width, height, position, start_date, end_date, show_today_close, is_active)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `).bind(title, content, image_url, link_url, width || 500, height || 400, position || 'center', start_date, end_date, show_today_close ? 1 : 0, is_active !== false ? 1 : 0).run()
+    }
+    
+    return c.json({ success: true })
+  } catch (e: any) {
+    return c.json({ success: false, error: e.message })
+  }
+})
+
+// 87. Delete Popup
+api.delete('/admin/popups/:id', async (c) => {
+  try {
+    const db = c.env.DB
+    const id = c.req.param('id')
+    
+    await db.prepare('DELETE FROM popups WHERE id = ?').bind(id).run()
+    
+    return c.json({ success: true })
+  } catch (e: any) {
+    return c.json({ success: false, error: e.message })
+  }
+})
+
+// 88. Get Banners
+api.get('/admin/banners', async (c) => {
+  try {
+    const db = c.env.DB
+    
+    // Create table if not exists
+    await db.prepare(`
+      CREATE TABLE IF NOT EXISTS banners (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        title TEXT NOT NULL,
+        banner_type TEXT DEFAULT 'top',
+        image_url TEXT,
+        link_url TEXT,
+        background_color TEXT,
+        text_content TEXT,
+        display_order INTEGER DEFAULT 0,
+        start_date TEXT,
+        end_date TEXT,
+        is_active INTEGER DEFAULT 1,
+        created_at TEXT DEFAULT (datetime('now'))
+      )
+    `).run()
+    
+    const result = await db.prepare('SELECT * FROM banners ORDER BY display_order, id DESC').all()
+    
+    return c.json({ success: true, banners: result.results || [] })
+  } catch (e: any) {
+    return c.json({ success: false, banners: [], error: e.message })
+  }
+})
+
+// 89. Save Banner
+api.post('/admin/banners', async (c) => {
+  try {
+    const db = c.env.DB
+    const body = await c.req.json()
+    const { id, title, banner_type, image_url, link_url, background_color, text_content, display_order, start_date, end_date, is_active } = body
+    
+    if (id) {
+      await db.prepare(`
+        UPDATE banners SET 
+          title = ?, banner_type = ?, image_url = ?, link_url = ?, 
+          background_color = ?, text_content = ?, display_order = ?,
+          start_date = ?, end_date = ?, is_active = ?
+        WHERE id = ?
+      `).bind(title, banner_type, image_url, link_url, background_color, text_content, display_order, start_date, end_date, is_active ? 1 : 0, id).run()
+    } else {
+      await db.prepare(`
+        INSERT INTO banners (title, banner_type, image_url, link_url, background_color, text_content, display_order, start_date, end_date, is_active)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `).bind(title, banner_type || 'top', image_url, link_url, background_color, text_content, display_order || 0, start_date, end_date, is_active !== false ? 1 : 0).run()
+    }
+    
+    return c.json({ success: true })
+  } catch (e: any) {
+    return c.json({ success: false, error: e.message })
+  }
+})
+
+// 90. Delete Banner
+api.delete('/admin/banners/:id', async (c) => {
+  try {
+    const db = c.env.DB
+    const id = c.req.param('id')
+    
+    await db.prepare('DELETE FROM banners WHERE id = ?').bind(id).run()
+    
+    return c.json({ success: true })
+  } catch (e: any) {
+    return c.json({ success: false, error: e.message })
+  }
+})
+
+// ==========================================
+// Active Popups/Banners for Frontend
+// ==========================================
+
+// 91. Get Active Popups for Frontend
+api.get('/popups/active', async (c) => {
+  try {
+    const db = c.env.DB
+    const today = new Date().toISOString().split('T')[0]
+    
+    const result = await db.prepare(`
+      SELECT * FROM popups 
+      WHERE is_active = 1 
+        AND (start_date IS NULL OR start_date <= ?)
+        AND (end_date IS NULL OR end_date >= ?)
+      ORDER BY id DESC
+    `).bind(today, today).all()
+    
+    return c.json({ popups: result.results || [] })
+  } catch (e: any) {
+    return c.json({ popups: [] })
+  }
+})
+
+// 92. Get Active Banners for Frontend
+api.get('/banners/active', async (c) => {
+  try {
+    const db = c.env.DB
+    const today = new Date().toISOString().split('T')[0]
+    
+    const result = await db.prepare(`
+      SELECT * FROM banners 
+      WHERE is_active = 1 
+        AND (start_date IS NULL OR start_date <= ?)
+        AND (end_date IS NULL OR end_date >= ?)
+      ORDER BY display_order, id DESC
+    `).bind(today, today).all()
+    
+    return c.json({ banners: result.results || [] })
+  } catch (e: any) {
+    return c.json({ banners: [] })
   }
 })
 
