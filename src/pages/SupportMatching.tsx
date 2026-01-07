@@ -22,14 +22,31 @@ export const SupportMatching = (props: { user: any }) => {
 
       <script>{`
         // --- View Switching Logic ---
-        document.getElementById('btn-start-landing').onclick = startApp;
-        document.getElementById('btn-start-landing-2').onclick = startApp;
+        function initButtons() {
+          const btn1 = document.getElementById('btn-start-landing');
+          const btn2 = document.getElementById('btn-start-landing-2');
+          
+          if (btn1) {
+            btn1.onclick = startApp;
+            console.log('Main: Button 1 onclick set');
+          }
+          if (btn2) {
+            btn2.onclick = startApp;
+            console.log('Main: Button 2 onclick set');
+          }
+        }
 
         function startApp() {
+          console.log('Main: startApp called');
           window.scrollTo({ top: 0, behavior: 'smooth' });
-          document.getElementById('view-landing').classList.add('hidden');
-          document.getElementById('view-app').classList.remove('hidden');
+          const landing = document.getElementById('view-landing');
+          const app = document.getElementById('view-app');
+          if (landing) landing.classList.add('hidden');
+          if (app) app.classList.remove('hidden');
         }
+        
+        // Initialize after a short delay to ensure LandingPage scripts have run
+        setTimeout(initButtons, 100);
 
         // --- Wizard Logic ---
         let currentStep = 1;

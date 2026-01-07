@@ -2,6 +2,42 @@ import { html } from 'hono/html'
 
 export const LandingPage = () => html`
   <div id="landing-page" class="bg-white min-h-screen">
+    <script>
+      console.log('LandingPage loaded');
+      // Wait for DOM to be ready
+      document.addEventListener('DOMContentLoaded', function() {
+        console.log('DOM ready, setting up buttons');
+        const btn1 = document.getElementById('btn-start-landing');
+        const btn2 = document.getElementById('btn-start-landing-2');
+        
+        if (btn1) {
+          console.log('Button 1 found');
+          btn1.addEventListener('click', function(e) {
+            e.preventDefault();
+            console.log('Button 1 clicked');
+            startApp();
+          });
+        }
+        
+        if (btn2) {
+          console.log('Button 2 found');
+          btn2.addEventListener('click', function(e) {
+            e.preventDefault();
+            console.log('Button 2 clicked');
+            startApp();
+          });
+        }
+        
+        function startApp() {
+          console.log('Starting app...');
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+          const landing = document.getElementById('view-landing');
+          const app = document.getElementById('view-app');
+          if (landing) landing.classList.add('hidden');
+          if (app) app.classList.remove('hidden');
+        }
+      });
+    </script>
     
     <!-- 1. Hero Section (Dark Blue Background like the image) -->
     <div class="bg-slate-900 text-white py-20 px-6 relative overflow-hidden">
