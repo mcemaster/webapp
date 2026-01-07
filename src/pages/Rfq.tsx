@@ -8,10 +8,49 @@ export const Rfq = (props: { user?: any }) => {
           
           <div class="text-center mb-12">
             <h1 class="text-3xl font-bold text-slate-900 mb-4">ISO/IAF 기준 맞춤 공급사 찾기</h1>
-            <p class="text-slate-600">
+            <p class="text-slate-600 mb-6">
               상세한 스펙을 입력할수록 귀사의 요구사항을 100% 충족하는<br/>
               <strong>검증된 파트너(Verified Partner)</strong>를 매칭받을 확률이 높아집니다.
             </p>
+            
+            {/* AI Smart Search */}
+            <div class="max-w-3xl mx-auto mb-8">
+              <div class="bg-gradient-to-r from-indigo-50 to-blue-50 rounded-2xl p-6 border border-indigo-200">
+                <div class="flex items-center justify-center mb-4">
+                  <div class="w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center mr-3">
+                    <i class="fas fa-robot text-white text-xl"></i>
+                  </div>
+                  <h3 class="text-xl font-bold text-indigo-900">AI 스마트 공급사 검색</h3>
+                </div>
+                <p class="text-sm text-indigo-700 mb-4 text-center">원하는 제품이나 서비스를 설명해주세요. AI가 최적의 공급업체를 찾아드립니다.</p>
+                
+                <div class="relative">
+                  <textarea 
+                    id="ai-search-input" 
+                    placeholder="예: 자동차 부품용 알루미늄 CNC 가공 업체를 찾고 있습니다. ISO 9001 인증이 필요하고, 월 1000개 생산 가능한 곳이어야 합니다."
+                    class="w-full px-4 py-3 pr-24 rounded-xl border-2 border-indigo-300 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 outline-none resize-none h-24 text-sm"
+                  ></textarea>
+                  <button 
+                    type="button" 
+                    id="btn-ai-search"
+                    class="absolute bottom-3 right-3 bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-bold text-sm transition-all transform hover:scale-105 shadow-lg"
+                  >
+                    <i class="fas fa-search mr-2"></i>AI 검색
+                  </button>
+                </div>
+                
+                <div id="ai-search-result" class="hidden mt-4 p-4 bg-white rounded-xl border border-indigo-200">
+                  <div class="flex items-start mb-2">
+                    <i class="fas fa-lightbulb text-yellow-500 mr-2 mt-1"></i>
+                    <div class="flex-1">
+                      <h4 class="font-bold text-slate-800 mb-2">AI 분석 결과</h4>
+                      <div id="ai-analysis-text" class="text-sm text-slate-600 mb-3"></div>
+                      <div id="ai-suggested-companies" class="space-y-2"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
           <div class="lg:grid lg:grid-cols-3 lg:gap-8 items-start">
@@ -29,6 +68,14 @@ export const Rfq = (props: { user?: any }) => {
                   
                   {/* Hidden Input for Form Submission (Comma separated) */}
                   <input type="hidden" name="iaf_code" id="iaf_code_input" required />
+                  
+                  {/* Selected IAF Codes Display */}
+                  <div id="selected-iaf-display" class="hidden mb-4 p-4 bg-blue-50 rounded-xl border border-blue-200">
+                    <h4 class="text-sm font-bold text-blue-900 mb-2 flex items-center">
+                      <i class="fas fa-check-circle mr-2"></i>선택된 산업 분야
+                    </h4>
+                    <div id="selected-iaf-tags" class="flex flex-wrap gap-2"></div>
+                  </div>
 
                   <div class="space-y-8" id="iaf-selector">
                     
@@ -532,6 +579,82 @@ export const Rfq = (props: { user?: any }) => {
 
       <script dangerouslySetInnerHTML={{ __html: `
         document.addEventListener('DOMContentLoaded', () => {
+          // --- 0. AI Smart Search ---
+          const aiSearchBtn = document.getElementById('btn-ai-search');
+          const aiSearchInput = document.getElementById('ai-search-input');
+          const aiResultDiv = document.getElementById('ai-search-result');
+          const aiAnalysisText = document.getElementById('ai-analysis-text');
+          const aiSuggestedCompanies = document.getElementById('ai-suggested-companies');
+          
+          if (aiSearchBtn) {
+            aiSearchBtn.addEventListener('click', async () => {
+              const query = aiSearchInput.value.trim();
+              if (!query) {
+                alert('검색할 내용을 입력해주세요.');
+                return;
+              }
+              
+              // Show loading
+              aiSearchBtn.disabled = true;
+              aiSearchBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>AI 분석 중...';
+              aiResultDiv.classList.add('hidden');
+              
+              try {
+                const response = await fetch('/api/rfq/ai-search', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ query })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success && result.data) {
+                  // Show analysis
+                  aiAnalysisText.innerHTML = result.data.analysis || '요구사항을 분석했습니다.';
+                  
+                  // Show suggested companies
+                  if (result.data.companies && result.data.companies.length > 0) {
+                    aiSuggestedCompanies.innerHTML = result.data.companies.map((company, idx) => \`
+                      <div class="bg-slate-50 p-3 rounded-lg border border-slate-200">
+                        <div class="flex items-start justify-between mb-2">
+                          <div class="flex-1">
+                            <h5 class="font-bold text-slate-800 flex items-center">
+                              <span class="w-6 h-6 rounded-full bg-indigo-600 text-white text-xs flex items-center justify-center mr-2">\${idx+1}</span>
+                              \${company.name}
+                            </h5>
+                            <p class="text-xs text-slate-500 mt-1">\${company.industry}</p>
+                          </div>
+                          <div class="text-right">
+                            <div class="text-xl font-bold text-indigo-600">\${company.matchScore}</div>
+                            <div class="text-[10px] text-slate-400">매칭률</div>
+                          </div>
+                        </div>
+                        <p class="text-xs text-slate-600 leading-relaxed">\${company.reason}</p>
+                        <div class="mt-2 flex flex-wrap gap-1">
+                          \${(company.certifications || []).map(cert => \`
+                            <span class="px-2 py-0.5 bg-blue-100 text-blue-700 text-[10px] font-bold rounded">\${cert}</span>
+                          \`).join('')}
+                        </div>
+                      </div>
+                    \`).join('');
+                  } else {
+                    aiSuggestedCompanies.innerHTML = '<p class="text-sm text-slate-500">매칭되는 공급업체를 찾지 못했습니다.</p>';
+                  }
+                  
+                  aiResultDiv.classList.remove('hidden');
+                } else {
+                  alert('AI 검색 중 오류가 발생했습니다.');
+                }
+              } catch (err) {
+                console.error(err);
+                alert('네트워크 오류가 발생했습니다.');
+              } finally {
+                aiSearchBtn.disabled = false;
+                aiSearchBtn.innerHTML = '<i class="fas fa-search mr-2"></i>AI 검색';
+              }
+            });
+          }
+          
           // --- 1. Multi-Select IAF Logic ---
           const iafBtns = document.querySelectorAll('.iaf-btn');
           const hiddenInput = document.getElementById('iaf_code_input');
@@ -541,6 +664,7 @@ export const Rfq = (props: { user?: any }) => {
             btn.addEventListener('click', () => {
               const val = btn.dataset.value;
               const checkIcon = btn.querySelector('.check-icon');
+              const labelText = btn.querySelector('span:last-child').textContent;
 
               if (selectedCodes.has(val)) {
                 // Deselect
@@ -560,8 +684,33 @@ export const Rfq = (props: { user?: any }) => {
 
               // Update Hidden Input (Comma separated)
               if(hiddenInput) hiddenInput.value = Array.from(selectedCodes).join(',');
+              
+              // Update display of selected codes
+              updateSelectedDisplay();
             });
           });
+          
+          function updateSelectedDisplay() {
+            const displayDiv = document.getElementById('selected-iaf-display');
+            const tagsDiv = document.getElementById('selected-iaf-tags');
+            
+            if (selectedCodes.size > 0) {
+              displayDiv.classList.remove('hidden');
+              tagsDiv.innerHTML = Array.from(selectedCodes).map(code => {
+                const btn = document.querySelector(\`.iaf-btn[data-value="\${code}"]\`);
+                const label = btn ? btn.querySelector('span:last-child').textContent : \`IAF \${code}\`;
+                return \`
+                  <span class="inline-flex items-center px-3 py-1 bg-blue-600 text-white text-sm font-bold rounded-lg">
+                    <span class="mr-2">IAF \${code}</span>
+                    <span class="text-xs">·</span>
+                    <span class="ml-2 text-xs">\${label}</span>
+                  </span>
+                \`;
+              }).join('');
+            } else {
+              displayDiv.classList.add('hidden');
+            }
+          }
 
           // --- 2. Drag and Drop Logic ---
           function setupDragAndDrop(zoneId, inputId) {
