@@ -187,11 +187,14 @@ api.post('/register', async (c) => {
       )
     `).run()
     
-    // password 컬럼이 없으면 추가 (기존 테이블용 마이그레이션)
-    try {
-      await db.prepare(`ALTER TABLE users ADD COLUMN password TEXT`).run()
-    } catch (e) {
-      // 이미 존재하면 무시
+    // 기존 테이블에 누락된 컬럼들 추가 (마이그레이션)
+    const columnsToAdd = ['password TEXT', 'phone TEXT', 'company_name TEXT', 'user_type TEXT DEFAULT \'buyer\'', 'status TEXT DEFAULT \'active\'']
+    for (const col of columnsToAdd) {
+      try {
+        await db.prepare(`ALTER TABLE users ADD COLUMN ${col}`).run()
+      } catch (e) {
+        // 이미 존재하면 무시
+      }
     }
     
     // 이메일 중복 체크
