@@ -423,7 +423,7 @@ api.get('/admin/api-usage', async (c) => {
     
     // DART 마지막 동기화
     const lastDartSync = await db.prepare(`
-      SELECT MAX(updated_at) as last_sync FROM companies WHERE source = 'dart'
+      SELECT MAX(analyzed_at) as last_sync FROM companies WHERE source = 'dart'
     `).first<{last_sync: string}>()
     
     // 네이버 금융 크롤링 기업 수
