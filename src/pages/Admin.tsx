@@ -16,7 +16,7 @@ export const Admin = (props: { user: any, tab?: string }) => {
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>관리자 대시보드 - MCE 경영인증평가원</title>
-        <link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.4.1/dist/tailwind.min.css" rel="stylesheet">
+        <script src="https://cdn.tailwindcss.com"></script>
         <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <style>
