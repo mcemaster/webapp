@@ -8,7 +8,14 @@ export const Dashboard = (props: { user: any }) => {
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <title>마이 대시보드 - MCE</title>
-      <script src="https://cdn.tailwindcss.com"></script>
+      <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio,line-clamp"></script>
+      <script>
+        tailwind.config = {
+          theme: {
+            extend: {}
+          }
+        }
+      </script>
       <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
       <!-- Chart.js for Visualization -->
       <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>

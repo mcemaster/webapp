@@ -5150,4 +5150,39 @@ api.get('/debug/companies-count', async (c) => {
   }
 })
 
+// Debug: Delete all DART_DETAIL companies (옵션 2용)
+api.post('/debug/delete-dart-data', async (c) => {
+  try {
+    const db = c.env.DB
+    const { confirm } = await c.req.json()
+    
+    if (confirm !== 'DELETE_DART_DATA') {
+      return c.json({ 
+        success: false, 
+        error: 'confirm 필드에 "DELETE_DART_DATA"를 입력해야 합니다.' 
+      }, 400)
+    }
+    
+    // 삭제 전 개수 확인
+    const beforeCount = await db.prepare("SELECT COUNT(*) as count FROM companies WHERE source = 'DART_DETAIL'").first<{count: number}>()
+    
+    // DART_DETAIL 데이터 삭제
+    await db.prepare("DELETE FROM companies WHERE source = 'DART_DETAIL'").run()
+    
+    // 삭제 후 개수 확인
+    const afterTotal = await db.prepare('SELECT COUNT(*) as count FROM companies').first<{count: number}>()
+    const afterDart = await db.prepare("SELECT COUNT(*) as count FROM companies WHERE source = 'DART_DETAIL'").first<{count: number}>()
+    
+    return c.json({
+      success: true,
+      deleted: beforeCount?.count || 0,
+      remaining: afterTotal?.count || 0,
+      dart_remaining: afterDart?.count || 0,
+      message: `${beforeCount?.count || 0}개의 DART 데이터가 삭제되었습니다.`
+    })
+  } catch (e: any) {
+    return c.json({ success: false, error: e.message }, 500)
+  }
+})
+
 export default api
