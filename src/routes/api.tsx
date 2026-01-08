@@ -5134,4 +5134,20 @@ api.get('/banners/active', async (c) => {
   }
 })
 
+// Debug: Get actual DB count
+api.get('/debug/companies-count', async (c) => {
+  try {
+    const db = c.env.DB
+    const result = await db.prepare('SELECT COUNT(*) as count FROM companies').first<{count: number}>()
+    const dartCount = await db.prepare("SELECT COUNT(*) as count FROM companies WHERE source = 'DART_DETAIL'").first<{count: number}>()
+    return c.json({ 
+      total: result?.count || 0,
+      dart_detail: dartCount?.count || 0,
+      timestamp: new Date().toISOString()
+    })
+  } catch (e: any) {
+    return c.json({ error: e.message })
+  }
+})
+
 export default api
