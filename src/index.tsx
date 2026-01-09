@@ -20,6 +20,8 @@ import { PartnershipProposal } from './pages/PartnershipProposal'
 import { Legal } from './pages/Legal'
 import { AuditApplication } from './pages/AuditApplication'
 import { Register } from './pages/Register'
+import { CertificationSearch } from './pages/CertificationSearch'
+import { CertificationDetail } from './pages/CertificationDetail'
 
 type Bindings = {
   DB: D1Database;
@@ -82,6 +84,35 @@ app.get('/legal', (c) => {
 })
 app.get('/audit/apply', (c) => c.render(<AuditApplication />))
 app.get('/register', (c) => c.render(<Register />))
+
+// ==========================================
+// Certification System Routes
+// ==========================================
+
+// Public certification search page
+app.get('/certification0000', (c) => c.render(<CertificationSearch />))
+
+// Certification detail page
+app.get('/certification0000/:id', async (c) => {
+  const id = c.req.param('id')
+  try {
+    const db = c.env.DB
+    const response = await fetch(`${c.req.url.replace(/\/certification0000\/\d+/, '')}/api/certifications/${id}/detail`)
+    const data = await response.json()
+    
+    if (data.success) {
+      return c.render(<CertificationDetail cert={data.cert} files={data.files} />)
+    } else {
+      return c.text('인증서를 찾을 수 없습니다.', 404)
+    }
+  } catch (e) {
+    return c.text('오류가 발생했습니다.', 500)
+  }
+})
+
+// Legacy routes (redirect to new structure)
+app.get('/certification-search', (c) => c.redirect('/certification0000'))
+app.get('/certifications/:id', (c) => c.redirect(`/certification0000/${c.req.param('id')}`))
 
 // ==========================================
 // 3. SEO - Sitemap & Robots

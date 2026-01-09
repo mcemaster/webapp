@@ -40,6 +40,18 @@ export const AdminSidebar = (props: { activeTab: string }) => {
         </div>
 
         <div>
+          <p class="px-4 text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Certifications</p>
+          <div class="space-y-1">
+            <a href="/admin/certification0000_admin" class="flex items-center px-4 py-3 text-sm font-bold rounded-xl transition-colors text-slate-600 hover:bg-slate-50">
+              <i class="fas fa-certificate w-5 text-center mr-2"></i> 인증 기업 관리
+            </a>
+            <a href="/admin/certification0000_admin/database" class="flex items-center px-4 py-3 text-sm font-bold rounded-xl transition-colors text-slate-600 hover:bg-slate-50">
+              <i class="fas fa-database w-5 text-center mr-2"></i> DB 관리 & 업로드
+            </a>
+          </div>
+        </div>
+
+        <div>
           <p class="px-4 text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Configuration</p>
           <div class="space-y-1">
             ${menuItem('settings', 'cog', '시스템 설정')}

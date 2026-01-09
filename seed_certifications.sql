@@ -1,0 +1,12 @@
+-- 샘플 인증 기업 데이터
+INSERT INTO certifications (company_name, certificate_number, certificate_type, certification_body, issue_date, expiry_date, scope, status, contact_person, contact_email, contact_phone, address, esg_compliant, iso26000_compliant, management_evaluation_score, website_url) VALUES
+('삼성전자주식회사', 'KR-ISO9001-2024-001', 'ISO 9001:2015', 'MCE경영인증평가원', '2024-01-15', '2027-01-14', '반도체 및 전자제품 제조', 'VALID', '김철수', 'quality@samsung.com', '02-1234-5678', '경기도 수원시 영통구 삼성로 129', 'Y', 'Y', 95, 'https://www.samsung.com'),
+('현대자동차주식회사', 'KR-ISO14001-2024-002', 'ISO 14001:2015', 'MCE경영인증평가원', '2024-02-20', '2027-02-19', '자동차 제조 및 환경관리', 'VALID', '이영희', 'env@hyundai.com', '02-2345-6789', '서울특별시 서초구 헌릉로 12', 'Y', 'Y', 92, 'https://www.hyundai.com'),
+('LG화학주식회사', 'KR-ISO45001-2024-003', 'ISO 45001:2018', 'MCE경영인증평가원', '2024-03-10', '2027-03-09', '화학제품 제조 및 안전보건', 'VALID', '박민수', 'safety@lgchem.com', '02-3456-7890', '서울특별시 영등포구 여의대로 128', 'Y', 'Y', 90, 'https://www.lgchem.com'),
+('SK하이닉스주식회사', 'KR-ISO9001-2023-015', 'ISO 9001:2015', 'MCE경영인증평가원', '2023-05-01', '2026-04-30', '메모리 반도체 제조', 'VALID', '최지훈', 'qm@skhynix.com', '031-5000-1234', '경기도 이천시 부발읍 아미리 산136-1', 'Y', 'N', 88, 'https://www.skhynix.com'),
+('네이버주식회사', 'KR-ISO27001-2024-004', 'ISO 27001:2013', 'MCE경영인증평가원', '2024-04-15', '2027-04-14', '정보보안 관리체계', 'VALID', '정수진', 'security@naver.com', '031-7000-1000', '경기도 성남시 분당구 정자일로 95', 'PARTIAL', 'Y', 93, 'https://www.navercorp.com'),
+('카카오주식회사', 'KR-ISO27001-2024-005', 'ISO 27001:2013', 'MCE경영인증평가원', '2024-06-01', '2027-05-31', '인터넷 플랫폼 서비스', 'VALID', '한지영', 'isms@kakao.com', '02-6789-1234', '제주특별자치도 제주시 첨단로 242', 'Y', 'Y', 91, 'https://www.kakaocorp.com'),
+('포스코홀딩스주식회사', 'KR-ISO14001-2023-012', 'ISO 14001:2015', 'MCE경영인증평가원', '2023-08-20', '2026-08-19', '철강 제조 및 환경관리', 'VALID', '김태영', 'env@posco.com', '02-3457-0114', '경상북도 포항시 남구 동해안로 6261', 'Y', 'Y', 87, 'https://www.posco.co.kr'),
+('한화에어로스페이스주식회사', 'KR-AS9100-2024-006', 'AS 9100D', 'MCE경영인증평가원', '2024-07-10', '2027-07-09', '항공우주 부품 제조', 'VALID', '윤성호', 'aerospace@hanwha.com', '055-210-3114', '경상남도 창원시 성산구 완암동 462-1', 'Y', 'N', 85, NULL),
+('두산에너빌리티주식회사', 'KR-ISO9001-2024-007', 'ISO 9001:2015', 'MCE경영인증평가원', '2024-08-05', '2027-08-04', '발전설비 제조', 'VALID', '서준혁', 'quality@doosan.com', '051-468-0114', '경상남도 창원시 성산구 두산볼보로 22', 'Y', 'Y', 89, NULL),
+('롯데케미칼주식회사', 'KR-ISO14001-2024-008', 'ISO 14001:2015', 'MCE경영인증평가원', '2024-09-15', '2027-09-14', '석유화학 제품 제조', 'VALID', '임현정', 'hse@lottechem.com', '02-829-4114', '서울특별시 송파구 올림픽로 300', 'Y', 'Y', 86, NULL);

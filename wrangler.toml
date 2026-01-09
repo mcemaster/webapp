@@ -1,12 +1,16 @@
-name = "webapp"
+name = "mce-certification"
 compatibility_date = "2026-01-04"
 compatibility_flags = ["nodejs_compat"]
 pages_build_output_dir = "./dist"
 
+# Note: D1 database will be created separately
+# Run: npx wrangler d1 create mce-certification-db
+# Then update database_id below
+
 [[d1_databases]]
 binding = "DB"
-database_name = "webapp-production"
-database_id = "4f2b491e-f8de-4bc0-85d1-a044b33cc4a5"
+database_name = "mce-certification-db"
+database_id = "YOUR_NEW_DATABASE_ID_HERE"
 
 [browser]
 binding = "MYBROWSER"
