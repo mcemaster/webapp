@@ -2389,6 +2389,161 @@ api.delete('/admin/certifications/:certId/files/:fileId', async (c) => {
   }
 })
 
+// ==========================================
+// DB 관리 API (Database Manager)
+// ==========================================
+
+// 45. 마이그레이션 003 실행
+api.post('/admin/db/migrate/003', async (c) => {
+  try {
+    const db = c.env.DB
+    
+    // Create certifications table
+    await db.prepare(`
+      CREATE TABLE IF NOT EXISTS certifications (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        company_name TEXT NOT NULL,
+        certificate_number TEXT NOT NULL UNIQUE,
+        certificate_type TEXT NOT NULL,
+        certification_body TEXT NOT NULL,
+        issue_date TEXT NOT NULL,
+        expiry_date TEXT NOT NULL,
+        scope TEXT,
+        status TEXT DEFAULT 'VALID',
+        contact_person TEXT,
+        contact_email TEXT,
+        contact_phone TEXT,
+        address TEXT,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      )
+    `).run()
+    
+    // Create indexes
+    await db.prepare('CREATE INDEX IF NOT EXISTS idx_cert_company_name ON certifications(company_name)').run()
+    await db.prepare('CREATE INDEX IF NOT EXISTS idx_cert_number ON certifications(certificate_number)').run()
+    await db.prepare('CREATE INDEX IF NOT EXISTS idx_cert_type ON certifications(certificate_type)').run()
+    await db.prepare('CREATE INDEX IF NOT EXISTS idx_cert_status ON certifications(status)').run()
+    
+    return c.json({ success: true, message: '마이그레이션 003 완료' })
+  } catch (e: any) {
+    return c.json({ success: false, error: e.message }, 500)
+  }
+})
+
+// 46. 마이그레이션 004 실행
+api.post('/admin/db/migrate/004', async (c) => {
+  try {
+    const db = c.env.DB
+    
+    // Create certification_files table
+    await db.prepare(`
+      CREATE TABLE IF NOT EXISTS certification_files (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        certification_id INTEGER NOT NULL,
+        file_type TEXT NOT NULL,
+        file_name TEXT NOT NULL,
+        file_url TEXT NOT NULL,
+        file_size INTEGER,
+        mime_type TEXT,
+        uploaded_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (certification_id) REFERENCES certifications(id) ON DELETE CASCADE
+      )
+    `).run()
+    
+    // Add columns to certifications table
+    const columns = [
+      'esg_compliant TEXT',
+      'iso26000_compliant TEXT',
+      'management_evaluation_score INTEGER',
+      'certificate_pdf_url TEXT',
+      'logo_url TEXT',
+      'website_url TEXT'
+    ]
+    
+    for (const col of columns) {
+      try {
+        await db.prepare(`ALTER TABLE certifications ADD COLUMN ${col}`).run()
+      } catch (e) {
+        // Column might already exist
+      }
+    }
+    
+    // Create indexes
+    await db.prepare('CREATE INDEX IF NOT EXISTS idx_cert_files_cert_id ON certification_files(certification_id)').run()
+    await db.prepare('CREATE INDEX IF NOT EXISTS idx_cert_files_type ON certification_files(file_type)').run()
+    
+    return c.json({ success: true, message: '마이그레이션 004 완료' })
+  } catch (e: any) {
+    return c.json({ success: false, error: e.message }, 500)
+  }
+})
+
+// 47. 샘플 데이터 시딩
+api.post('/admin/db/seed/certifications', async (c) => {
+  try {
+    const db = c.env.DB
+    
+    const sampleData = [
+      { company_name: '삼성전자주식회사', certificate_number: 'KR-ISO9001-2024-001', certificate_type: 'ISO 9001:2015', certification_body: 'MCE경영인증평가원', issue_date: '2024-01-15', expiry_date: '2027-01-14', scope: '반도체 및 전자제품 제조', status: 'VALID', contact_person: '김철수', contact_email: 'quality@samsung.com', contact_phone: '02-1234-5678', address: '경기도 수원시 영통구 삼성로 129', esg_compliant: 'Y', iso26000_compliant: 'Y', management_evaluation_score: 95, website_url: 'https://www.samsung.com' },
+      { company_name: '현대자동차주식회사', certificate_number: 'KR-ISO14001-2024-002', certificate_type: 'ISO 14001:2015', certification_body: 'MCE경영인증평가원', issue_date: '2024-02-20', expiry_date: '2027-02-19', scope: '자동차 제조 및 환경관리', status: 'VALID', contact_person: '이영희', contact_email: 'env@hyundai.com', contact_phone: '02-2345-6789', address: '서울특별시 서초구 헌릉로 12', esg_compliant: 'Y', iso26000_compliant: 'Y', management_evaluation_score: 92, website_url: 'https://www.hyundai.com' },
+      { company_name: 'LG화학주식회사', certificate_number: 'KR-ISO45001-2024-003', certificate_type: 'ISO 45001:2018', certification_body: 'MCE경영인증평가원', issue_date: '2024-03-10', expiry_date: '2027-03-09', scope: '화학제품 제조 및 안전보건', status: 'VALID', contact_person: '박민수', contact_email: 'safety@lgchem.com', contact_phone: '02-3456-7890', address: '서울특별시 영등포구 여의대로 128', esg_compliant: 'Y', iso26000_compliant: 'Y', management_evaluation_score: 90, website_url: 'https://www.lgchem.com' },
+      { company_name: 'SK하이닉스주식회사', certificate_number: 'KR-ISO9001-2023-015', certificate_type: 'ISO 9001:2015', certification_body: 'MCE경영인증평가원', issue_date: '2023-05-01', expiry_date: '2026-04-30', scope: '메모리 반도체 제조', status: 'VALID', contact_person: '최지훈', contact_email: 'qm@skhynix.com', contact_phone: '031-5000-1234', address: '경기도 이천시 부발읍 아미리 산136-1', esg_compliant: 'Y', iso26000_compliant: 'N', management_evaluation_score: 88, website_url: 'https://www.skhynix.com' },
+      { company_name: '네이버주식회사', certificate_number: 'KR-ISO27001-2024-004', certificate_type: 'ISO 27001:2013', certification_body: 'MCE경영인증평가원', issue_date: '2024-04-15', expiry_date: '2027-04-14', scope: '정보보안 관리체계', status: 'VALID', contact_person: '정수진', contact_email: 'security@naver.com', contact_phone: '031-7000-1000', address: '경기도 성남시 분당구 정자일로 95', esg_compliant: 'PARTIAL', iso26000_compliant: 'Y', management_evaluation_score: 93, website_url: 'https://www.navercorp.com' },
+      { company_name: '카카오주식회사', certificate_number: 'KR-ISO27001-2024-005', certificate_type: 'ISO 27001:2013', certification_body: 'MCE경영인증평가원', issue_date: '2024-06-01', expiry_date: '2027-05-31', scope: '인터넷 플랫폼 서비스', status: 'VALID', contact_person: '한지영', contact_email: 'isms@kakao.com', contact_phone: '02-6789-1234', address: '제주특별자치도 제주시 첨단로 242', esg_compliant: 'Y', iso26000_compliant: 'Y', management_evaluation_score: 91, website_url: 'https://www.kakaocorp.com' },
+      { company_name: '포스코홀딩스주식회사', certificate_number: 'KR-ISO14001-2023-012', certificate_type: 'ISO 14001:2015', certification_body: 'MCE경영인증평가원', issue_date: '2023-08-20', expiry_date: '2026-08-19', scope: '철강 제조 및 환경관리', status: 'VALID', contact_person: '김태영', contact_email: 'env@posco.com', contact_phone: '02-3457-0114', address: '경상북도 포항시 남구 동해안로 6261', esg_compliant: 'Y', iso26000_compliant: 'Y', management_evaluation_score: 87, website_url: 'https://www.posco.co.kr' },
+      { company_name: '한화에어로스페이스주식회사', certificate_number: 'KR-AS9100-2024-006', certificate_type: 'AS 9100D', certification_body: 'MCE경영인증평가원', issue_date: '2024-07-10', expiry_date: '2027-07-09', scope: '항공우주 부품 제조', status: 'VALID', contact_person: '윤성호', contact_email: 'aerospace@hanwha.com', contact_phone: '055-210-3114', address: '경상남도 창원시 성산구 완암동 462-1', esg_compliant: 'Y', iso26000_compliant: 'N', management_evaluation_score: 85, website_url: null },
+      { company_name: '두산에너빌리티주식회사', certificate_number: 'KR-ISO9001-2024-007', certificate_type: 'ISO 9001:2015', certification_body: 'MCE경영인증평가원', issue_date: '2024-08-05', expiry_date: '2027-08-04', scope: '발전설비 제조', status: 'VALID', contact_person: '서준혁', contact_email: 'quality@doosan.com', contact_phone: '051-468-0114', address: '경상남도 창원시 성산구 두산볼보로 22', esg_compliant: 'Y', iso26000_compliant: 'Y', management_evaluation_score: 89, website_url: null },
+      { company_name: '롯데케미칼주식회사', certificate_number: 'KR-ISO14001-2024-008', certificate_type: 'ISO 14001:2015', certification_body: 'MCE경영인증평가원', issue_date: '2024-09-15', expiry_date: '2027-09-14', scope: '석유화학 제품 제조', status: 'VALID', contact_person: '임현정', contact_email: 'hse@lottechem.com', contact_phone: '02-829-4114', address: '서울특별시 송파구 올림픽로 300', esg_compliant: 'Y', iso26000_compliant: 'Y', management_evaluation_score: 86, website_url: null }
+    ]
+    
+    let inserted = 0
+    let duplicates = 0
+    
+    for (const data of sampleData) {
+      try {
+        // Check duplicate
+        const existing = await db.prepare(
+          'SELECT id FROM certifications WHERE certificate_number = ?'
+        ).bind(data.certificate_number).first()
+        
+        if (existing) {
+          duplicates++
+          continue
+        }
+        
+        await db.prepare(`
+          INSERT INTO certifications (
+            company_name, certificate_number, certificate_type, certification_body,
+            issue_date, expiry_date, scope, status, contact_person, contact_email,
+            contact_phone, address, esg_compliant, iso26000_compliant,
+            management_evaluation_score, website_url
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `).bind(
+          data.company_name, data.certificate_number, data.certificate_type,
+          data.certification_body, data.issue_date, data.expiry_date, data.scope,
+          data.status, data.contact_person, data.contact_email, data.contact_phone,
+          data.address, data.esg_compliant, data.iso26000_compliant,
+          data.management_evaluation_score, data.website_url
+        ).run()
+        
+        inserted++
+      } catch (e) {
+        console.error('Insert error:', e)
+      }
+    }
+    
+    return c.json({ 
+      success: true, 
+      inserted, 
+      duplicates,
+      message: `${inserted}건 추가, ${duplicates}건 중복(스킵)` 
+    })
+  } catch (e: any) {
+    return c.json({ success: false, error: e.message }, 500)
+  }
+})
+
 // 37. Admin - OpenAI를 통한 기업 데이터 생성
 api.post('/admin/companies/generate', async (c) => {
   try {
@@ -5499,6 +5654,221 @@ api.get('/debug/companies-count', async (c) => {
     })
   } catch (e: any) {
     return c.json({ error: e.message })
+  }
+})
+
+// ==========================================
+// Database Management API (CSV/Excel Upload)
+// ==========================================
+
+// 93. Upload CSV/Excel Certifications Data
+api.post('/admin/database/upload-certifications', async (c) => {
+  try {
+    const db = c.env.DB
+    const body = await c.req.json()
+    const { data } = body // data is array of certification objects
+    
+    if (!Array.isArray(data) || data.length === 0) {
+      return c.json({ success: false, error: 'Invalid data format' }, 400)
+    }
+    
+    let inserted = 0
+    let updated = 0
+    let errors = 0
+    const errorDetails: any[] = []
+    
+    for (const row of data) {
+      try {
+        const {
+          company_name,
+          certificate_number,
+          certificate_type,
+          certification_body = 'MCE경영인증평가원',
+          issue_date,
+          expiry_date,
+          scope,
+          status = 'VALID',
+          contact_person,
+          contact_email,
+          contact_phone,
+          address,
+          esg_compliant = 'N',
+          iso26000_compliant = 'N',
+          management_evaluation_score,
+          website_url,
+          logo_url,
+          certificate_pdf_url
+        } = row
+        
+        if (!company_name || !certificate_number) {
+          errors++
+          errorDetails.push({ row, error: 'Missing required fields: company_name or certificate_number' })
+          continue
+        }
+        
+        // Check if exists
+        const existing = await db.prepare(`
+          SELECT id FROM certifications WHERE certificate_number = ?
+        `).bind(certificate_number).first()
+        
+        if (existing) {
+          // Update
+          await db.prepare(`
+            UPDATE certifications SET
+              company_name = ?,
+              certificate_type = ?,
+              certification_body = ?,
+              issue_date = ?,
+              expiry_date = ?,
+              scope = ?,
+              status = ?,
+              contact_person = ?,
+              contact_email = ?,
+              contact_phone = ?,
+              address = ?,
+              esg_compliant = ?,
+              iso26000_compliant = ?,
+              management_evaluation_score = ?,
+              website_url = ?,
+              logo_url = ?,
+              certificate_pdf_url = ?,
+              updated_at = CURRENT_TIMESTAMP
+            WHERE certificate_number = ?
+          `).bind(
+            company_name,
+            certificate_type,
+            certification_body,
+            issue_date,
+            expiry_date,
+            scope,
+            status,
+            contact_person,
+            contact_email,
+            contact_phone,
+            address,
+            esg_compliant,
+            iso26000_compliant,
+            management_evaluation_score,
+            website_url,
+            logo_url,
+            certificate_pdf_url,
+            certificate_number
+          ).run()
+          updated++
+        } else {
+          // Insert
+          await db.prepare(`
+            INSERT INTO certifications (
+              company_name, certificate_number, certificate_type, certification_body,
+              issue_date, expiry_date, scope, status,
+              contact_person, contact_email, contact_phone, address,
+              esg_compliant, iso26000_compliant, management_evaluation_score,
+              website_url, logo_url, certificate_pdf_url
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          `).bind(
+            company_name,
+            certificate_number,
+            certificate_type,
+            certification_body,
+            issue_date,
+            expiry_date,
+            scope,
+            status,
+            contact_person,
+            contact_email,
+            contact_phone,
+            address,
+            esg_compliant,
+            iso26000_compliant,
+            management_evaluation_score,
+            website_url,
+            logo_url,
+            certificate_pdf_url
+          ).run()
+          inserted++
+        }
+      } catch (err: any) {
+        errors++
+        errorDetails.push({ row, error: err.message })
+      }
+    }
+    
+    return c.json({
+      success: true,
+      summary: {
+        total: data.length,
+        inserted,
+        updated,
+        errors
+      },
+      errorDetails: errorDetails.length > 0 ? errorDetails : undefined
+    })
+  } catch (e: any) {
+    return c.json({ success: false, error: e.message }, 500)
+  }
+})
+
+// 94. Run SQL Migration
+api.post('/admin/database/run-migration', async (c) => {
+  try {
+    const db = c.env.DB
+    const body = await c.req.json()
+    const { sql } = body
+    
+    if (!sql || typeof sql !== 'string') {
+      return c.json({ success: false, error: 'SQL query is required' }, 400)
+    }
+    
+    // Split by semicolon to handle multiple statements
+    const statements = sql.split(';').filter(s => s.trim())
+    
+    const results = []
+    for (const statement of statements) {
+      const trimmed = statement.trim()
+      if (!trimmed) continue
+      
+      const result = await db.prepare(trimmed).run()
+      results.push({
+        statement: trimmed.substring(0, 100) + '...',
+        success: result.success,
+        meta: result.meta
+      })
+    }
+    
+    return c.json({
+      success: true,
+      message: `Executed ${results.length} statement(s)`,
+      results
+    })
+  } catch (e: any) {
+    return c.json({ success: false, error: e.message }, 500)
+  }
+})
+
+// 95. Get Database Schema Info
+api.get('/admin/database/schema', async (c) => {
+  try {
+    const db = c.env.DB
+    
+    // Get all tables
+    const tablesResult = await db.prepare(`
+      SELECT name FROM sqlite_master 
+      WHERE type='table' AND name NOT LIKE 'sqlite_%'
+      ORDER BY name
+    `).all()
+    
+    const tables = tablesResult.results || []
+    const schema: any = {}
+    
+    for (const table of tables) {
+      const tableName = (table as any).name
+      const columnsResult = await db.prepare(`PRAGMA table_info(${tableName})`).all()
+      schema[tableName] = columnsResult.results || []
+    }
+    
+    return c.json({ success: true, schema })
+  } catch (e: any) {
+    return c.json({ success: false, error: e.message }, 500)
   }
 })
 

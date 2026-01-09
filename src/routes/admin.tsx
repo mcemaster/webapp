@@ -2,6 +2,7 @@ import { Hono } from 'hono'
 import { getCookie } from 'hono/cookie'
 import { Admin } from '../pages/Admin'
 import { CertificationManagement } from '../pages/admin/CertificationManagement'
+import { DatabaseManager } from '../pages/admin/DatabaseManager'
 
 // Environment Bindings
 type Bindings = {
@@ -28,6 +29,14 @@ admin.get('/certifications', (c) => {
   const user = userSession ? JSON.parse(userSession) : undefined
   if (!user || user.role !== 'admin') return c.redirect('/auth/login')
   return c.render(<CertificationManagement />)
+})
+
+// --- Database Manager Page ---
+admin.get('/database', (c) => {
+  const userSession = getCookie(c, 'user_session')
+  const user = userSession ? JSON.parse(userSession) : undefined
+  if (!user || user.role !== 'admin') return c.redirect('/auth/login')
+  return c.render(<DatabaseManager />)
 })
 
 export default admin
