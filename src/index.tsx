@@ -84,14 +84,20 @@ app.get('/legal', (c) => {
 })
 app.get('/audit/apply', (c) => c.render(<AuditApplication />))
 app.get('/register', (c) => c.render(<Register />))
-app.get('/certification-search', (c) => c.render(<CertificationSearch />))
+
+// ==========================================
+// Certification System Routes
+// ==========================================
+
+// Public certification search page
+app.get('/certification0000', (c) => c.render(<CertificationSearch />))
 
 // Certification detail page
-app.get('/certifications/:id', async (c) => {
+app.get('/certification0000/:id', async (c) => {
   const id = c.req.param('id')
   try {
     const db = c.env.DB
-    const response = await fetch(`${c.req.url.replace(/\/certifications\/\d+/, '')}/api/certifications/${id}/detail`)
+    const response = await fetch(`${c.req.url.replace(/\/certification0000\/\d+/, '')}/api/certifications/${id}/detail`)
     const data = await response.json()
     
     if (data.success) {
@@ -103,6 +109,10 @@ app.get('/certifications/:id', async (c) => {
     return c.text('오류가 발생했습니다.', 500)
   }
 })
+
+// Legacy routes (redirect to new structure)
+app.get('/certification-search', (c) => c.redirect('/certification0000'))
+app.get('/certifications/:id', (c) => c.redirect(`/certification0000/${c.req.param('id')}`))
 
 // ==========================================
 // 3. SEO - Sitemap & Robots

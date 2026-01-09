@@ -197,7 +197,7 @@ export function CertificationSearch() {
             const html = \`
               <div class="mb-6 pb-6 border-b">
                 <a 
-                  href="/certifications/\${cert.id}" 
+                  href="/certification0000/\${cert.id}" 
                   class="inline-block px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors"
                 >
                   📄 인증서 전체 정보 및 ISO 증빙 파일 보기
