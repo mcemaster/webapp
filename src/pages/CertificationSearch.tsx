@@ -195,6 +195,14 @@ export function CertificationSearch() {
               : 'px-4 py-2 bg-red-100 text-red-800 font-semibold rounded-full text-sm';
             
             const html = \`
+              <div class="mb-6 pb-6 border-b">
+                <a 
+                  href="/certifications/\${cert.id}" 
+                  class="inline-block px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors"
+                >
+                  📄 인증서 전체 정보 및 ISO 증빙 파일 보기
+                </a>
+              </div>
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="space-y-4">
                   <div>

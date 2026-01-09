@@ -2173,6 +2173,222 @@ api.get('/certifications/verify/:certNumber', async (c) => {
   }
 })
 
+// 37. 인증서 상세 조회 (파일 포함)
+api.get('/certifications/:id/detail', async (c) => {
+  try {
+    const db = c.env.DB
+    const id = c.req.param('id')
+    
+    // Get certification info
+    const cert = await db.prepare('SELECT * FROM certifications WHERE id = ?').bind(id).first()
+    
+    if (!cert) {
+      return c.json({ success: false, error: '인증서를 찾을 수 없습니다.' }, 404)
+    }
+    
+    // Get associated files
+    const filesResult = await db.prepare(
+      'SELECT * FROM certification_files WHERE certification_id = ? ORDER BY uploaded_at DESC'
+    ).bind(id).all()
+    
+    return c.json({ 
+      success: true, 
+      cert, 
+      files: filesResult.results || [] 
+    })
+  } catch (e: any) {
+    return c.json({ success: false, error: e.message }, 500)
+  }
+})
+
+// 38. 관리자 - 인증서 통계
+api.get('/admin/certifications/stats', async (c) => {
+  try {
+    const db = c.env.DB
+    const today = new Date().toISOString().split('T')[0]
+    const thirtyDaysLater = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+    
+    // Total certifications
+    const totalResult = await db.prepare('SELECT COUNT(*) as count FROM certifications').first<{count: number}>()
+    
+    // Valid certifications
+    const validResult = await db.prepare(
+      `SELECT COUNT(*) as count FROM certifications 
+       WHERE status = 'VALID' AND expiry_date >= ?`
+    ).bind(today).first<{count: number}>()
+    
+    // Expiring soon (within 30 days)
+    const expiringSoonResult = await db.prepare(
+      `SELECT COUNT(*) as count FROM certifications 
+       WHERE status = 'VALID' AND expiry_date >= ? AND expiry_date <= ?`
+    ).bind(today, thirtyDaysLater).first<{count: number}>()
+    
+    // Expired
+    const expiredResult = await db.prepare(
+      `SELECT COUNT(*) as count FROM certifications 
+       WHERE status = 'VALID' AND expiry_date < ?`
+    ).bind(today).first<{count: number}>()
+    
+    return c.json({
+      total: totalResult?.count || 0,
+      valid: validResult?.count || 0,
+      expiring_soon: expiringSoonResult?.count || 0,
+      expired: expiredResult?.count || 0
+    })
+  } catch (e: any) {
+    return c.json({ total: 0, valid: 0, expiring_soon: 0, expired: 0, error: e.message })
+  }
+})
+
+// 39. 관리자 - 인증서 단일 조회
+api.get('/admin/certifications/:id', async (c) => {
+  try {
+    const db = c.env.DB
+    const id = c.req.param('id')
+    
+    const cert = await db.prepare('SELECT * FROM certifications WHERE id = ?').bind(id).first()
+    
+    if (!cert) {
+      return c.json({ success: false, error: '인증서를 찾을 수 없습니다.' }, 404)
+    }
+    
+    return c.json(cert)
+  } catch (e: any) {
+    return c.json({ success: false, error: e.message }, 500)
+  }
+})
+
+// 40. 관리자 - 인증서 생성
+api.post('/admin/certifications', async (c) => {
+  try {
+    const db = c.env.DB
+    const body = await c.req.json()
+    
+    const { company_name, certificate_number, certificate_type, certification_body,
+            issue_date, expiry_date, scope, status, contact_person, contact_email,
+            contact_phone, address, esg_compliant, iso26000_compliant, 
+            management_evaluation_score, certificate_pdf_url, logo_url, website_url } = body
+    
+    if (!company_name || !certificate_number || !certificate_type || !certification_body || !issue_date || !expiry_date) {
+      return c.json({ success: false, error: '필수 항목을 입력해주세요.' }, 400)
+    }
+    
+    // Check duplicate certificate number
+    const existing = await db.prepare(
+      'SELECT id FROM certifications WHERE certificate_number = ?'
+    ).bind(certificate_number).first()
+    
+    if (existing) {
+      return c.json({ success: false, error: '이미 존재하는 인증서번호입니다.' }, 400)
+    }
+    
+    await db.prepare(`
+      INSERT INTO certifications (
+        company_name, certificate_number, certificate_type, certification_body,
+        issue_date, expiry_date, scope, status, contact_person, contact_email,
+        contact_phone, address, esg_compliant, iso26000_compliant,
+        management_evaluation_score, certificate_pdf_url, logo_url, website_url
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `).bind(
+      company_name, certificate_number, certificate_type, certification_body,
+      issue_date, expiry_date, scope || null, status || 'VALID', contact_person || null,
+      contact_email || null, contact_phone || null, address || null,
+      esg_compliant || null, iso26000_compliant || null, management_evaluation_score || null,
+      certificate_pdf_url || null, logo_url || null, website_url || null
+    ).run()
+    
+    return c.json({ success: true, message: '인증서가 추가되었습니다.' })
+  } catch (e: any) {
+    return c.json({ success: false, error: e.message }, 500)
+  }
+})
+
+// 41. 관리자 - 인증서 수정
+api.put('/admin/certifications/:id', async (c) => {
+  try {
+    const db = c.env.DB
+    const id = c.req.param('id')
+    const body = await c.req.json()
+    
+    const { company_name, certificate_number, certificate_type, certification_body,
+            issue_date, expiry_date, scope, status, contact_person, contact_email,
+            contact_phone, address, esg_compliant, iso26000_compliant,
+            management_evaluation_score, certificate_pdf_url, logo_url, website_url } = body
+    
+    await db.prepare(`
+      UPDATE certifications SET
+        company_name = ?, certificate_number = ?, certificate_type = ?, certification_body = ?,
+        issue_date = ?, expiry_date = ?, scope = ?, status = ?, contact_person = ?,
+        contact_email = ?, contact_phone = ?, address = ?, esg_compliant = ?,
+        iso26000_compliant = ?, management_evaluation_score = ?, certificate_pdf_url = ?,
+        logo_url = ?, website_url = ?, updated_at = CURRENT_TIMESTAMP
+      WHERE id = ?
+    `).bind(
+      company_name, certificate_number, certificate_type, certification_body,
+      issue_date, expiry_date, scope || null, status || 'VALID', contact_person || null,
+      contact_email || null, contact_phone || null, address || null,
+      esg_compliant || null, iso26000_compliant || null, management_evaluation_score || null,
+      certificate_pdf_url || null, logo_url || null, website_url || null, id
+    ).run()
+    
+    return c.json({ success: true, message: '인증서가 수정되었습니다.' })
+  } catch (e: any) {
+    return c.json({ success: false, error: e.message }, 500)
+  }
+})
+
+// 42. 관리자 - 인증서 삭제
+api.delete('/admin/certifications/:id', async (c) => {
+  try {
+    const db = c.env.DB
+    const id = c.req.param('id')
+    
+    // Delete associated files first
+    await db.prepare('DELETE FROM certification_files WHERE certification_id = ?').bind(id).run()
+    
+    // Delete certification
+    await db.prepare('DELETE FROM certifications WHERE id = ?').bind(id).run()
+    
+    return c.json({ success: true, message: '인증서가 삭제되었습니다.' })
+  } catch (e: any) {
+    return c.json({ success: false, error: e.message }, 500)
+  }
+})
+
+// 43. 관리자 - 인증서 파일 업로드
+api.post('/admin/certifications/:id/files', async (c) => {
+  try {
+    const db = c.env.DB
+    const certId = c.req.param('id')
+    const body = await c.req.json()
+    
+    const { file_type, file_name, file_url, file_size, mime_type } = body
+    
+    await db.prepare(`
+      INSERT INTO certification_files (certification_id, file_type, file_name, file_url, file_size, mime_type)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `).bind(certId, file_type, file_name, file_url, file_size || 0, mime_type || 'application/pdf').run()
+    
+    return c.json({ success: true, message: '파일이 추가되었습니다.' })
+  } catch (e: any) {
+    return c.json({ success: false, error: e.message }, 500)
+  }
+})
+
+// 44. 관리자 - 인증서 파일 삭제
+api.delete('/admin/certifications/:certId/files/:fileId', async (c) => {
+  try {
+    const db = c.env.DB
+    const fileId = c.req.param('fileId')
+    
+    await db.prepare('DELETE FROM certification_files WHERE id = ?').bind(fileId).run()
+    
+    return c.json({ success: true, message: '파일이 삭제되었습니다.' })
+  } catch (e: any) {
+    return c.json({ success: false, error: e.message }, 500)
+  }
+})
+
 // 37. Admin - OpenAI를 통한 기업 데이터 생성
 api.post('/admin/companies/generate', async (c) => {
   try {
