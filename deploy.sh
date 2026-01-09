@@ -57,7 +57,7 @@ echo ""
 # 2. 배포
 echo "🚀 Step 2: Cloudflare Pages 배포 중..."
 echo "─────────────────────────────────────────────"
-npx wrangler pages deploy dist --project-name=webapp
+npx wrangler pages deploy dist --project-name=mce-certification
 if [ $? -eq 0 ]; then
   echo "✅ 배포 완료"
 else
@@ -80,15 +80,15 @@ if [[ $migrate =~ ^[Yy]$ ]]; then
   echo "─────────────────────────────────────────────"
   
   echo "1/3: certifications 테이블 생성..."
-  npx wrangler d1 execute webapp-production --remote \
+  npx wrangler d1 execute mce-certification-db --remote \
     --file=migrations/003_create_certifications.sql 2>&1 | grep -E "(success|error|failed)" || echo "완료"
   
   echo "2/3: certificate_files 테이블 생성..."
-  npx wrangler d1 execute webapp-production --remote \
+  npx wrangler d1 execute mce-certification-db --remote \
     --file=migrations/004_add_certificate_files.sql 2>&1 | grep -E "(success|error|failed)" || echo "완료"
   
   echo "3/3: 샘플 데이터 시딩..."
-  npx wrangler d1 execute webapp-production --remote \
+  npx wrangler d1 execute mce-certification-db --remote \
     --file=seed_certifications.sql 2>&1 | grep -E "(success|error|failed)" || echo "완료"
   
   echo "✅ 마이그레이션 완료"
@@ -96,7 +96,7 @@ if [[ $migrate =~ ^[Yy]$ ]]; then
   
   # 데이터 확인
   echo "📊 인증 데이터 확인 중..."
-  npx wrangler d1 execute webapp-production --remote \
+  npx wrangler d1 execute mce-certification-db --remote \
     --command="SELECT COUNT(*) as count FROM certifications"
   echo ""
 fi
@@ -106,8 +106,8 @@ echo "  🎉 배포 완료!"
 echo "================================================"
 echo ""
 echo "📍 접속 URL:"
-echo "   - 인증 검색: https://webapp.pages.dev/certification0000"
-echo "   - 관리자: https://webapp.pages.dev/admin/certification0000_admin"
+echo "   - 인증 검색: https://mce-certification.pages.dev/certification0000"
+echo "   - 관리자: https://mce-certification.pages.dev/admin/certification0000_admin"
 echo ""
 echo "💡 다음 단계:"
 echo "   1. Pages 대시보드에서 배포 상태 확인"

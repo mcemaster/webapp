@@ -1,11 +1,11 @@
 {
-  "name": "webapp",
+  "name": "mce-certification",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build && cp -r public/* dist/ 2>/dev/null || true",
     "preview": "wrangler pages dev dist",
-    "deploy": "npm run build && wrangler pages deploy dist",
+    "deploy": "npm run build && wrangler pages deploy dist --project-name=mce-certification",
     "cf-typegen": "wrangler types --env-interface CloudflareBindings"
   },
   "dependencies": {
