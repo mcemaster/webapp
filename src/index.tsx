@@ -20,6 +20,7 @@ import { PartnershipProposal } from './pages/PartnershipProposal'
 import { Legal } from './pages/Legal'
 import { AuditApplication } from './pages/AuditApplication'
 import { Register } from './pages/Register'
+import { CertificationSearch } from './pages/CertificationSearch'
 
 type Bindings = {
   DB: D1Database;
@@ -82,6 +83,7 @@ app.get('/legal', (c) => {
 })
 app.get('/audit/apply', (c) => c.render(<AuditApplication />))
 app.get('/register', (c) => c.render(<Register />))
+app.get('/certification-search', (c) => c.render(<CertificationSearch />))
 
 // ==========================================
 // 3. SEO - Sitemap & Robots

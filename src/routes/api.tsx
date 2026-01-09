@@ -2037,7 +2037,143 @@ api.post('/admin/companies/seed', async (c) => {
   }
 })
 
-// 34. Admin - OpenAI를 통한 기업 데이터 생성
+// ==========================================
+// 인증 기업 검색 API (Certifications)
+// ==========================================
+
+// 34. 인증 기업 검색 (공개 API)
+api.get('/certifications/search', async (c) => {
+  try {
+    const db = c.env.DB
+    const companyName = c.req.query('company_name') || ''
+    const certNumber = c.req.query('cert_number') || ''
+    
+    if (!companyName && !certNumber) {
+      return c.json({ 
+        success: false, 
+        error: '기업명 또는 인증서번호를 입력해주세요.' 
+      }, 400)
+    }
+    
+    // 정확한 매칭 검색
+    let query = `
+      SELECT * FROM certifications 
+      WHERE (company_name = ? OR ? = '') 
+        AND (certificate_number = ? OR ? = '')
+        AND status = 'VALID'
+      LIMIT 1
+    `
+    
+    const result = await db.prepare(query)
+      .bind(companyName, companyName, certNumber, certNumber)
+      .first()
+    
+    if (!result) {
+      return c.json({ 
+        success: false, 
+        error: '검색 결과가 없습니다. 인증서에 명시된 정확한 기업명과 인증번호를 입력해주세요.' 
+      })
+    }
+    
+    return c.json({ 
+      success: true, 
+      data: result 
+    })
+  } catch (e: any) {
+    console.error('Certification search error:', e)
+    return c.json({ success: false, error: e.message }, 500)
+  }
+})
+
+// 35. 전체 인증 기업 목록 (관리자용)
+api.get('/admin/certifications', async (c) => {
+  try {
+    const db = c.env.DB
+    const page = parseInt(c.req.query('page') || '1')
+    const limit = parseInt(c.req.query('limit') || '20')
+    const search = c.req.query('q') || ''
+    const certType = c.req.query('cert_type') || ''
+    const offset = (page - 1) * limit
+    
+    let whereClause = 'WHERE 1=1'
+    let params: any[] = []
+    
+    if (search) {
+      whereClause += ' AND (company_name LIKE ? OR certificate_number LIKE ?)'
+      params.push(`%${search}%`, `%${search}%`)
+    }
+    
+    if (certType && certType !== '전체') {
+      whereClause += ' AND certificate_type = ?'
+      params.push(certType)
+    }
+    
+    // Get total count
+    const countQuery = `SELECT COUNT(*) as count FROM certifications ${whereClause}`
+    const countResult = params.length > 0
+      ? await db.prepare(countQuery).bind(...params).first<{count: number}>()
+      : await db.prepare(countQuery).first<{count: number}>()
+    const total = countResult?.count || 0
+    const totalPages = Math.ceil(total / limit)
+    
+    // Get paginated data
+    const dataQuery = `
+      SELECT * FROM certifications
+      ${whereClause}
+      ORDER BY created_at DESC
+      LIMIT ? OFFSET ?
+    `
+    
+    const result = params.length > 0
+      ? await db.prepare(dataQuery).bind(...params, limit, offset).all()
+      : await db.prepare(dataQuery).bind(limit, offset).all()
+    
+    return c.json({ 
+      certifications: result.results || [], 
+      total, 
+      page, 
+      totalPages 
+    })
+  } catch (e: any) {
+    console.error('Admin certifications error:', e)
+    return c.json({ certifications: [], total: 0, page: 1, totalPages: 1, error: e.message })
+  }
+})
+
+// 36. 인증서 유효성 검증 API (공개)
+api.get('/certifications/verify/:certNumber', async (c) => {
+  try {
+    const db = c.env.DB
+    const certNumber = c.req.param('certNumber')
+    
+    const result = await db.prepare(
+      'SELECT * FROM certifications WHERE certificate_number = ? AND status = \'VALID\''
+    ).bind(certNumber).first()
+    
+    if (!result) {
+      return c.json({ 
+        success: false, 
+        valid: false,
+        message: '유효하지 않은 인증서번호입니다.' 
+      })
+    }
+    
+    // Check if expired
+    const today = new Date().toISOString().split('T')[0]
+    const isExpired = result.expiry_date < today
+    
+    return c.json({ 
+      success: true, 
+      valid: !isExpired,
+      data: result,
+      message: isExpired ? '인증서가 만료되었습니다.' : '유효한 인증서입니다.'
+    })
+  } catch (e: any) {
+    return c.json({ success: false, valid: false, error: e.message }, 500)
+  }
+})
+
+// 37. Admin - OpenAI를 통한 기업 데이터 생성
 api.post('/admin/companies/generate', async (c) => {
   try {
     // First try environment variable, then DB
